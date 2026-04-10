@@ -1,0 +1,76 @@
+/* HERO */
+.hero {
+  background: linear-gradient(
+    rgba(21, 73, 28, 0.7),
+    rgba(21, 73, 28, 0.7)
+  ),
+  url("../../img/Hero-background.png");
+  background-size: cover;
+  background-position: center;
+  color: white;
+  text-align: center;
+  padding: 100px 20px;
+}
+
+
+.hero h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+h2 {
+  margin-bottom: 15px;
+}
+
+.hero p {
+  margin-bottom: 20px;
+}
+
+
+.about {
+  text-align: center;
+  margin: 40px auto;
+  max-width: 700px;
+}
+
+/* FOOTER */
+.footer {
+  background: var(--color5);
+  color: white;
+  margin-top: 50px;
+  padding: 30px 20px;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer h3, .footer h4 {
+  margin-bottom: 10px;
+}
+
+.footer p {
+  margin: 5px 0;
+}
+
+.footer-copy {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 26px;
+  }
+
+  .footer-container {
+    flex-direction: column;
+    text-align: center;
+  }
+}
