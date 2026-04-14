@@ -1,0 +1,185 @@
+.admin-quotations-page {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+}
+
+.admin-quotations-list,
+.admin-quotation-detail {
+  background: white;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.admin-quotations-list-header h2,
+.admin-quotation-detail-header h2,
+.admin-quotation-products h3 {
+  margin: 0;
+  color: #1f3b2d;
+}
+
+.admin-quotations-list-header p {
+  margin: 8px 0 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.admin-quotation-items {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-quotation-item {
+  width: 100%;
+  border: 1px solid #e5e7e5;
+  background: #f8faf8;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: 0.3s ease;
+}
+
+.admin-quotation-item:hover {
+  border-color: #4d7c5f;
+}
+
+.admin-quotation-item.active {
+  border-color: #4d7c5f;
+  background-color: #eef3ed;
+}
+
+.admin-quotation-item-top,
+.admin-quotation-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.admin-quotation-item-top h3 {
+  margin: 0;
+  color: #1f3b2d;
+  font-size: 1rem;
+}
+
+.admin-quotation-date {
+  margin: 8px 0 6px;
+  color: #666;
+  font-size: 0.88rem;
+}
+
+.admin-quotation-summary {
+  margin: 0;
+  color: #444;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.quotation-status {
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.quotation-status.pendiente {
+  background-color: #fff4dd;
+  color: #a56a00;
+}
+
+.quotation-status.respondida {
+  background-color: #e6f4ea;
+  color: #256c3d;
+}
+
+.quotation-status.cerrada {
+  background-color: #fde8e8;
+  color: #b42318;
+}
+
+.admin-quotation-info {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.admin-quotation-info p {
+  margin: 0;
+}
+
+.admin-quotation-products {
+  margin-top: 24px;
+}
+
+.admin-quotation-products ul {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  color: #333;
+}
+
+.admin-quotation-products li {
+  margin-bottom: 8px;
+}
+
+.admin-quotation-response {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-quotation-response label {
+  color: #1f3b2d;
+  font-weight: 600;
+}
+
+.admin-quotation-response textarea {
+  min-height: 150px;
+  resize: vertical;
+  border: 1px solid #d8ddd8;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.admin-quotation-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-primary-button {
+  background-color: #4d7c5f;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.admin-secondary-button {
+  background-color: #dfe8e1;
+  color: #1f3b2d;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+@media (max-width: 1000px) {
+  .admin-quotations-page {
+    grid-template-columns: 1fr;
+  }
+}

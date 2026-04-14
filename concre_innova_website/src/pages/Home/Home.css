@@ -74,3 +74,47 @@ h2 {
     text-align: center;
   }
 }
+
+.admin-home-access {
+  margin-top: 30px;
+  margin-bottom: 10px;
+}
+
+.admin-home-card {
+  background: #f5f7f2;
+  border: 1px solid #dfe8e1;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.admin-home-card h2 {
+  margin: 0 0 10px;
+  color: #1f3b2d;
+}
+
+.admin-home-card p {
+  margin: 0;
+  color: #555;
+  max-width: 700px;
+  line-height: 1.5;
+}
+
+.admin-home-button {
+  background-color: #4d7c5f;
+  color: white;
+  text-decoration: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: 0.3s ease;
+  white-space: nowrap;
+}
+
+.admin-home-button:hover {
+  background-color: #3f684f;
+}

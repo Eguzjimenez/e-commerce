@@ -1,14 +1,16 @@
 import IMAGEN from "../../img/Maceta-Negra.jpg";
 import "./Home.css";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ADMIN_ROUTES } from "../../routes/routes";
 import ProductModal from "../../components/ProductModal/ProductModal";
 
 function Home() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [mode, setMode] = useState("home");
+
   return (
     <div>
-
       {/* HERO / BIENVENIDA */}
       <section className="hero">
         <div className="hero-content">
@@ -27,11 +29,28 @@ function Home() {
         </p>
       </section>
 
+      {/* ACCESO ADMINISTRATIVO */}
+      <section className="container admin-home-access">
+        <div className="admin-home-card">
+          <div>
+            <h2>Panel de administración</h2>
+            <p>
+              Accede a la gestión de inventario, productos, categorías,
+              cotizaciones, pedidos, chat, reportes y estadísticas.
+            </p>
+          </div>
+
+          <Link to={ADMIN_ROUTES.DASHBOARD} className="admin-home-button">
+            Ir al panel
+          </Link>
+        </div>
+      </section>
+
       <section className="container">
         <h2>Productos destacados</h2>
 
         <div className="grid">
-          {[1,2,3,4].map((item) => (
+          {[1, 2, 3, 4].map((item) => (
             <div
               className="card"
               key={item}
@@ -58,7 +77,6 @@ function Home() {
       {/* FOOTER */}
       <footer className="footer">
         <div className="footer-container">
-
           <div>
             <h3>🌿 Concre Innova</h3>
             <p>Diseño ecológico para espacios modernos</p>
@@ -76,7 +94,6 @@ function Home() {
             <p>Facebook</p>
             <p>TikTok</p>
           </div>
-
         </div>
 
         <p className="footer-copy">
@@ -84,13 +101,12 @@ function Home() {
         </p>
       </footer>
 
-      {/* 🔥 MODAL */}
+      {/* MODAL */}
       <ProductModal
         product={selectedProduct}
         mode={mode}
         onClose={() => setSelectedProduct(null)}
       />
-
     </div>
   );
 }

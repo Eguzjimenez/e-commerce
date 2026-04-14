@@ -1,0 +1,157 @@
+.admin-orders-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-orders-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-orders-filters {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.admin-orders-search,
+.admin-orders-select {
+  padding: 12px 14px;
+  border: 1px solid #d8ddd8;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: white;
+  min-width: 220px;
+}
+
+.admin-primary-button {
+  background-color: #4d7c5f;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.admin-table-wrapper {
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.admin-orders-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-orders-table thead {
+  background-color: #eef3ed;
+}
+
+.admin-orders-table th,
+.admin-orders-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #ececec;
+}
+
+.admin-orders-table th {
+  color: #1f3b2d;
+  font-size: 0.95rem;
+}
+
+.admin-orders-table td {
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.order-status-badge {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.status-pendiente {
+  background-color: #fff4dd;
+  color: #a56a00;
+}
+
+.status-proceso {
+  background-color: #e8f1ff;
+  color: #1d4ed8;
+}
+
+.status-enviado {
+  background-color: #ede9fe;
+  color: #6d28d9;
+}
+
+.status-entregado {
+  background-color: #e6f4ea;
+  color: #256c3d;
+}
+
+.status-cancelado {
+  background-color: #fde8e8;
+  color: #b42318;
+}
+
+.order-action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.order-action-btn {
+  border: none;
+  background-color: #4d7c5f;
+  color: white;
+  padding: 9px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.order-action-btn.secondary {
+  background-color: #dfe8e1;
+  color: #1f3b2d;
+}
+
+.admin-empty-row {
+  text-align: center;
+  color: #666;
+  padding: 24px;
+}
+
+@media (max-width: 900px) {
+  .admin-orders-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-orders-filters {
+    flex-direction: column;
+  }
+
+  .admin-orders-search,
+  .admin-orders-select {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .admin-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .admin-orders-table {
+    min-width: 850px;
+  }
+}

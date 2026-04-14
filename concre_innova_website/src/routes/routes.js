@@ -12,3 +12,15 @@ export const PRIVATE_ROUTES = {
   CART: "/cart",
   CHECKOUT: "/checkout"
 };
+
+export const ADMIN_ROUTES = {
+  DASHBOARD: "/admin",
+  INVENTORY: "/admin/inventory",
+  PRODUCTS: "/admin/products",
+  CATEGORIES: "/admin/categories",
+  QUOTATIONS: "/admin/quotations",
+  ORDERS: "/admin/orders",
+  CHAT: "/admin/chat",
+  REPORTS: "/admin/reports",
+  STATISTICS: "/admin/statistics"
+};
