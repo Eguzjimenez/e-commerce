@@ -30,21 +30,24 @@ function Home() {
       </section>
 
       {/* ACCESO ADMINISTRATIVO */}
-      <section className="container admin-home-access">
-        <div className="admin-home-card">
-          <div>
-            <h2>Panel de administración</h2>
-            <p>
-              Accede a la gestión de inventario, productos, categorías,
-              cotizaciones, pedidos, chat, reportes y estadísticas.
-            </p>
-          </div>
+<section className="container admin-home-access">
+  <div className="admin-home-card">
+    <div className="admin-home-card-content">
+      <span className="admin-home-badge">Acceso interno</span>
+      <h2>Panel de administración</h2>
+      <p>
+        Gestiona inventario, productos, categorías, cotizaciones, pedidos,
+        chat, reportes y estadísticas desde un solo lugar.
+      </p>
+    </div>
 
-          <Link to={ADMIN_ROUTES.DASHBOARD} className="admin-home-button">
-            Ir al panel
-          </Link>
-        </div>
-      </section>
+    <div className="admin-home-card-action">
+      <Link to={ADMIN_ROUTES.DASHBOARD} className="admin-home-button">
+        Ir al panel
+      </Link>
+    </div>
+  </div>
+</section>
 
       <section className="container">
         <h2>Productos destacados</h2>
