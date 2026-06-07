@@ -76,6 +76,15 @@ function AdminLayout({ title, children }) {
           </NavLink>
 
           <NavLink
+            to={ADMIN_ROUTES.USERS}
+            className={({ isActive }) =>
+              isActive ? "admin-nav-link active" : "admin-nav-link"
+            }
+          >
+            Usuarios
+          </NavLink>
+
+          <NavLink
             to={ADMIN_ROUTES.REPORTS}
             className={({ isActive }) =>
               isActive ? "admin-nav-link active" : "admin-nav-link"

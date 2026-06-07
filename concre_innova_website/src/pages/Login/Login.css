@@ -35,8 +35,18 @@
   font-size: medium;
 }
 
-.login-input:focus {
+..login-input:focus {
   border-color: var(--color2);
+}
+
+.login-error {
+  margin-bottom: 12px;
+  color: #b00020;
+  background: #ffe9ec;
+  padding: 10px 12px;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 0.95rem;
 }
 
 /* LOGO */

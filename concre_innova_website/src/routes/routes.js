@@ -22,5 +22,6 @@ export const ADMIN_ROUTES = {
   ORDERS: "/admin/orders",
   CHAT: "/admin/chat",
   REPORTS: "/admin/reports",
-  STATISTICS: "/admin/statistics"
+  STATISTICS: "/admin/statistics",
+  USERS: "/admin/users"
 };

@@ -21,6 +21,7 @@ import AdminOrders from "../pages/AdminOrders/AdminOrders";
 import AdminChat from "../pages/AdminChat/AdminChat";
 import AdminReports from "../pages/AdminReports/AdminReports";
 import AdminStatistics from "../pages/AdminStatistics/AdminStatistics";
+import AdminUsers from "../pages/AdminUsers/AdminUsers";
 
 function AppRoutes() {
   return (
@@ -45,6 +46,7 @@ function AppRoutes() {
       <Route path={ADMIN_ROUTES.CHAT} element={<AdminChat />} />
       <Route path={ADMIN_ROUTES.REPORTS} element={<AdminReports />} />
       <Route path={ADMIN_ROUTES.STATISTICS} element={<AdminStatistics />} />
+      <Route path={ADMIN_ROUTES.USERS} element={<AdminUsers />} />
     </Routes>
   );
 }

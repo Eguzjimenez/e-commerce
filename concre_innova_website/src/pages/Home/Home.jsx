@@ -3,11 +3,14 @@ import "./Home.css";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ADMIN_ROUTES } from "../../routes/routes";
+import { getAuth } from "../../services/authService";
 import ProductModal from "../../components/ProductModal/ProductModal";
 
 function Home() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [mode, setMode] = useState("home");
+  const auth = getAuth();
+  const showAdminAccess = auth?.idRol === 2;
 
   return (
     <div>
@@ -30,24 +33,26 @@ function Home() {
       </section>
 
       {/* ACCESO ADMINISTRATIVO */}
-<section className="container admin-home-access">
-  <div className="admin-home-card">
-    <div className="admin-home-card-content">
-      <span className="admin-home-badge">Acceso interno</span>
-      <h2>Panel de administración</h2>
-      <p>
-        Gestiona inventario, productos, categorías, cotizaciones, pedidos,
-        chat, reportes y estadísticas desde un solo lugar.
-      </p>
-    </div>
+      {showAdminAccess && (
+        <section className="container admin-home-access">
+          <div className="admin-home-card">
+            <div className="admin-home-card-content">
+              <span className="admin-home-badge">Acceso interno</span>
+              <h2>Panel de administración</h2>
+              <p>
+                Gestiona inventario, productos, categorías, cotizaciones,
+                pedidos, chat, reportes y estadísticas desde un solo lugar.
+              </p>
+            </div>
 
-    <div className="admin-home-card-action">
-      <Link to={ADMIN_ROUTES.DASHBOARD} className="admin-home-button">
-        Ir al panel
-      </Link>
-    </div>
-  </div>
-</section>
+            <div className="admin-home-card-action">
+              <Link to={ADMIN_ROUTES.DASHBOARD} className="admin-home-button">
+                Ir al panel
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="container">
         <h2>Productos destacados</h2>
