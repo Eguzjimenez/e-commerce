@@ -3,6 +3,8 @@ import Swal from "sweetalert2";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
 import { getUserList, newUser, updateUser, getRoles } from "../../services/userService";
 import "./AdminUsers.css";
+import { registerBitacora } from "../../services/bitacoraService";
+import { getAuth } from "../../services/authService";
 
 const roleNames = {
   1: "Administrador",
@@ -131,6 +133,15 @@ function AdminUsers() {
       }
 
       await (modalMode === "add" ? newUser(payload) : updateUser(payload));
+      const auth = getAuth(); 
+      await registerBitacora({
+        idUsuario:     auth.idUsuario,
+        tablaAfectada: "Usuarios",
+        operacion:     modalMode === "add" ? "INSERT" : "UPDATE",
+        descripcion:   modalMode === "add"
+          ? `Usuario creado: ${formData.correo}`
+          : `Usuario actualizado: ${formData.correo}`,
+      });
       await Swal.fire({
         icon: "success",
         title: modalMode === "add" ? "Usuario creado" : "Usuario actualizado",

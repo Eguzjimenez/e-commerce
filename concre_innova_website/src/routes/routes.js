@@ -23,5 +23,7 @@ export const ADMIN_ROUTES = {
   CHAT: "/admin/chat",
   REPORTS: "/admin/reports",
   STATISTICS: "/admin/statistics",
-  USERS: "/admin/users"
+  USERS: "/admin/users",
+  BITACORA: "/admin/bitacora"
 };
+
