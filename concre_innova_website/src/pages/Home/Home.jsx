@@ -3,14 +3,14 @@ import "./Home.css";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ADMIN_ROUTES } from "../../routes/routes";
-import { getAuth } from "../../services/authService";
+import { getUserRole } from "../../services/authService";
+import { ROLES } from "../../constants/roles";
 import ProductModal from "../../components/ProductModal/ProductModal";
 
 function Home() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [mode, setMode] = useState("home");
-  const auth = getAuth();
-  const showAdminAccess = auth?.idRol === 1;
+  const showAdminAccess = getUserRole() === ROLES.ADMINISTRADOR;
 
   return (
     <div>

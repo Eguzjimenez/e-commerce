@@ -1,7 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ADMIN_ROUTES, PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
-import { getAuth, isAdmin, isLoggedIn, logout } from "../../services/authService";
+import { getAuth, getUserRole, isLoggedIn, logout } from "../../services/authService";
+import { ROLES } from "../../constants/roles";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ function Navbar() {
   };
 
   const authenticated = isLoggedIn() && auth;
-  const admin = isAdmin();
+  const admin = getUserRole() === ROLES.ADMINISTRADOR;
 
   return (
     <nav className="navbar">

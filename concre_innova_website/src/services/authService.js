@@ -71,22 +71,15 @@ export function getUserId() {
 }
 
 export function getUserRole() {
-  return getAuth()?.idRol ?? null;
+  const auth = getAuth();
+  return auth?.nombreRol || ROL_ID_MAP[auth?.idRol] || null;
 }
 
 export function isVendor() {
-  return getUserRole() === 2;
-}
-
-export function isAdmin() {
-  return getUserRole() === 1;
+  return getUserRole() === ROL_ID_MAP[2];
 }
 
 export function isLoggedIn() {
   const auth = getAuth();
   return Boolean(auth?.codigo === 1 && auth?.idUsuario && auth?.idRol !== 4);
-}
-
-export function isClient() {
-  return getUserRole() === 3;
 }
