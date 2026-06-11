@@ -27,10 +27,16 @@
 }
 
 .logo-icon {
-  font-size: 32px;
+  font-size: 20px;
+  color: white;
+  font-weight: 700;
   background: var(--color1);
-  padding: 8px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .logo-text {
@@ -46,11 +52,15 @@
   color: var(--color3);
 }
 
+.register-form {
+  display: grid;
+  gap: 12px;
+}
+
 /* INPUTS */
 .register-input {
   width: 100%;
   padding: 12px;
-  margin-bottom: 12px;
   border-radius: 8px;
   border: 1px solid #ddd;
   outline: none;
@@ -75,6 +85,11 @@
 
 .register-btn:hover {
   background: var(--color4);
+}
+
+.register-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 /* LINKS */

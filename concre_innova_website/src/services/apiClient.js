@@ -1,4 +1,26 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || "https://localhost:7258";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5222";
+const AUTH_STORAGE_KEY = "concre_innova_auth";
+
+function getAuthHeaders() {
+  try {
+    const rawAuth = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!rawAuth) {
+      return {};
+    }
+
+    const auth = JSON.parse(rawAuth);
+    if (!auth?.idUsuario || !auth?.idRol) {
+      return {};
+    }
+
+    return {
+      "X-User-Id": String(auth.idUsuario),
+      "X-User-Role": String(auth.idRol),
+    };
+  } catch {
+    return {};
+  }
+}
 
 async function request(path, options = {}) {
   const url = `${API_BASE_URL}${path}`;
@@ -6,6 +28,7 @@ async function request(path, options = {}) {
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      ...getAuthHeaders(),
       ...options.headers,
     },
     ...options,
@@ -26,7 +49,11 @@ async function request(path, options = {}) {
   }
 
   if (!response.ok) {
-    const message = data?.mensaje || data?.error || response.statusText;
+    const message =
+      data?.mensaje ||
+      data?.message ||
+      data?.error ||
+      (typeof data === "string" ? data : response.statusText);
     throw new Error(message || "Error en la solicitud");
   }
 

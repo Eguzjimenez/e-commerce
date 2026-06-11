@@ -27,66 +27,127 @@ import AdminStatistics from "../pages/AdminStatistics/AdminStatistics";
 import AdminUsers from "../pages/AdminUsers/AdminUsers";
 import AdminBitacora from "../pages/AdminBitacora/AdminBitacora";
 
-const SOLO_ADMIN           = [ROLES.ADMINISTRADOR];
-const ADMIN_Y_VENDEDOR     = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR];
-const TODOS_AUTENTICADOS   = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR, ROLES.CLIENTE];
+const SOLO_ADMIN = [ROLES.ADMINISTRADOR];
+const ADMIN_Y_VENDEDOR = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR];
+const TODOS_AUTENTICADOS = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR, ROLES.CLIENTE];
 
 function AppRoutes() {
   return (
     <Routes>
-      {/* ── Rutas públicas ──────────────────────────────────────── */}
-      <Route path={PUBLIC_ROUTES.HOME}           element={<Home />} />
-      <Route path={PUBLIC_ROUTES.CATALOG}        element={<Catalog />} />
-      <Route path={PUBLIC_ROUTES.PRODUCT}        element={<ProductDetail />} />
-      <Route path={PUBLIC_ROUTES.LOGIN}          element={<Login />} />
-      <Route path={PUBLIC_ROUTES.REGISTER}       element={<Register />} />
+      <Route path={PUBLIC_ROUTES.HOME} element={<Home />} />
+      <Route path={PUBLIC_ROUTES.CATALOG} element={<Catalog />} />
+      <Route path={PUBLIC_ROUTES.PRODUCT} element={<ProductDetail />} />
+      <Route path={PUBLIC_ROUTES.LOGIN} element={<Login />} />
+      <Route path={PUBLIC_ROUTES.REGISTER} element={<Register />} />
       <Route path={PUBLIC_ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
-      <Route path={PUBLIC_ROUTES.CHAT}           element={<Chat />} />
-      <Route path="/acceso-denegado"             element={<AccessDenied />} />
+      <Route path={PUBLIC_ROUTES.CHAT} element={<Chat />} />
+      <Route path="/acceso-denegado" element={<AccessDenied />} />
 
-      {/* ── Rutas privadas (cualquier usuario autenticado) ────────── */}
-      <Route path={PRIVATE_ROUTES.CART}
-        element={<ProtectedRoute allowedRoles={TODOS_AUTENTICADOS}><Cart /></ProtectedRoute>}
+      <Route
+        path={PRIVATE_ROUTES.CART}
+        element={
+          <ProtectedRoute allowedRoles={TODOS_AUTENTICADOS}>
+            <Cart />
+          </ProtectedRoute>
+        }
       />
-      <Route path={PRIVATE_ROUTES.CHECKOUT}
-        element={<ProtectedRoute allowedRoles={TODOS_AUTENTICADOS}><Checkout /></ProtectedRoute>}
-      />
-
-      {/* ── Rutas solo Administrador ─────────────────────────────── */}
-      <Route path={ADMIN_ROUTES.DASHBOARD}
-        element={<ProtectedRoute allowedRoles={SOLO_ADMIN}><AdminDashboard /></ProtectedRoute>}
-      />
-      <Route path={ADMIN_ROUTES.USERS}
-        element={<ProtectedRoute allowedRoles={SOLO_ADMIN}><AdminUsers /></ProtectedRoute>}
-      />
-      <Route path={ADMIN_ROUTES.CATEGORIES}
-        element={<ProtectedRoute allowedRoles={SOLO_ADMIN}><AdminCategories /></ProtectedRoute>}
-      />
-      <Route path={ADMIN_ROUTES.REPORTS}
-        element={<ProtectedRoute allowedRoles={SOLO_ADMIN}><AdminReports /></ProtectedRoute>}
-      />
-      <Route path={ADMIN_ROUTES.STATISTICS}
-        element={<ProtectedRoute allowedRoles={SOLO_ADMIN}><AdminStatistics /></ProtectedRoute>}
-      />
-      <Route path={ADMIN_ROUTES.BITACORA}
-        element={<ProtectedRoute allowedRoles={SOLO_ADMIN}><AdminBitacora /></ProtectedRoute>}
+      <Route
+        path={PRIVATE_ROUTES.CHECKOUT}
+        element={
+          <ProtectedRoute allowedRoles={TODOS_AUTENTICADOS}>
+            <Checkout />
+          </ProtectedRoute>
+        }
       />
 
-      {/* ── Rutas Administrador + Vendedor ───────────────────────── */}
-      <Route path={ADMIN_ROUTES.INVENTORY}
-        element={<ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}><AdminInventory /></ProtectedRoute>}
+      <Route
+        path={ADMIN_ROUTES.DASHBOARD}
+        element={
+          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
       />
-      <Route path={ADMIN_ROUTES.PRODUCTS}
-        element={<ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}><AdminProducts /></ProtectedRoute>}
+      <Route
+        path={ADMIN_ROUTES.USERS}
+        element={
+          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+            <AdminUsers />
+          </ProtectedRoute>
+        }
       />
-      <Route path={ADMIN_ROUTES.QUOTATIONS}
-        element={<ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}><AdminQuotations /></ProtectedRoute>}
+      <Route
+        path={ADMIN_ROUTES.CATEGORIES}
+        element={
+          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+            <AdminCategories />
+          </ProtectedRoute>
+        }
       />
-      <Route path={ADMIN_ROUTES.ORDERS}
-        element={<ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}><AdminOrders /></ProtectedRoute>}
+      <Route
+        path={ADMIN_ROUTES.REPORTS}
+        element={
+          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+            <AdminReports />
+          </ProtectedRoute>
+        }
       />
-      <Route path={ADMIN_ROUTES.CHAT}
-        element={<ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}><AdminChat /></ProtectedRoute>}
+      <Route
+        path={ADMIN_ROUTES.STATISTICS}
+        element={
+          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+            <AdminStatistics />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.BITACORA}
+        element={
+          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+            <AdminBitacora />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path={ADMIN_ROUTES.INVENTORY}
+        element={
+          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+            <AdminInventory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.PRODUCTS}
+        element={
+          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+            <AdminProducts />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.QUOTATIONS}
+        element={
+          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+            <AdminQuotations />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.ORDERS}
+        element={
+          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+            <AdminOrders />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.CHAT}
+        element={
+          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+            <AdminChat />
+          </ProtectedRoute>
+        }
       />
     </Routes>
   );

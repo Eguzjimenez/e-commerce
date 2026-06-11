@@ -10,7 +10,7 @@ function Home() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [mode, setMode] = useState("home");
   const auth = getAuth();
-  const showAdminAccess = auth?.idRol === 2;
+  const showAdminAccess = auth?.idRol === 1;
 
   return (
     <div>

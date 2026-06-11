@@ -78,6 +78,9 @@ body {
   display: none;
   flex-direction: column;
   cursor: pointer;
+  background: transparent;
+  border: 0;
+  padding: 4px;
 }
 
 .menu-toggle span {
@@ -191,11 +194,13 @@ body {
 .logout-btn {
   background: none;
   border: none;
-  color: var(--color4);
+  color: var(--bg);
   font-weight: 500;
   cursor: pointer;
+  font-size: 1rem;
+  font-family: inherit;
 }
 
 .logout-btn:hover {
-  color: var(--color2);
+  color: var(--color4);
 }

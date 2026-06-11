@@ -1,7 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
-import { getUserList, newUser, updateUser, getRoles } from "../../services/userService";
+import {
+  deactivateUser,
+  getRoles,
+  getUserDetail,
+  getUserList,
+  newUser,
+  updateUser,
+} from "../../services/userService";
 import "./AdminUsers.css";
 import { registerBitacora } from "../../services/bitacoraService";
 import { getAuth } from "../../services/authService";
@@ -26,6 +33,9 @@ function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("Todos");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [modalMode, setModalMode] = useState("add");
   const [formData, setFormData] = useState({
     idUsuario: null,
@@ -50,7 +60,7 @@ function AdminUsers() {
       await Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.message || "No se pudo cargar la información de usuarios.",
+        text: error.message || "No se pudo cargar la informacion de usuarios.",
       });
     }
   };
@@ -72,6 +82,7 @@ function AdminUsers() {
 
   const openAddModal = () => {
     setModalMode("add");
+    setSelectedUser(null);
     setFormData({
       idUsuario: null,
       nombre: "",
@@ -86,6 +97,7 @@ function AdminUsers() {
 
   const openEditModal = (user) => {
     setModalMode("edit");
+    setSelectedUser(null);
     setFormData({
       ...user,
       contrasena: "",
@@ -93,8 +105,34 @@ function AdminUsers() {
     setIsModalOpen(true);
   };
 
+  const openDetailModal = async (user) => {
+    setIsModalOpen(false);
+    setIsDetailOpen(true);
+    setDetailLoading(true);
+    setSelectedUser(null);
+
+    try {
+      const detail = await getUserDetail(user.idUsuario);
+      setSelectedUser(detail);
+    } catch (error) {
+      setIsDetailOpen(false);
+      await Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "No se pudo cargar el detalle del usuario.",
+      });
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  const closeDetailModal = () => {
+    setIsDetailOpen(false);
+    setSelectedUser(null);
   };
 
   const handleFormChange = (event) => {
@@ -120,8 +158,8 @@ function AdminUsers() {
     if (modalMode === "add" && !formData.contrasena) {
       await Swal.fire({
         icon: "warning",
-        title: "Contraseña requerida",
-        text: "Ingresa una contraseña para el nuevo usuario.",
+        title: "Contrasena requerida",
+        text: "Ingresa una contrasena para el nuevo usuario.",
       });
       return;
     }
@@ -165,9 +203,9 @@ function AdminUsers() {
     const result = await Swal.fire({
       icon: "warning",
       title: "Inactivar usuario",
-      text: `¿Deseas inactivar al usuario ${user.nombre} ${user.apellido}?`,
+      text: `Deseas inactivar al usuario ${user.nombre} ${user.apellido}?`,
       showCancelButton: true,
-      confirmButtonText: "Sí, inactivar",
+      confirmButtonText: "Si, inactivar",
       cancelButtonText: "Cancelar",
     });
 
@@ -176,10 +214,7 @@ function AdminUsers() {
     }
 
     try {
-      await updateUser({
-        ...user,
-        idRol: 4,
-      });
+      await deactivateUser(user.idUsuario);
       await Swal.fire({
         icon: "success",
         title: "Usuario inactivado",
@@ -205,8 +240,16 @@ function AdminUsers() {
     return role?.nombreRol || roleNames[idRol] || "Desconocido";
   };
 
+  const formatDate = (value) => {
+    if (!value) {
+      return "No disponible";
+    }
+
+    return new Date(value).toLocaleString();
+  };
+
   return (
-    <AdminLayout title="Gestión de Usuarios">
+    <AdminLayout title="Gestion de Usuarios">
       <div className="admin-users-page">
         <div className="admin-users-topbar">
           <div className="admin-users-filters">
@@ -234,7 +277,7 @@ function AdminUsers() {
           </div>
 
           <button className="admin-primary-button" onClick={openAddModal}>
-            + Agregar usuario
+            Agregar usuario
           </button>
         </div>
 
@@ -244,7 +287,7 @@ function AdminUsers() {
               <tr>
                 <th>Nombre</th>
                 <th>Correo</th>
-                <th>Teléfono</th>
+                <th>Telefono</th>
                 <th>Rol</th>
                 <th>Acciones</th>
               </tr>
@@ -252,24 +295,40 @@ function AdminUsers() {
             <tbody>
               {filteredUsers.map((user) => (
                 <tr key={user.idUsuario}>
-                  <td>{`${user.nombre} ${user.apellido}`}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="user-name-button"
+                      onClick={() => openDetailModal(user)}
+                    >
+                      {`${user.nombre} ${user.apellido}`}
+                    </button>
+                  </td>
                   <td>{user.correo}</td>
                   <td>{user.telefono}</td>
                   <td>{getRoleLabel(user.idRol)}</td>
                   <td className="admin-users-actions">
                     <button
                       type="button"
-                      className="icon-button edit"
-                      onClick={() => openEditModal(user)}
+                      className="action-button"
+                      onClick={() => openDetailModal(user)}
                     >
-                      ✏️
+                      Ver
                     </button>
                     <button
                       type="button"
-                      className="icon-button delete"
-                      onClick={() => handleDeleteUser(user)}
+                      className="action-button edit"
+                      onClick={() => openEditModal(user)}
                     >
-                      🗑️
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      className="action-button delete"
+                      onClick={() => handleDeleteUser(user)}
+                      disabled={user.idRol === 4}
+                    >
+                      Inactivar
                     </button>
                   </td>
                 </tr>
@@ -294,7 +353,7 @@ function AdminUsers() {
                   {modalMode === "add" ? "Agregar usuario" : "Editar usuario"}
                 </h2>
                 <button className="modal-close" onClick={closeModal}>
-                  ✕
+                  x
                 </button>
               </div>
 
@@ -328,7 +387,7 @@ function AdminUsers() {
                   />
                 </div>
                 <div className="form-row">
-                  <label>Teléfono</label>
+                  <label>Telefono</label>
                   <input
                     name="telefono"
                     value={formData.telefono}
@@ -352,7 +411,7 @@ function AdminUsers() {
                 </div>
                 <div className="form-row">
                   <label>
-                    {modalMode === "add" ? "Contraseña" : "Contraseña (opcional)"}
+                    {modalMode === "add" ? "Contrasena" : "Contrasena (opcional)"}
                   </label>
                   <input
                     name="contrasena"
@@ -361,8 +420,8 @@ function AdminUsers() {
                     onChange={handleFormChange}
                     placeholder={
                       modalMode === "edit"
-                        ? "Dejar vacío para no cambiar"
-                        : "Contraseña"
+                        ? "Dejar vacio para no cambiar"
+                        : "Contrasena"
                     }
                     {...(modalMode === "add" ? { required: true } : {})}
                   />
@@ -377,6 +436,56 @@ function AdminUsers() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {isDetailOpen && (
+          <div className="admin-modal-overlay">
+            <div className="admin-modal admin-detail-modal">
+              <div className="admin-modal-header">
+                <h2>Detalle de usuario</h2>
+                <button className="modal-close" onClick={closeDetailModal}>
+                  x
+                </button>
+              </div>
+
+              {detailLoading && <p className="admin-detail-loading">Cargando detalle...</p>}
+
+              {!detailLoading && selectedUser && (
+                <div className="admin-user-detail-grid">
+                  <div className="detail-item">
+                    <span>Nombre</span>
+                    <strong>{`${selectedUser.nombre} ${selectedUser.apellido}`}</strong>
+                  </div>
+                  <div className="detail-item">
+                    <span>Correo</span>
+                    <strong>{selectedUser.correo}</strong>
+                  </div>
+                  <div className="detail-item">
+                    <span>Telefono</span>
+                    <strong>{selectedUser.telefono || "No disponible"}</strong>
+                  </div>
+                  <div className="detail-item">
+                    <span>Rol</span>
+                    <strong>{selectedUser.nombreRol || getRoleLabel(selectedUser.idRol)}</strong>
+                  </div>
+                  <div className="detail-item">
+                    <span>Estado</span>
+                    <strong>{selectedUser.idRol === 4 ? "Inactivo" : selectedUser.estado}</strong>
+                  </div>
+                  <div className="detail-item">
+                    <span>Fecha de registro</span>
+                    <strong>{formatDate(selectedUser.fechaRegistro)}</strong>
+                  </div>
+                </div>
+              )}
+
+              <div className="modal-actions">
+                <button type="button" className="secondary" onClick={closeDetailModal}>
+                  Cerrar
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 import { login as loginUser } from "../../services/authService";
@@ -9,6 +9,7 @@ import { registerBitacora } from "../../services/bitacoraService";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [error, setError] = useState("");
@@ -50,8 +51,11 @@ function Login() {
         return;
       }
 
-      if (auth.idRol === 2) {
-        navigate(ADMIN_ROUTES.DASHBOARD);
+      const requestedPath = location.state?.from?.pathname;
+      if (auth.idRol === 1) {
+        navigate(requestedPath?.startsWith("/admin") ? requestedPath : ADMIN_ROUTES.DASHBOARD);
+      } else if (requestedPath && !requestedPath.startsWith("/admin")) {
+        navigate(requestedPath);
       } else {
         navigate("/");
       }
