@@ -5,6 +5,7 @@ import "sweetalert2/dist/sweetalert2.min.css";
 import { login as loginUser } from "../../services/authService";
 import { ADMIN_ROUTES } from "../../routes/routes";
 import "./Login.css";
+import { registerBitacora } from "../../services/bitacoraService";
 
 function Login() {
   const navigate = useNavigate();
@@ -21,14 +22,34 @@ function Login() {
 
     try {
       const auth = await loginUser({ correo, contrasena });
+      if (auth.codigo === 1) {
+        await registerBitacora({
+          idUsuario:     auth.idUsuario,
+          tablaAfectada: "Usuarios",
+          operacion:     "LOGIN",
+          descripcion:   `Inicio de sesión exitoso: ${auth.correo}`,
+        });
 
-      await Swal.fire({
-        icon: "success",
-        title: "Bienvenido",
-        text: auth.mensaje || "Inicio de sesión exitoso.",
-        timer: 1800,
-        showConfirmButton: false,
-      });
+        await Swal.fire({
+            icon: "success",
+            title: "Bienvenido",
+            text: auth.mensaje || "Inicio de sesión exitoso.",
+            timer: 1800,
+            showConfirmButton: false,
+        });
+
+      }
+
+      if (auth.codigo === 0) {
+        const msg = auth.mensaje || "No se pudo iniciar sesión.";
+        setError(msg);
+        Swal.fire({
+          icon: "error",
+          title: "Acceso denegado",
+          text: msg,
+        });
+        return;
+      }
 
       const requestedPath = location.state?.from?.pathname;
       if (auth.idRol === 1) {

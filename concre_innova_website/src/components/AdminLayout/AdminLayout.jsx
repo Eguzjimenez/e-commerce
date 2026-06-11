@@ -101,6 +101,13 @@ function AdminLayout({ title, children }) {
           >
             Estadísticas
           </NavLink>
+          <NavLink
+            to={ADMIN_ROUTES.BITACORA}
+            className={({ isActive }) =>
+                isActive ? "admin-nav-link active" : "admin-nav-link"
+              }>
+            Bitácora
+          </NavLink>
         </nav>
       </aside>
 

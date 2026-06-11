@@ -1,6 +1,8 @@
-import { Navigate, Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import { PUBLIC_ROUTES, PRIVATE_ROUTES, ADMIN_ROUTES } from "./routes";
+import { ROLES } from "../constants/roles";
+import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
 
 import Home from "../pages/Home/Home";
 import Catalog from "../pages/Catalog/Catalog";
@@ -11,6 +13,7 @@ import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import ForgotPassword from "../pages/forgot-password/ForgotPassword";
 import Chat from "../pages/Chat/Chat";
+import AccessDenied from "../pages/AccessDenied/AccessDenied";
 
 import AdminDashboard from "../pages/AdminDashboard/AdminDashboard";
 import AdminInventory from "../pages/AdminInventory/AdminInventory";
@@ -22,31 +25,11 @@ import AdminChat from "../pages/AdminChat/AdminChat";
 import AdminReports from "../pages/AdminReports/AdminReports";
 import AdminStatistics from "../pages/AdminStatistics/AdminStatistics";
 import AdminUsers from "../pages/AdminUsers/AdminUsers";
-import { isAdmin, isLoggedIn } from "../services/authService";
+import AdminBitacora from "../pages/AdminBitacora/AdminBitacora";
 
-function RequireAuth({ children }) {
-  const location = useLocation();
-
-  if (!isLoggedIn()) {
-    return <Navigate to={PUBLIC_ROUTES.LOGIN} replace state={{ from: location }} />;
-  }
-
-  return children;
-}
-
-function RequireAdmin({ children }) {
-  const location = useLocation();
-
-  if (!isLoggedIn()) {
-    return <Navigate to={PUBLIC_ROUTES.LOGIN} replace state={{ from: location }} />;
-  }
-
-  if (!isAdmin()) {
-    return <Navigate to={PUBLIC_ROUTES.HOME} replace />;
-  }
-
-  return children;
-}
+const SOLO_ADMIN = [ROLES.ADMINISTRADOR];
+const ADMIN_Y_VENDEDOR = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR];
+const TODOS_AUTENTICADOS = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR, ROLES.CLIENTE];
 
 function AppRoutes() {
   return (
@@ -58,20 +41,114 @@ function AppRoutes() {
       <Route path={PUBLIC_ROUTES.REGISTER} element={<Register />} />
       <Route path={PUBLIC_ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
       <Route path={PUBLIC_ROUTES.CHAT} element={<Chat />} />
+      <Route path="/acceso-denegado" element={<AccessDenied />} />
 
-      <Route path={PRIVATE_ROUTES.CART} element={<RequireAuth><Cart /></RequireAuth>} />
-      <Route path={PRIVATE_ROUTES.CHECKOUT} element={<RequireAuth><Checkout /></RequireAuth>} />
+      <Route
+        path={PRIVATE_ROUTES.CART}
+        element={
+          <ProtectedRoute allowedRoles={TODOS_AUTENTICADOS}>
+            <Cart />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={PRIVATE_ROUTES.CHECKOUT}
+        element={
+          <ProtectedRoute allowedRoles={TODOS_AUTENTICADOS}>
+            <Checkout />
+          </ProtectedRoute>
+        }
+      />
 
-      <Route path={ADMIN_ROUTES.DASHBOARD} element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
-      <Route path={ADMIN_ROUTES.INVENTORY} element={<RequireAdmin><AdminInventory /></RequireAdmin>} />
-      <Route path={ADMIN_ROUTES.PRODUCTS} element={<RequireAdmin><AdminProducts /></RequireAdmin>} />
-      <Route path={ADMIN_ROUTES.CATEGORIES} element={<RequireAdmin><AdminCategories /></RequireAdmin>} />
-      <Route path={ADMIN_ROUTES.QUOTATIONS} element={<RequireAdmin><AdminQuotations /></RequireAdmin>} />
-      <Route path={ADMIN_ROUTES.ORDERS} element={<RequireAdmin><AdminOrders /></RequireAdmin>} />
-      <Route path={ADMIN_ROUTES.CHAT} element={<RequireAdmin><AdminChat /></RequireAdmin>} />
-      <Route path={ADMIN_ROUTES.REPORTS} element={<RequireAdmin><AdminReports /></RequireAdmin>} />
-      <Route path={ADMIN_ROUTES.STATISTICS} element={<RequireAdmin><AdminStatistics /></RequireAdmin>} />
-      <Route path={ADMIN_ROUTES.USERS} element={<RequireAdmin><AdminUsers /></RequireAdmin>} />
+      <Route
+        path={ADMIN_ROUTES.DASHBOARD}
+        element={
+          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.USERS}
+        element={
+          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+            <AdminUsers />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.CATEGORIES}
+        element={
+          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+            <AdminCategories />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.REPORTS}
+        element={
+          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+            <AdminReports />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.STATISTICS}
+        element={
+          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+            <AdminStatistics />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.BITACORA}
+        element={
+          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+            <AdminBitacora />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path={ADMIN_ROUTES.INVENTORY}
+        element={
+          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+            <AdminInventory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.PRODUCTS}
+        element={
+          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+            <AdminProducts />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.QUOTATIONS}
+        element={
+          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+            <AdminQuotations />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.ORDERS}
+        element={
+          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+            <AdminOrders />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.CHAT}
+        element={
+          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+            <AdminChat />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
