@@ -25,6 +25,7 @@ import AdminChat from "../pages/AdminChat/AdminChat";
 import AdminReports from "../pages/AdminReports/AdminReports";
 import AdminStatistics from "../pages/AdminStatistics/AdminStatistics";
 import AdminUsers from "../pages/AdminUsers/AdminUsers";
+import AdminBitacora from "../pages/AdminBitacora/AdminBitacora";
 
 const SOLO_ADMIN           = [ROLES.ADMINISTRADOR];
 const ADMIN_Y_VENDEDOR     = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR];
@@ -66,6 +67,9 @@ function AppRoutes() {
       />
       <Route path={ADMIN_ROUTES.STATISTICS}
         element={<ProtectedRoute allowedRoles={SOLO_ADMIN}><AdminStatistics /></ProtectedRoute>}
+      />
+      <Route path={ADMIN_ROUTES.BITACORA}
+        element={<ProtectedRoute allowedRoles={SOLO_ADMIN}><AdminBitacora /></ProtectedRoute>}
       />
 
       {/* ── Rutas Administrador + Vendedor ───────────────────────── */}
