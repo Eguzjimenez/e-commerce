@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 
 import { PUBLIC_ROUTES, PRIVATE_ROUTES, ADMIN_ROUTES } from "./routes";
 
@@ -22,6 +22,31 @@ import AdminChat from "../pages/AdminChat/AdminChat";
 import AdminReports from "../pages/AdminReports/AdminReports";
 import AdminStatistics from "../pages/AdminStatistics/AdminStatistics";
 import AdminUsers from "../pages/AdminUsers/AdminUsers";
+import { isAdmin, isLoggedIn } from "../services/authService";
+
+function RequireAuth({ children }) {
+  const location = useLocation();
+
+  if (!isLoggedIn()) {
+    return <Navigate to={PUBLIC_ROUTES.LOGIN} replace state={{ from: location }} />;
+  }
+
+  return children;
+}
+
+function RequireAdmin({ children }) {
+  const location = useLocation();
+
+  if (!isLoggedIn()) {
+    return <Navigate to={PUBLIC_ROUTES.LOGIN} replace state={{ from: location }} />;
+  }
+
+  if (!isAdmin()) {
+    return <Navigate to={PUBLIC_ROUTES.HOME} replace />;
+  }
+
+  return children;
+}
 
 function AppRoutes() {
   return (
@@ -34,19 +59,19 @@ function AppRoutes() {
       <Route path={PUBLIC_ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
       <Route path={PUBLIC_ROUTES.CHAT} element={<Chat />} />
 
-      <Route path={PRIVATE_ROUTES.CART} element={<Cart />} />
-      <Route path={PRIVATE_ROUTES.CHECKOUT} element={<Checkout />} />
+      <Route path={PRIVATE_ROUTES.CART} element={<RequireAuth><Cart /></RequireAuth>} />
+      <Route path={PRIVATE_ROUTES.CHECKOUT} element={<RequireAuth><Checkout /></RequireAuth>} />
 
-      <Route path={ADMIN_ROUTES.DASHBOARD} element={<AdminDashboard />} />
-      <Route path={ADMIN_ROUTES.INVENTORY} element={<AdminInventory />} />
-      <Route path={ADMIN_ROUTES.PRODUCTS} element={<AdminProducts />} />
-      <Route path={ADMIN_ROUTES.CATEGORIES} element={<AdminCategories />} />
-      <Route path={ADMIN_ROUTES.QUOTATIONS} element={<AdminQuotations />} />
-      <Route path={ADMIN_ROUTES.ORDERS} element={<AdminOrders />} />
-      <Route path={ADMIN_ROUTES.CHAT} element={<AdminChat />} />
-      <Route path={ADMIN_ROUTES.REPORTS} element={<AdminReports />} />
-      <Route path={ADMIN_ROUTES.STATISTICS} element={<AdminStatistics />} />
-      <Route path={ADMIN_ROUTES.USERS} element={<AdminUsers />} />
+      <Route path={ADMIN_ROUTES.DASHBOARD} element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
+      <Route path={ADMIN_ROUTES.INVENTORY} element={<RequireAdmin><AdminInventory /></RequireAdmin>} />
+      <Route path={ADMIN_ROUTES.PRODUCTS} element={<RequireAdmin><AdminProducts /></RequireAdmin>} />
+      <Route path={ADMIN_ROUTES.CATEGORIES} element={<RequireAdmin><AdminCategories /></RequireAdmin>} />
+      <Route path={ADMIN_ROUTES.QUOTATIONS} element={<RequireAdmin><AdminQuotations /></RequireAdmin>} />
+      <Route path={ADMIN_ROUTES.ORDERS} element={<RequireAdmin><AdminOrders /></RequireAdmin>} />
+      <Route path={ADMIN_ROUTES.CHAT} element={<RequireAdmin><AdminChat /></RequireAdmin>} />
+      <Route path={ADMIN_ROUTES.REPORTS} element={<RequireAdmin><AdminReports /></RequireAdmin>} />
+      <Route path={ADMIN_ROUTES.STATISTICS} element={<RequireAdmin><AdminStatistics /></RequireAdmin>} />
+      <Route path={ADMIN_ROUTES.USERS} element={<RequireAdmin><AdminUsers /></RequireAdmin>} />
     </Routes>
   );
 }
