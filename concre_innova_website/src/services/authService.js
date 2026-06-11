@@ -1,4 +1,5 @@
 import { request } from "./apiClient";
+import { ROL_ID_MAP } from "../constants/roles";
 
 const AUTH_STORAGE_KEY = "concre_innova_auth";
 
@@ -12,6 +13,7 @@ export async function login({ correo, contrasena }) {
     correo,
     idUsuario: data?.idUsuario ?? null,
     idRol: data?.idRol ?? null,
+    nombreRol: ROL_ID_MAP[data?.idRol] ?? null,
     codigo: data?.codigo,
     mensaje: data?.mensaje,
     loggedAt: new Date().toISOString(),
@@ -57,4 +59,12 @@ export function isVendor() {
 
 export function isLoggedIn() {
   return Boolean(getAuth());
+}
+
+export function isAdmin() {
+  return getUserRole() === "Administrador";
+}
+
+export function isClient() {
+  return getUserRole() === "Cliente";
 }
