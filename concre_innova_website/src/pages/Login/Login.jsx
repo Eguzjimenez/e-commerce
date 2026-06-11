@@ -28,14 +28,27 @@ function Login() {
           operacion:     "LOGIN",
           descripcion:   `Inicio de sesión exitoso: ${auth.correo}`,
         });
+
+        await Swal.fire({
+            icon: "success",
+            title: "Bienvenido",
+            text: auth.mensaje || "Inicio de sesión exitoso.",
+            timer: 1800,
+            showConfirmButton: false,
+        });
+
       }
-      await Swal.fire({
-        icon: "success",
-        title: "Bienvenido",
-        text: auth.mensaje || "Inicio de sesión exitoso.",
-        timer: 1800,
-        showConfirmButton: false,
-      });
+
+      if (auth.codigo === 0) {
+        const msg = auth.mensaje || "No se pudo iniciar sesión.";
+        setError(msg);
+        Swal.fire({
+          icon: "error",
+          title: "Acceso denegado",
+          text: msg,
+        });
+        return;
+      }
 
       if (auth.idRol === 2) {
         navigate(ADMIN_ROUTES.DASHBOARD);
