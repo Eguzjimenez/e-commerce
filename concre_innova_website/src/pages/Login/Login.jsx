@@ -53,7 +53,9 @@ function Login() {
       }
 
       const requestedPath = location.state?.from?.pathname;
-      if (auth.nombreRol === ROLES.ADMINISTRADOR) {
+      const isStaff = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR].includes(auth.nombreRol);
+
+      if (isStaff) {
         navigate(requestedPath?.startsWith("/admin") ? requestedPath : ADMIN_ROUTES.DASHBOARD);
       } else if (requestedPath && !requestedPath.startsWith("/admin")) {
         navigate(requestedPath);

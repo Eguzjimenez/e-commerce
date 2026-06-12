@@ -29,7 +29,8 @@ function Navbar() {
   };
 
   const authenticated = isLoggedIn() && auth;
-  const admin = getUserRole() === ROLES.ADMINISTRADOR;
+  const userRole = getUserRole();
+  const staff = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR].includes(userRole);
 
   return (
     <nav className="navbar">
@@ -61,9 +62,9 @@ function Navbar() {
               <Link to={PRIVATE_ROUTES.CART}>Carrito</Link>
             </li>
           )}
-          {admin && (
+          {staff && (
             <li>
-              <Link to={ADMIN_ROUTES.DASHBOARD}>Admin</Link>
+              <Link to={ADMIN_ROUTES.DASHBOARD}>Panel</Link>
             </li>
           )}
           <li>
