@@ -1,113 +1,93 @@
 import "./AdminLayout.css";
 import { NavLink } from "react-router-dom";
 import { ADMIN_ROUTES } from "../../routes/routes";
+import { ROLES } from "../../constants/roles";
+import { getUserRole } from "../../services/authService";
+
+const navItems = [
+  {
+    to: ADMIN_ROUTES.DASHBOARD,
+    label: "Panel principal",
+    roles: [ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
+  },
+  {
+    to: ADMIN_ROUTES.INVENTORY,
+    label: "Inventario",
+    roles: [ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
+  },
+  {
+    to: ADMIN_ROUTES.PRODUCTS,
+    label: "Productos",
+    roles: [ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
+  },
+  {
+    to: ADMIN_ROUTES.CATEGORIES,
+    label: "Categorias",
+    roles: [ROLES.ADMINISTRADOR],
+  },
+  {
+    to: ADMIN_ROUTES.QUOTATIONS,
+    label: "Cotizaciones",
+    roles: [ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
+  },
+  {
+    to: ADMIN_ROUTES.ORDERS,
+    label: "Pedidos",
+    roles: [ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
+  },
+  {
+    to: ADMIN_ROUTES.CHAT,
+    label: "Chat administrativo",
+    roles: [ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
+  },
+  {
+    to: ADMIN_ROUTES.USERS,
+    label: "Usuarios",
+    roles: [ROLES.ADMINISTRADOR],
+  },
+  {
+    to: ADMIN_ROUTES.REPORTS,
+    label: "Reportes",
+    roles: [ROLES.ADMINISTRADOR],
+  },
+  {
+    to: ADMIN_ROUTES.STATISTICS,
+    label: "Estadisticas",
+    roles: [ROLES.ADMINISTRADOR],
+  },
+  {
+    to: ADMIN_ROUTES.BITACORA,
+    label: "Bitacora",
+    roles: [ROLES.ADMINISTRADOR],
+  },
+];
 
 function AdminLayout({ title, children }) {
+  const userRole = getUserRole();
+  const visibleItems = navItems.filter((item) => item.roles.includes(userRole));
+  const panelName =
+    userRole === ROLES.VENDEDOR ? "Panel de Ventas" : "Panel de Administracion";
+
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">
         <div className="admin-sidebar-brand">
           <h2>Concre Innova</h2>
-          <p>Panel de Administración</p>
+          <p>{panelName}</p>
         </div>
 
         <nav className="admin-sidebar-nav">
-          <NavLink
-            to={ADMIN_ROUTES.DASHBOARD}
-            className={({ isActive }) =>
-              isActive ? "admin-nav-link active" : "admin-nav-link"
-            }
-          >
-            Panel principal
-          </NavLink>
-
-          <NavLink
-            to={ADMIN_ROUTES.INVENTORY}
-            className={({ isActive }) =>
-              isActive ? "admin-nav-link active" : "admin-nav-link"
-            }
-          >
-            Inventario
-          </NavLink>
-
-          <NavLink
-            to={ADMIN_ROUTES.PRODUCTS}
-            className={({ isActive }) =>
-              isActive ? "admin-nav-link active" : "admin-nav-link"
-            }
-          >
-            Productos
-          </NavLink>
-
-          <NavLink
-            to={ADMIN_ROUTES.CATEGORIES}
-            className={({ isActive }) =>
-              isActive ? "admin-nav-link active" : "admin-nav-link"
-            }
-          >
-            Categorías
-          </NavLink>
-
-          <NavLink
-            to={ADMIN_ROUTES.QUOTATIONS}
-            className={({ isActive }) =>
-              isActive ? "admin-nav-link active" : "admin-nav-link"
-            }
-          >
-            Cotizaciones
-          </NavLink>
-
-          <NavLink
-            to={ADMIN_ROUTES.ORDERS}
-            className={({ isActive }) =>
-              isActive ? "admin-nav-link active" : "admin-nav-link"
-            }
-          >
-            Pedidos
-          </NavLink>
-
-          <NavLink
-            to={ADMIN_ROUTES.CHAT}
-            className={({ isActive }) =>
-              isActive ? "admin-nav-link active" : "admin-nav-link"
-            }
-          >
-            Chat administrativo
-          </NavLink>
-
-          <NavLink
-            to={ADMIN_ROUTES.USERS}
-            className={({ isActive }) =>
-              isActive ? "admin-nav-link active" : "admin-nav-link"
-            }
-          >
-            Usuarios
-          </NavLink>
-
-          <NavLink
-            to={ADMIN_ROUTES.REPORTS}
-            className={({ isActive }) =>
-              isActive ? "admin-nav-link active" : "admin-nav-link"
-            }
-          >
-            Reportes
-          </NavLink>
-
-          <NavLink
-            to={ADMIN_ROUTES.STATISTICS}
-            className={({ isActive }) =>
-              isActive ? "admin-nav-link active" : "admin-nav-link"
-            }
-          >
-            Estadísticas
-          </NavLink>
-          <NavLink
-            to={ADMIN_ROUTES.BITACORA}
-            className={({ isActive }) =>
+          {visibleItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
                 isActive ? "admin-nav-link active" : "admin-nav-link"
-              }>
-            Bitácora
-          </NavLink>
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
         </nav>
       </aside>
 
@@ -119,7 +99,7 @@ function AdminLayout({ title, children }) {
           </div>
 
           <div className="admin-header-user">
-            <span>Administrador</span>
+            <span>{userRole || "Usuario"}</span>
           </div>
         </header>
 

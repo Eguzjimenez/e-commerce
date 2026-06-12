@@ -63,7 +63,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.DASHBOARD}
         element={
-          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
             <AdminDashboard />
           </ProtectedRoute>
         }
