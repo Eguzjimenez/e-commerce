@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 import { PUBLIC_ROUTES, PRIVATE_ROUTES, ADMIN_ROUTES } from "./routes";
-import { ROLES } from "../constants/roles";
+import { ROLE_GROUPS } from "../constants/roleAccess";
 import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
 
 import Home from "../pages/Home/Home";
@@ -27,10 +27,6 @@ import AdminStatistics from "../pages/AdminStatistics/AdminStatistics";
 import AdminUsers from "../pages/AdminUsers/AdminUsers";
 import AdminBitacora from "../pages/AdminBitacora/AdminBitacora";
 
-const SOLO_ADMIN = [ROLES.ADMINISTRADOR];
-const ADMIN_Y_VENDEDOR = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR];
-const TODOS_AUTENTICADOS = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR, ROLES.CLIENTE];
-
 function AppRoutes() {
   return (
     <Routes>
@@ -46,7 +42,7 @@ function AppRoutes() {
       <Route
         path={PRIVATE_ROUTES.CART}
         element={
-          <ProtectedRoute allowedRoles={TODOS_AUTENTICADOS}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
             <Cart />
           </ProtectedRoute>
         }
@@ -54,7 +50,7 @@ function AppRoutes() {
       <Route
         path={PRIVATE_ROUTES.CHECKOUT}
         element={
-          <ProtectedRoute allowedRoles={TODOS_AUTENTICADOS}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
             <Checkout />
           </ProtectedRoute>
         }
@@ -63,7 +59,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.DASHBOARD}
         element={
-          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.STAFF}>
             <AdminDashboard />
           </ProtectedRoute>
         }
@@ -71,7 +67,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.USERS}
         element={
-          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
             <AdminUsers />
           </ProtectedRoute>
         }
@@ -79,7 +75,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.CATEGORIES}
         element={
-          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
             <AdminCategories />
           </ProtectedRoute>
         }
@@ -87,7 +83,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.REPORTS}
         element={
-          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
             <AdminReports />
           </ProtectedRoute>
         }
@@ -95,7 +91,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.STATISTICS}
         element={
-          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
             <AdminStatistics />
           </ProtectedRoute>
         }
@@ -103,7 +99,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.BITACORA}
         element={
-          <ProtectedRoute allowedRoles={SOLO_ADMIN}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
             <AdminBitacora />
           </ProtectedRoute>
         }
@@ -112,7 +108,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.INVENTORY}
         element={
-          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.STAFF}>
             <AdminInventory />
           </ProtectedRoute>
         }
@@ -120,7 +116,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.PRODUCTS}
         element={
-          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.STAFF}>
             <AdminProducts />
           </ProtectedRoute>
         }
@@ -128,7 +124,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.QUOTATIONS}
         element={
-          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.STAFF}>
             <AdminQuotations />
           </ProtectedRoute>
         }
@@ -136,7 +132,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.ORDERS}
         element={
-          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.STAFF}>
             <AdminOrders />
           </ProtectedRoute>
         }
@@ -144,7 +140,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.CHAT}
         element={
-          <ProtectedRoute allowedRoles={ADMIN_Y_VENDEDOR}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.STAFF}>
             <AdminChat />
           </ProtectedRoute>
         }

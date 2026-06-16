@@ -1,72 +1,12 @@
 import "./AdminLayout.css";
 import { NavLink } from "react-router-dom";
-import { ADMIN_ROUTES } from "../../routes/routes";
-import { ROLES } from "../../constants/roles";
+import { ADMIN_NAV_ITEMS, getAdminPanelName } from "../../constants/adminNavigation";
 import { getUserRole } from "../../services/authService";
-
-const navItems = [
-  {
-    to: ADMIN_ROUTES.DASHBOARD,
-    label: "Panel principal",
-    roles: [ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
-  },
-  {
-    to: ADMIN_ROUTES.INVENTORY,
-    label: "Inventario",
-    roles: [ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
-  },
-  {
-    to: ADMIN_ROUTES.PRODUCTS,
-    label: "Productos",
-    roles: [ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
-  },
-  {
-    to: ADMIN_ROUTES.CATEGORIES,
-    label: "Categorias",
-    roles: [ROLES.ADMINISTRADOR],
-  },
-  {
-    to: ADMIN_ROUTES.QUOTATIONS,
-    label: "Cotizaciones",
-    roles: [ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
-  },
-  {
-    to: ADMIN_ROUTES.ORDERS,
-    label: "Pedidos",
-    roles: [ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
-  },
-  {
-    to: ADMIN_ROUTES.CHAT,
-    label: "Chat administrativo",
-    roles: [ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
-  },
-  {
-    to: ADMIN_ROUTES.USERS,
-    label: "Usuarios",
-    roles: [ROLES.ADMINISTRADOR],
-  },
-  {
-    to: ADMIN_ROUTES.REPORTS,
-    label: "Reportes",
-    roles: [ROLES.ADMINISTRADOR],
-  },
-  {
-    to: ADMIN_ROUTES.STATISTICS,
-    label: "Estadisticas",
-    roles: [ROLES.ADMINISTRADOR],
-  },
-  {
-    to: ADMIN_ROUTES.BITACORA,
-    label: "Bitacora",
-    roles: [ROLES.ADMINISTRADOR],
-  },
-];
 
 function AdminLayout({ title, children }) {
   const userRole = getUserRole();
-  const visibleItems = navItems.filter((item) => item.roles.includes(userRole));
-  const panelName =
-    userRole === ROLES.VENDEDOR ? "Panel de Ventas" : "Panel de Administracion";
+  const visibleItems = ADMIN_NAV_ITEMS.filter((item) => item.roles.includes(userRole));
+  const panelName = getAdminPanelName(userRole);
 
   return (
     <div className="admin-layout">

@@ -4,14 +4,14 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ADMIN_ROUTES } from "../../routes/routes";
 import { getUserRole } from "../../services/authService";
-import { ROLES } from "../../constants/roles";
+import { isStaffRole, isVendorRole } from "../../constants/roleAccess";
 import ProductModal from "../../components/ProductModal/ProductModal";
 
 function Home() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [mode, setMode] = useState("home");
   const userRole = getUserRole();
-  const showStaffAccess = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR].includes(userRole);
+  const showStaffAccess = isStaffRole(userRole);
 
   return (
     <div>
@@ -39,7 +39,7 @@ function Home() {
           <div className="admin-home-card">
             <div className="admin-home-card-content">
               <span className="admin-home-badge">Acceso interno</span>
-              <h2>{userRole === ROLES.VENDEDOR ? "Panel de ventas" : "Panel de administracion"}</h2>
+              <h2>{isVendorRole(userRole) ? "Panel de ventas" : "Panel de administracion"}</h2>
               <p>
                 Gestiona las funciones internas disponibles para tu rol desde un solo lugar.
               </p>

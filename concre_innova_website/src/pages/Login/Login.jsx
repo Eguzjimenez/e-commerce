@@ -6,7 +6,7 @@ import { login as loginUser } from "../../services/authService";
 import { ADMIN_ROUTES } from "../../routes/routes";
 import "./Login.css";
 import { registerBitacora } from "../../services/bitacoraService";
-import { ROLES } from "../../constants/roles";
+import { isStaffRole } from "../../constants/roleAccess";
 
 function Login() {
   const navigate = useNavigate();
@@ -53,9 +53,8 @@ function Login() {
       }
 
       const requestedPath = location.state?.from?.pathname;
-      const isStaff = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR].includes(auth.nombreRol);
 
-      if (isStaff) {
+      if (isStaffRole(auth.nombreRol)) {
         navigate(requestedPath?.startsWith("/admin") ? requestedPath : ADMIN_ROUTES.DASHBOARD);
       } else if (requestedPath && !requestedPath.startsWith("/admin")) {
         navigate(requestedPath);

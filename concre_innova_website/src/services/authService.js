@@ -1,5 +1,6 @@
 import { request } from "./apiClient";
 import { ROL_ID_MAP } from "../constants/roles";
+import { isVendorRole } from "../constants/roleAccess";
 
 const AUTH_STORAGE_KEY = "concre_innova_auth";
 
@@ -76,7 +77,7 @@ export function getUserRole() {
 }
 
 export function isVendor() {
-  return getUserRole() === ROL_ID_MAP[2];
+  return isVendorRole(getUserRole());
 }
 
 export function isLoggedIn() {
