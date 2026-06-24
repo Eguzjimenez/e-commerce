@@ -91,7 +91,7 @@ function AdminBitacora() {
             </select>
           </div>
           <button className="bitacora-refresh-btn" onClick={loadBitacora}>
-            🔄 Actualizar
+            Actualizar
           </button>
         </div>
 

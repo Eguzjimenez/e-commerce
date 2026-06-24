@@ -25,24 +25,23 @@ function Login() {
       const auth = await loginUser({ correo, contrasena });
       if (auth.codigo === 1) {
         await registerBitacora({
-          idUsuario:     auth.idUsuario,
+          idUsuario: auth.idUsuario,
           tablaAfectada: "Usuarios",
-          operacion:     "LOGIN",
-          descripcion:   `Inicio de sesión exitoso: ${auth.correo}`,
+          operacion: "LOGIN",
+          descripcion: `Inicio de sesion exitoso: ${auth.correo}`,
         });
 
         await Swal.fire({
-            icon: "success",
-            title: "Bienvenido",
-            text: auth.mensaje || "Inicio de sesión exitoso.",
-            timer: 1800,
-            showConfirmButton: false,
+          icon: "success",
+          title: "Bienvenido",
+          text: auth.mensaje || "Inicio de sesion exitoso.",
+          timer: 1800,
+          showConfirmButton: false,
         });
-
       }
 
       if (auth.codigo === 0) {
-        const msg = auth.mensaje || "No se pudo iniciar sesión.";
+        const msg = auth.mensaje || "No se pudo iniciar sesion.";
         setError(msg);
         Swal.fire({
           icon: "error",
@@ -62,11 +61,11 @@ function Login() {
         navigate("/");
       }
     } catch (err) {
-      const message = err?.message || "Error al iniciar sesión. Verifica tus datos.";
+      const message = err?.message || "Error al iniciar sesion. Verifica tus datos.";
       setError(message);
       Swal.fire({
         icon: "error",
-        title: "No se pudo iniciar sesión",
+        title: "No se pudo iniciar sesion",
         text: message,
       });
     } finally {
@@ -77,10 +76,15 @@ function Login() {
   return (
     <div className="login-wrapper">
       <div className="login-card">
-        
         <div className="login-logo">
-          <span className="logo-icon">🌿</span>
+          <span className="logo-icon">CI</span>
           <span className="logo-text">Concre Innova</span>
+        </div>
+
+        <div className="auth-heading">
+          <span>Acceso</span>
+          <h1>Iniciar sesion</h1>
+          <p>Ingresa para continuar con tus compras o gestionar el panel interno.</p>
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
@@ -96,7 +100,7 @@ function Login() {
           <input
             className="login-input"
             type="password"
-            placeholder="Contraseña"
+            placeholder="Contrasena"
             value={contrasena}
             onChange={(event) => setContrasena(event.target.value)}
             required
@@ -110,7 +114,7 @@ function Login() {
         </form>
 
         <div className="login-links">
-          <Link to="/forgot-password">¿Olvidaste tu contraseña?</Link>
+          <Link to="/forgot-password">Olvidaste tu contrasena?</Link>
           <Link to="/register">Crear cuenta</Link>
         </div>
       </div>

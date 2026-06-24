@@ -12,7 +12,10 @@ function AdminLayout({ title, children }) {
     <div className="admin-layout">
       <aside className="admin-sidebar">
         <div className="admin-sidebar-brand">
-          <h2>Concre Innova</h2>
+          <div className="admin-brand-row">
+            <span className="admin-brand-mark" aria-hidden="true"></span>
+            <h2>Concre Innova</h2>
+          </div>
           <p>{panelName}</p>
         </div>
 

@@ -2,8 +2,7 @@ import "./AdminOrders.css";
 import { useMemo, useState } from "react";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
 
-function AdminOrders() {
-  const orders = [
+const orders = [
     {
       id: 1,
       numeroPedido: "PED-001",
@@ -52,8 +51,9 @@ function AdminOrders() {
       total: 310.2,
       estado: "Pendiente"
     }
-  ];
+];
 
+function AdminOrders() {
   const [busqueda, setBusqueda] = useState("");
   const [estadoSeleccionado, setEstadoSeleccionado] = useState("Todos");
 
