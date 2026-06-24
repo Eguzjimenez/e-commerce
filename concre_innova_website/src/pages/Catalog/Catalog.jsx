@@ -7,6 +7,10 @@ import {
 } from "../../services/catalogService";
 import { addToCart, getCart } from "../../services/cartService";
 import {
+  getFavoriteProductIds,
+  toggleFavorite,
+} from "../../services/favoriteService";
+import {
   buildCatalogModalProduct,
   filterAndSortCatalogProducts,
   formatCatalogPrice,
@@ -32,6 +36,7 @@ function Catalog() {
   const [selectedMinPrice, setSelectedMinPrice] = useState(0);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(0);
   const [cartItems, setCartItems] = useState([]);
+  const [favoriteProductIds, setFavoriteProductIds] = useState(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -106,6 +111,17 @@ function Catalog() {
     window.addEventListener("cartchange", syncCart);
 
     return () => window.removeEventListener("cartchange", syncCart);
+  }, []);
+
+  useEffect(() => {
+    const syncFavorites = () => {
+      setFavoriteProductIds(new Set(getFavoriteProductIds()));
+    };
+
+    syncFavorites();
+    window.addEventListener("favoriteschange", syncFavorites);
+
+    return () => window.removeEventListener("favoriteschange", syncFavorites);
   }, []);
 
   const normalizedCategories = useMemo(
@@ -191,6 +207,22 @@ function Catalog() {
 
   const openProduct = (product) => {
     navigate(buildProductDetailRoute(product.idProducto));
+  };
+
+  const handleToggleFavorite = async (event, product) => {
+    event.stopPropagation();
+    const result = toggleFavorite(product);
+    setFavoriteProductIds(new Set(result.favorites.map((favorite) => favorite.idProducto)));
+
+    await Swal.fire({
+      icon: "success",
+      title: result.isFavorite ? "Agregado a favoritos" : "Eliminado de favoritos",
+      text: result.isFavorite
+        ? `${product.nombre} fue guardado en favoritos.`
+        : `${product.nombre} fue removido de favoritos.`,
+      timer: 1300,
+      showConfirmButton: false,
+    });
   };
 
   const handleAddToCart = async (product) => {
@@ -323,7 +355,9 @@ function Catalog() {
 
           {!isLoading && !error && (
             <div className="catalog-product-grid">
-              {filteredProducts.map((product, index) => (
+              {filteredProducts.map((product, index) => {
+                const isFavorite = favoriteProductIds.has(Number(product.idProducto));
+                return (
                   <article
                     className="catalog-shop-card"
                     key={product.idProducto}
@@ -340,6 +374,19 @@ function Catalog() {
                       <span className="product-rating">
                         {getCatalogProductAvailabilityText(product)}
                       </span>
+                      <button
+                        type="button"
+                        className={`catalog-favorite-button ${isFavorite ? "active" : ""}`}
+                        aria-label={
+                          isFavorite
+                            ? `Eliminar ${product.nombre} de favoritos`
+                            : `Agregar ${product.nombre} a favoritos`
+                        }
+                        aria-pressed={isFavorite}
+                        onClick={(event) => handleToggleFavorite(event, product)}
+                      >
+                        {isFavorite ? "\u2665" : "\u2661"}
+                      </button>
                       <img
                         src={getCatalogProductImage(product)}
                         alt={product.nombre}
@@ -372,7 +419,8 @@ function Catalog() {
                       </div>
                     </div>
                   </article>
-                ))}
+                );
+              })}
 
               {filteredProducts.length === 0 && (
                 <div className="catalog-empty">
