@@ -1,118 +1,135 @@
 .admin-quotations-page {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: minmax(300px, 360px) 1fr;
   gap: 24px;
 }
 
 .admin-quotations-list,
 .admin-quotation-detail {
-  background: white;
-  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(20, 39, 41, 0.98), rgba(9, 24, 29, 0.98));
+  border: 1px solid rgba(191, 219, 199, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.24);
+}
+
+.admin-quotations-list {
   padding: 22px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.admin-quotation-detail {
+  padding: 26px;
 }
 
 .admin-quotations-list-header h2,
 .admin-quotation-detail-header h2,
 .admin-quotation-products h3 {
+  color: #f8fbf5;
   margin: 0;
-  color: #1f3b2d;
 }
 
 .admin-quotations-list-header p {
-  margin: 8px 0 0;
-  color: #666;
+  color: #94a3b8;
   font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 8px 0 0;
 }
 
 .admin-quotation-items {
-  margin-top: 20px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
+  margin-top: 20px;
 }
 
 .admin-quotation-item {
-  width: 100%;
-  border: 1px solid #e5e7e5;
-  background: #f8faf8;
-  border-radius: 12px;
-  padding: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(191, 219, 199, 0.1);
+  border-radius: 8px;
+  color: inherit;
   cursor: pointer;
+  padding: 16px;
   text-align: left;
-  transition: 0.3s ease;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  width: 100%;
 }
 
-.admin-quotation-item:hover {
-  border-color: #4d7c5f;
-}
-
+.admin-quotation-item:hover,
 .admin-quotation-item.active {
-  border-color: #4d7c5f;
-  background-color: #eef3ed;
+  background: rgba(210, 122, 82, 0.12);
+  border-color: rgba(210, 122, 82, 0.55);
+  transform: translateY(-1px);
 }
 
 .admin-quotation-item-top,
 .admin-quotation-detail-header {
-  display: flex;
-  justify-content: space-between;
   align-items: flex-start;
+  display: flex;
   gap: 12px;
+  justify-content: space-between;
 }
 
 .admin-quotation-item-top h3 {
-  margin: 0;
-  color: #1f3b2d;
+  color: #f8fbf5;
   font-size: 1rem;
+  margin: 0;
 }
 
 .admin-quotation-date {
+  color: #94a3b8;
+  font-size: 0.85rem;
   margin: 8px 0 6px;
-  color: #666;
-  font-size: 0.88rem;
 }
 
 .admin-quotation-summary {
-  margin: 0;
-  color: #444;
+  color: #cbd5e1;
   font-size: 0.92rem;
-  line-height: 1.4;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .quotation-status {
-  padding: 7px 11px;
   border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  padding: 7px 11px;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
 .quotation-status.pendiente {
-  background-color: #fff4dd;
-  color: #a56a00;
+  background: rgba(244, 180, 77, 0.14);
+  color: #f7c873;
 }
 
 .quotation-status.respondida {
-  background-color: #e6f4ea;
-  color: #256c3d;
+  background: rgba(103, 148, 119, 0.18);
+  color: #a7d7b4;
 }
 
 .quotation-status.cerrada {
-  background-color: #fde8e8;
-  color: #b42318;
+  background: rgba(210, 122, 82, 0.18);
+  color: #f2a079;
 }
 
 .admin-quotation-info {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(191, 219, 199, 0.1);
+  border-radius: 8px;
+  color: #cbd5e1;
+  display: grid;
   gap: 10px;
-  color: #333;
-  line-height: 1.5;
+  line-height: 1.55;
+  margin-top: 22px;
+  padding: 18px;
 }
 
 .admin-quotation-info p {
   margin: 0;
+}
+
+.admin-quotation-info strong {
+  color: #f8fbf5;
 }
 
 .admin-quotation-products {
@@ -120,62 +137,73 @@
 }
 
 .admin-quotation-products ul {
-  margin: 12px 0 0;
-  padding-left: 20px;
-  color: #333;
+  color: #dbe7d7;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
 }
 
 .admin-quotation-products li {
-  margin-bottom: 8px;
+  background: rgba(103, 148, 119, 0.16);
+  border: 1px solid rgba(103, 148, 119, 0.22);
+  border-radius: 999px;
+  padding: 8px 12px;
 }
 
 .admin-quotation-response {
-  margin-top: 24px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: 24px;
 }
 
 .admin-quotation-response label {
-  color: #1f3b2d;
-  font-weight: 600;
+  color: #f8fbf5;
+  font-weight: 800;
 }
 
 .admin-quotation-response textarea {
+  background: rgba(6, 20, 26, 0.78);
+  border: 1px solid rgba(191, 219, 199, 0.16);
+  border-radius: 8px;
+  color: #f8fbf5;
+  font: inherit;
   min-height: 150px;
-  resize: vertical;
-  border: 1px solid #d8ddd8;
-  border-radius: 12px;
   padding: 14px;
-  font-size: 0.95rem;
-  font-family: inherit;
+  resize: vertical;
+}
+
+.admin-quotation-response textarea::placeholder {
+  color: #64748b;
 }
 
 .admin-quotation-actions {
-  margin-top: 20px;
   display: flex;
-  gap: 12px;
   flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.admin-primary-button,
+.admin-secondary-button {
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 12px 18px;
 }
 
 .admin-primary-button {
-  background-color: #4d7c5f;
-  color: white;
-  border: none;
-  padding: 12px 18px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
+  background: #d27a52;
+  color: #fffaf3;
 }
 
 .admin-secondary-button {
-  background-color: #dfe8e1;
-  color: #1f3b2d;
-  border: none;
-  padding: 12px 18px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  color: #dbe7d7;
 }
 
 @media (max-width: 1000px) {

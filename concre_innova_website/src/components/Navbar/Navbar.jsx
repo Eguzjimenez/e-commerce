@@ -2,8 +2,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ADMIN_ROUTES, PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 import { getAuth, getUserRole, isLoggedIn, logout } from "../../services/authService";
+import { isStaffRole } from "../../constants/roleAccess";
 import { getCartCount } from "../../services/cartService";
-import { ROLES } from "../../constants/roles";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -15,6 +15,7 @@ function Navbar() {
   useEffect(() => {
     setMenuOpen(false);
     setAuth(getAuth());
+    setCartCount(getCartCount());
   }, [location.pathname]);
 
   useEffect(() => {
@@ -37,7 +38,7 @@ function Navbar() {
 
   const authenticated = isLoggedIn() && auth;
   const userRole = getUserRole();
-  const staff = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR].includes(userRole);
+  const staff = isStaffRole(userRole);
 
   return (
     <nav className="navbar">
@@ -65,14 +66,10 @@ function Navbar() {
             <Link to={PUBLIC_ROUTES.CATALOG}>Catalogo</Link>
           </li>
           <li>
-            <Link to={PRIVATE_ROUTES.CART}>Carrito{cartCount > 0 ? ` (${cartCount})` : ""}</Link>
+            <Link to={PRIVATE_ROUTES.CART}>
+              Carrito{cartCount > 0 ? ` (${cartCount})` : ""}
+            </Link>
           </li>
-          {admin && (
-          {authenticated && (
-            <li>
-              <Link to={PRIVATE_ROUTES.CART}>Carrito</Link>
-            </li>
-          )}
           {staff && (
             <li>
               <Link to={ADMIN_ROUTES.DASHBOARD}>Panel</Link>

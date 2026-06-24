@@ -3,7 +3,7 @@ import { useState } from "react";
 
 function Chat() {
   const [messages, setMessages] = useState([
-    { text: "Hola 👋 ¿En qué puedo ayudarte?", type: "bot" }
+    { text: "Hola, en que puedo ayudarte?", type: "bot" },
   ]);
   const [input, setInput] = useState("");
 
@@ -13,7 +13,7 @@ function Chat() {
     const newMessages = [
       ...messages,
       { text: input, type: "user" },
-      { text: "Respuesta automática 🤖", type: "bot" }
+      { text: "Respuesta automatica", type: "bot" },
     ];
 
     setMessages(newMessages);
@@ -23,12 +23,11 @@ function Chat() {
   return (
     <div className="chat-wrapper">
       <div className="chat-container">
-
         <div className="chat-header">
-          🌿 Soporte Concre Innova
+          <span>Soporte Concre Innova</span>
+          <small>Atencion para productos, pedidos y cuidados</small>
         </div>
 
-        {/* MENSAJES */}
         <div className="chat-messages">
           {messages.map((msg, index) => (
             <div key={index} className={`chat-message ${msg.type}`}>
@@ -37,7 +36,6 @@ function Chat() {
           ))}
         </div>
 
-        {/* INPUT */}
         <div className="chat-input-area">
           <input
             value={input}
@@ -46,7 +44,6 @@ function Chat() {
           />
           <button onClick={sendMessage}>Enviar</button>
         </div>
-
       </div>
     </div>
   );
