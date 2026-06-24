@@ -1,50 +1,84 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import IMAGEN from "../../img/Maceta-Negra.jpg";
 import "./Cart.css";
 import ProductModal from "../../components/ProductModal/ProductModal";
+import { getProductImageCandidates } from "../../services/catalogService";
+import { isLoggedIn } from "../../services/authService";
+import { getCart, removeFromCart } from "../../services/cartService";
+import { PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 
 function Cart() {
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [mode, setMode] = useState("cart"); 
+  const [mode] = useState("cart");
+  const [products, setProducts] = useState([]);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const products = [
-    {
-      id: 1,
-      name: "Planta 1",
-      price: 25,
-      img: IMAGEN,
-      images: [IMAGEN, IMAGEN, IMAGEN],
-      description: "Planta decorativa ideal para interiores 🌿",
-      quantity: 1
-    },
-    {
-      id: 2,
-      name: "Planta 2", 
-      price: 30,
-      img: IMAGEN,
-      images: [IMAGEN, IMAGEN, IMAGEN],
-      description: "Planta tropical con hojas grandes 🌴",
-      quantity: 2
-    },
-    {
-      id: 3,
-      name: "Planta 3",
-      price: 20,
-      img: IMAGEN,
-      images: [IMAGEN, IMAGEN, IMAGEN],
-      description: "Suculenta perfecta para principiantes 🌵",
-      quantity: 1
-    },
-    {
-      id: 4,
-      name: "Planta 4",
-      price: 35,
-      img: IMAGEN,
-      images: [IMAGEN, IMAGEN, IMAGEN],
-      description: "Planta de interior con flores coloridas 🌸",
-      quantity: 3
+  useEffect(() => {
+    const syncCart = () => {
+      const cartProducts = getCart().map((item) => {
+        const imageCandidates = getProductImageCandidates(item.imagen);
+        return {
+          id: item.idProducto,
+          idProducto: item.idProducto,
+          name: item.nombre,
+          price: Number(item.precio) || 0,
+          img: imageCandidates[0] || IMAGEN,
+          images: imageCandidates.length ? [...imageCandidates, IMAGEN] : [IMAGEN],
+          description: item.descripcion,
+          quantity: Number(item.cantidad) || 1,
+          imagen: item.imagen,
+        };
+      });
+
+      setProducts(cartProducts);
+    };
+
+    syncCart();
+    window.addEventListener("cartchange", syncCart);
+
+    return () => window.removeEventListener("cartchange", syncCart);
+  }, []);
+
+  const total = useMemo(
+    () => products.reduce((sum, product) => sum + (product.price * product.quantity), 0),
+    [products]
+  );
+
+  const handleRemoveFromCart = async (product) => {
+    removeFromCart(product.idProducto || product.id);
+    setSelectedProduct(null);
+
+    await Swal.fire({
+      icon: "success",
+      title: "Producto eliminado",
+      text: `${product.name} fue eliminado del carrito.`,
+      timer: 1400,
+      showConfirmButton: false,
+    });
+  };
+
+  const handleProceedToCheckout = async () => {
+    if (products.length === 0) {
+      await Swal.fire({
+        icon: "info",
+        title: "Carrito vacio",
+        text: "Agrega productos antes de continuar al pago.",
+      });
+      return;
     }
-  ];
+
+    if (!isLoggedIn()) {
+      navigate(PUBLIC_ROUTES.LOGIN, {
+        state: { from: { pathname: PRIVATE_ROUTES.CHECKOUT }, cartRedirect: location.pathname },
+      });
+      return;
+    }
+
+    navigate(PRIVATE_ROUTES.CHECKOUT);
+  };
 
   return (
     <div className="cart-page container">
@@ -57,13 +91,16 @@ function Cart() {
             className="cart-item"
             onClick={() => {
               setSelectedProduct({
+                id: product.id,
+                idProducto: product.idProducto,
                 name: product.name,
                 price: product.price,
                 img: product.img,
                 images: product.images,
-                description: product.description
+                description: product.description,
+                quantity: product.quantity,
+                imagen: product.imagen,
               });
-              setMode("cart");
             }}
           >
             <img src={product.img} alt={product.name} />
@@ -76,6 +113,8 @@ function Cart() {
             <span className="cart-qty">x{product.quantity}</span>
           </div>
         ))}
+
+        {products.length === 0 && <div className="cart-item">Tu carrito esta vacio.</div>}
       </div>
 
       {/* TOTAL */}
@@ -83,10 +122,10 @@ function Cart() {
 
         <div className="summary-total">
           <span>Total</span>
-          <span>${products.reduce((total, product) => total + (product.price * product.quantity), 0)}</span>
+          <span>${total}</span>
         </div>
 
-        <button className="btn checkout-btn">
+        <button className="btn checkout-btn" onClick={handleProceedToCheckout}>
           Ir a pagar
         </button>
       </div>
@@ -97,6 +136,7 @@ function Cart() {
         product={selectedProduct}
         mode={mode}
         onClose={() => setSelectedProduct(null)}
+        onRemoveFromCart={handleRemoveFromCart}
       />
     </div>
   );

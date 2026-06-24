@@ -43,14 +43,7 @@ function AppRoutes() {
       <Route path={PUBLIC_ROUTES.CHAT} element={<Chat />} />
       <Route path="/acceso-denegado" element={<AccessDenied />} />
 
-      <Route
-        path={PRIVATE_ROUTES.CART}
-        element={
-          <ProtectedRoute allowedRoles={TODOS_AUTENTICADOS}>
-            <Cart />
-          </ProtectedRoute>
-        }
-      />
+      <Route path={PRIVATE_ROUTES.CART} element={<Cart />} />
       <Route
         path={PRIVATE_ROUTES.CHECKOUT}
         element={

@@ -83,6 +83,23 @@
   opacity: 1;
 }
 
+.product-availability {
+  margin: 8px 0 0;
+  font-weight: 600;
+}
+
+.availability-in {
+  color: #1a7f37;
+}
+
+.availability-low {
+  color: #b78103;
+}
+
+.availability-out {
+  color: #b42318;
+}
+
 /* BOTÓN ELIMINAR */
 .btn-danger {
   background: #d9534f;

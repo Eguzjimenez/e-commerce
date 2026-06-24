@@ -17,14 +17,48 @@ function Register() {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+    const normalizedValue = name === "telefono"
+      ? value.replace(/\D/g, "")
+      : value;
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: normalizedValue,
     }));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(formData.correo.trim())) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Correo invalido",
+        text: "Ingresa un correo electronico valido.",
+      });
+      return;
+    }
+
+    if (!/^\d+$/.test(formData.telefono) || formData.telefono.length === 0) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Telefono invalido",
+        text: "El telefono solo puede contener numeros.",
+      });
+      return;
+    }
+
+    if (formData.contrasena.length < 8) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Contrasena invalida",
+        text: "La contrasena debe tener al menos 8 caracteres.",
+      });
+      return;
+    }
 
     if (formData.contrasena !== formData.confirmarContrasena) {
       await Swal.fire({
@@ -89,14 +123,18 @@ function Register() {
             type="email"
             value={formData.correo}
             onChange={handleChange}
+            inputMode="email"
             required
           />
           <input
             className="register-input"
             name="telefono"
             placeholder="Telefono"
+            type="tel"
             value={formData.telefono}
             onChange={handleChange}
+            inputMode="numeric"
+            pattern="[0-9]+"
             required
           />
           <input
@@ -106,7 +144,7 @@ function Register() {
             placeholder="Contrasena"
             value={formData.contrasena}
             onChange={handleChange}
-            minLength="6"
+            minLength="8"
             required
           />
           <input
@@ -116,7 +154,7 @@ function Register() {
             placeholder="Confirmar contrasena"
             value={formData.confirmarContrasena}
             onChange={handleChange}
-            minLength="6"
+            minLength="8"
             required
           />
 
