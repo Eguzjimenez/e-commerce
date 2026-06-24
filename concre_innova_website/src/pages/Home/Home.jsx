@@ -1,11 +1,23 @@
-import IMAGEN from "../../img/Maceta-Negra.jpg";
 import "./Home.css";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ADMIN_ROUTES } from "../../routes/routes";
+import Swal from "sweetalert2";
+import { ADMIN_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 import { getUserRole } from "../../services/authService";
 import { isStaffRole, isVendorRole } from "../../constants/roleAccess";
 import ProductModal from "../../components/ProductModal/ProductModal";
+import { getCatalogCategories, getCatalogProducts } from "../../services/catalogService";
+import { addToCart } from "../../services/cartService";
+import {
+  buildCatalogModalProduct,
+  formatCatalogPrice,
+  getCatalogProductAvailabilityText,
+  getCatalogProductCategoryName,
+  getCatalogProductImage,
+  getFeaturedCatalogProducts,
+  handleCatalogImageFallback,
+  normalizeCatalogCategories,
+} from "../../services/catalogPresentationService";
 
 const homeSlides = [
   {
@@ -28,70 +40,14 @@ const homeSlides = [
   },
 ];
 
-const productGroups = ["Todos", "Interior", "Regalos", "Terraza"];
-
-const featuredProducts = [
-  {
-    id: 1,
-    name: "Maceta Nilo",
-    price: 25,
-    group: "Interior",
-    category: "Macetas",
-    rating: "4.8",
-    description: "Maceta decorativa para interiores modernos.",
-  },
-  {
-    id: 2,
-    name: "Palma Serena",
-    price: 35,
-    group: "Interior",
-    category: "Plantas",
-    rating: "4.9",
-    description: "Planta natural para salas, oficinas y entradas.",
-  },
-  {
-    id: 3,
-    name: "Ramo Alba",
-    price: 28,
-    group: "Regalos",
-    category: "Flores",
-    rating: "4.7",
-    description: "Arreglo floral listo para regalar.",
-  },
-  {
-    id: 4,
-    name: "Set Terra",
-    price: 42,
-    group: "Regalos",
-    category: "Set",
-    rating: "4.8",
-    description: "Set decorativo con maceta y planta de bajo cuidado.",
-  },
-  {
-    id: 5,
-    name: "Maceta Orion",
-    price: 32,
-    group: "Terraza",
-    category: "Macetas",
-    rating: "4.8",
-    description: "Maceta resistente para balcones y terrazas.",
-  },
-  {
-    id: 6,
-    name: "Helecho Bruma",
-    price: 29,
-    group: "Terraza",
-    category: "Plantas",
-    rating: "4.7",
-    description: "Helecho decorativo ideal para espacios frescos.",
-  },
-];
-
 function Home() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [mode, setMode] = useState("home");
   const [activeSlide, setActiveSlide] = useState(0);
-  const [activeGroup, setActiveGroup] = useState("Todos");
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [productsError, setProductsError] = useState("");
   const userRole = getUserRole();
   const showStaffAccess = isStaffRole(userRole);
 
@@ -103,25 +59,73 @@ function Home() {
     return () => clearInterval(slideTimer);
   }, []);
 
-  const visibleProducts = useMemo(() => {
-    if (activeGroup === "Todos") {
-      return featuredProducts;
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadFeaturedProducts() {
+      setIsLoadingProducts(true);
+      setProductsError("");
+
+      try {
+        const [productsResponse, categoriesResponse] = await Promise.all([
+          getCatalogProducts(),
+          getCatalogCategories(),
+        ]);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setProducts(Array.isArray(productsResponse) ? productsResponse : []);
+        setCategories(Array.isArray(categoriesResponse) ? categoriesResponse : []);
+      } catch (error) {
+        if (isMounted) {
+          setProductsError(error.message || "No se pudieron cargar los productos destacados.");
+          setProducts([]);
+          setCategories([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingProducts(false);
+        }
+      }
     }
 
-    return featuredProducts.filter((product) => product.group === activeGroup);
-  }, [activeGroup]);
+    loadFeaturedProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const normalizedCategories = useMemo(
+    () => normalizeCatalogCategories(categories),
+    [categories]
+  );
+
+  const featuredProducts = useMemo(
+    () => getFeaturedCatalogProducts(products, 6),
+    [products]
+  );
 
   const currentSlide = homeSlides[activeSlide];
+  const featuredHeroProduct = featuredProducts[activeSlide % Math.max(featuredProducts.length, 1)];
 
   const openProduct = (product) => {
-    setSelectedProduct({
-      name: product.name,
-      price: product.price,
-      img: IMAGEN,
-      images: [IMAGEN, IMAGEN, IMAGEN],
-      description: product.description,
-    });
+    setSelectedProduct(buildCatalogModalProduct(product));
     setMode("home");
+  };
+
+  const handleAddToCart = async (product) => {
+    addToCart(product, 1);
+
+    await Swal.fire({
+      icon: "success",
+      title: "Agregado al carrito",
+      text: `${product.nombre || product.name} fue agregado correctamente.`,
+      timer: 1400,
+      showConfirmButton: false,
+    });
   };
 
   const showNextSlide = () => {
@@ -143,20 +147,12 @@ function Home() {
           <p>{currentSlide.text}</p>
 
           <div className="home-showcase-actions">
-            <button
-              type="button"
-              className="btn"
-              onClick={() => setActiveGroup("Todos")}
-            >
+            <a href="#productos-destacados" className="btn">
               Ver seleccion
-            </button>
-            <button
-              type="button"
-              className="home-ghost-btn"
-              onClick={() => setActiveGroup("Regalos")}
-            >
-              Ver regalos
-            </button>
+            </a>
+            <Link to={PUBLIC_ROUTES.CATALOG} className="home-ghost-btn">
+              Ver catalogo
+            </Link>
           </div>
         </div>
 
@@ -173,12 +169,22 @@ function Home() {
           <div className="home-feature-card" key={currentSlide.title}>
             <div className="home-feature-image">
               <span>{currentSlide.highlight}</span>
-              <img src={IMAGEN} alt={currentSlide.highlight} />
+              <img
+                src={
+                  featuredHeroProduct
+                    ? getCatalogProductImage(featuredHeroProduct)
+                    : getCatalogProductImage({})
+                }
+                alt={featuredHeroProduct?.nombre || currentSlide.highlight}
+                onError={(event) =>
+                  handleCatalogImageFallback(event, featuredHeroProduct?.imagen)
+                }
+              />
             </div>
 
             <div className="home-feature-content">
               <span>Concre Innova</span>
-              <strong>{currentSlide.label}</strong>
+              <strong>{featuredHeroProduct?.nombre || currentSlide.label}</strong>
             </div>
           </div>
 
@@ -237,61 +243,70 @@ function Home() {
         </section>
       )}
 
-      <section className="container featured-section">
+      <section className="container featured-section" id="productos-destacados">
         <div className="section-title-row">
           <div>
             <span className="home-section-kicker">Colecciones</span>
             <h2>Productos destacados</h2>
             <p>Seleccion visual para plantas, flores y macetas decorativas.</p>
           </div>
+        </div>
 
-          <div className="home-product-tabs" aria-label="Filtrar productos destacados">
-            {productGroups.map((group) => (
-              <button
-                type="button"
-                key={group}
-                className={activeGroup === group ? "active" : ""}
-                onClick={() => setActiveGroup(group)}
+        {isLoadingProducts && (
+          <p className="home-products-status">Cargando productos destacados...</p>
+        )}
+
+        {!isLoadingProducts && productsError && (
+          <p className="home-products-error">{productsError}</p>
+        )}
+
+        {!isLoadingProducts && !productsError && (
+          <div className="grid home-product-grid">
+            {featuredProducts.map((product, index) => (
+              <div
+                className="card product-card-modern home-product-card"
+                key={product.idProducto}
+                style={{ "--card-index": index }}
+                onClick={() => openProduct(product)}
               >
-                {group}
-              </button>
+                <div className="product-visual">
+                  <span className="product-rating">
+                    {getCatalogProductAvailabilityText(product)}
+                  </span>
+                  <img
+                    src={getCatalogProductImage(product)}
+                    alt={product.nombre}
+                    onError={(event) => handleCatalogImageFallback(event, product.imagen)}
+                  />
+                </div>
+
+                <div className="product-card-body">
+                  <span className="product-category">
+                    {getCatalogProductCategoryName(product, normalizedCategories)}
+                  </span>
+                  <h3>{product.nombre}</h3>
+                  <p>{formatCatalogPrice(product.precio)}</p>
+                  <button
+                    className="btn"
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      openProduct(product);
+                    }}
+                  >
+                    Ver
+                  </button>
+                </div>
+              </div>
             ))}
+
+            {featuredProducts.length === 0 && (
+              <div className="home-products-empty">
+                No hay productos destacados disponibles.
+              </div>
+            )}
           </div>
-        </div>
-
-        <div className="grid home-product-grid">
-          {visibleProducts.map((product, index) => (
-            <div
-              className="card product-card-modern home-product-card"
-              key={product.id}
-              style={{ "--card-index": index }}
-              onClick={() => openProduct(product)}
-            >
-              <div className="product-visual">
-                <span className="product-rating">{product.rating}</span>
-                <img src={IMAGEN} alt={product.name} />
-              </div>
-
-              <div className="product-card-body">
-                <span className="product-category">
-                  {product.group} | {product.category}
-                </span>
-                <h3>{product.name}</h3>
-                <p>${product.price}</p>
-                <button
-                  className="btn"
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    openProduct(product);
-                  }}
-                >
-                  Ver
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        )}
       </section>
 
       <footer className="footer">
@@ -324,6 +339,7 @@ function Home() {
         product={selectedProduct}
         mode={mode}
         onClose={() => setSelectedProduct(null)}
+        onAddToCart={handleAddToCart}
       />
     </div>
   );
