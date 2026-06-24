@@ -1,7 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
-import ProductModal from "../../components/ProductModal/ProductModal";
 import {
   getCatalogCategories,
   getCatalogProducts,
@@ -9,24 +8,27 @@ import {
 import { addToCart, getCart } from "../../services/cartService";
 import {
   buildCatalogModalProduct,
+  filterAndSortCatalogProducts,
   formatCatalogPrice,
+  getCatalogQueryOptions,
   getCatalogProductAvailabilityClass,
   getCatalogProductAvailabilityText,
   getCatalogProductCategoryName,
   getCatalogProductImage,
   handleCatalogImageFallback,
   normalizeCatalogCategories,
+  PRODUCT_SORT_OPTIONS,
 } from "../../services/catalogPresentationService";
-import { PRIVATE_ROUTES } from "../../routes/routes";
+import { buildProductDetailRoute, PRIVATE_ROUTES } from "../../routes/routes";
 import "./Catalog.css";
 
 function Catalog() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [mode, setMode] = useState("catalog");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("all");
+  const [selectedSortOrder, setSelectedSortOrder] = useState(PRODUCT_SORT_OPTIONS.NONE);
   const [selectedMinPrice, setSelectedMinPrice] = useState(0);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(0);
   const [cartItems, setCartItems] = useState([]);
@@ -36,39 +38,64 @@ function Catalog() {
   useEffect(() => {
     let isMounted = true;
 
-    async function loadCatalogData() {
+    async function loadCategories() {
+      try {
+        const categoriesResponse = await getCatalogCategories();
+
+        if (!isMounted) {
+          return;
+        }
+
+        setCategories(Array.isArray(categoriesResponse) ? categoriesResponse : []);
+      } catch (loadError) {
+        if (isMounted) {
+          setError(loadError.message || "No se pudieron cargar las categorias.");
+        }
+      }
+    }
+
+    loadCategories();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    const searchDelay = searchTerm.trim() ? 350 : 0;
+
+    const timeoutId = setTimeout(async () => {
       setIsLoading(true);
       setError("");
 
       try {
-        const [productsResponse, categoriesResponse] = await Promise.all([
-          getCatalogProducts(),
-          getCatalogCategories(),
-        ]);
+        const productsResponse = await getCatalogProducts(
+          getCatalogQueryOptions(searchTerm, selectedSortOrder)
+        );
 
         if (!isMounted) {
           return;
         }
 
         setProducts(Array.isArray(productsResponse) ? productsResponse : []);
-        setCategories(Array.isArray(categoriesResponse) ? categoriesResponse : []);
       } catch (loadError) {
         if (isMounted) {
           setError(loadError.message || "No se pudo cargar el catalogo.");
+          setProducts([]);
         }
       } finally {
         if (isMounted) {
           setIsLoading(false);
         }
       }
-    }
-
-    loadCatalogData();
+    }, searchDelay);
 
     return () => {
       isMounted = false;
+      clearTimeout(timeoutId);
     };
-  }, []);
+  }, [searchTerm, selectedSortOrder]);
 
   useEffect(() => {
     const syncCart = () => {
@@ -107,40 +134,21 @@ function Catalog() {
   }, [priceBounds.min, priceBounds.max]);
 
   const filteredProducts = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
-    const min = Number(selectedMinPrice);
-    const max = Number(selectedMaxPrice);
-    const hasMinPrice = !Number.isNaN(min);
-    const hasMaxPrice = !Number.isNaN(max);
-
-    return products.filter((product) => {
-      const categoryId = String(product.idCategoria ?? "");
-      const matchesCategory =
-        selectedCategoryId === "all" || categoryId === selectedCategoryId;
-      const productPrice = Number(product.precio) || 0;
-      const matchesMinPrice = !hasMinPrice || productPrice >= min;
-      const matchesMaxPrice = !hasMaxPrice || productPrice <= max;
-
-      if (!matchesCategory || !matchesMinPrice || !matchesMaxPrice) {
-        return false;
-      }
-
-      if (!term) {
-        return true;
-      }
-
-      const searchableText = [
-        product.nombre,
-        product.descripcion,
-        product.nombreCategoria,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      return searchableText.includes(term);
+    return filterAndSortCatalogProducts(products, {
+      searchTerm,
+      selectedCategoryId,
+      selectedMinPrice,
+      selectedMaxPrice,
+      selectedSortOrder,
     });
-  }, [products, searchTerm, selectedCategoryId, selectedMinPrice, selectedMaxPrice]);
+  }, [
+    products,
+    searchTerm,
+    selectedCategoryId,
+    selectedMinPrice,
+    selectedMaxPrice,
+    selectedSortOrder,
+  ]);
 
   const activeCategoryName =
     selectedCategoryId === "all"
@@ -166,6 +174,7 @@ function Catalog() {
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedCategoryId("all");
+    setSelectedSortOrder(PRODUCT_SORT_OPTIONS.NONE);
     setSelectedMinPrice(priceBounds.min);
     setSelectedMaxPrice(priceBounds.max);
   };
@@ -181,8 +190,7 @@ function Catalog() {
   };
 
   const openProduct = (product) => {
-    setSelectedProduct(buildCatalogModalProduct(product));
-    setMode("catalog");
+    navigate(buildProductDetailRoute(product.idProducto));
   };
 
   const handleAddToCart = async (product) => {
@@ -205,12 +213,18 @@ function Catalog() {
           <p>Filtros visibles, busqueda clara y carrito persistente.</p>
         </div>
 
-        <input
-          className="input catalog-shop-search"
-          placeholder="Buscar plantas, flores o macetas"
-          value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
-        />
+        <form
+          className="catalog-shop-search-form"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <input
+            className="input catalog-shop-search"
+            placeholder="Buscar plantas, flores o macetas"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+          <button type="submit">Buscar</button>
+        </form>
       </section>
 
       <section className="catalog-shop-layout">
@@ -290,7 +304,18 @@ function Catalog() {
               {filteredProducts.length} producto
               {filteredProducts.length !== 1 ? "s" : ""}
             </span>
-            <div>{activeCategoryName}</div>
+            <div className="catalog-toolbar-controls">
+              <span>{activeCategoryName}</span>
+              <select
+                value={selectedSortOrder}
+                onChange={(event) => setSelectedSortOrder(event.target.value)}
+                aria-label="Ordenar productos"
+              >
+                <option value={PRODUCT_SORT_OPTIONS.NONE}>Orden original</option>
+                <option value={PRODUCT_SORT_OPTIONS.PRICE_ASC}>Precio: menor a mayor</option>
+                <option value={PRODUCT_SORT_OPTIONS.PRICE_DESC}>Precio: mayor a menor</option>
+              </select>
+            </div>
           </div>
 
           {isLoading && <p className="catalog-status">Cargando catalogo...</p>}
@@ -304,6 +329,12 @@ function Catalog() {
                     key={product.idProducto}
                     style={{ "--card-index": index }}
                     onClick={() => openProduct(product)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && event.target === event.currentTarget) {
+                        openProduct(product);
+                      }
+                    }}
+                    tabIndex={0}
                   >
                     <div className="catalog-card-visual">
                       <span className="product-rating">
@@ -388,12 +419,6 @@ function Catalog() {
         </aside>
       </section>
 
-      <ProductModal
-        product={selectedProduct}
-        mode={mode}
-        onClose={() => setSelectedProduct(null)}
-        onAddToCart={handleAddToCart}
-      />
     </div>
   );
 }

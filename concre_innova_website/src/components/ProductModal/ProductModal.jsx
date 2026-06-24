@@ -8,6 +8,7 @@ function ProductModal({ product, mode, onClose, onAddToCart, onRemoveFromCart })
 
   const isCart = mode === "cart";
   const images = product.images || [product.img];
+  const productName = product.nombre || product.name || "Producto";
 
   const stock = Number(product.stock);
   const hasNumericStock = !Number.isNaN(stock);
@@ -34,7 +35,7 @@ function ProductModal({ product, mode, onClose, onAddToCart, onRemoveFromCart })
         <div className="modal-image-wrap">
           <img
             src={images[currentImg]}
-            alt="producto"
+            alt={productName}
             className="main-img"
           />
         </div>
@@ -44,7 +45,7 @@ function ProductModal({ product, mode, onClose, onAddToCart, onRemoveFromCart })
             <img
               key={index}
               src={img}
-              alt={`Vista ${index + 1}`}
+              alt={`${productName} vista ${index + 1}`}
               className={currentImg === index ? "active" : ""}
               onClick={() => setCurrentImg(index)}
             />

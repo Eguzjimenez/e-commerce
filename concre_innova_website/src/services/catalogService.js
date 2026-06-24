@@ -1,11 +1,25 @@
 import { API_BASE_URL, request } from "./apiClient";
 
-async function requestWithFallback(paths) {
+function buildQueryString(params = {}) {
+  const query = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      query.set(key, String(value).trim());
+    }
+  });
+
+  const queryString = query.toString();
+  return queryString ? `?${queryString}` : "";
+}
+
+async function requestWithFallback(paths, queryParams = {}) {
   let lastError = null;
+  const queryString = buildQueryString(queryParams);
 
   for (const path of paths) {
     try {
-      return await request(path, { method: "GET" });
+      return await request(`${path}${queryString}`, { method: "GET" });
     } catch (error) {
       lastError = error;
 
@@ -20,11 +34,31 @@ async function requestWithFallback(paths) {
   throw lastError || new Error("No se encontraron endpoints disponibles.");
 }
 
-export async function getCatalogProducts() {
+export async function getCatalogProducts(options = {}) {
   return await requestWithFallback([
     "/api/Productos",
     "/api/Catalogo/productos",
-  ]);
+  ], {
+    busqueda: options.searchTerm,
+    ordenarPor: options.sortBy,
+    direccionOrden: options.sortDirection,
+    idCategoria: options.categoryId,
+  });
+}
+
+export async function getCatalogProductById(idProducto) {
+  try {
+    return await request(`/api/Productos/${idProducto}`, { method: "GET" });
+  } catch (error) {
+    if (![404, 405].includes(error?.status)) {
+      throw error;
+    }
+
+    const products = await getCatalogProducts();
+    return (Array.isArray(products) ? products : []).find(
+      (product) => Number(product.idProducto ?? product.id) === Number(idProducto)
+    ) || null;
+  }
 }
 
 export async function getCatalogCategories() {

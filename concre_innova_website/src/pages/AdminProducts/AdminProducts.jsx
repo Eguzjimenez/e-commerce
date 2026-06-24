@@ -5,10 +5,16 @@ import AdminLayout from "../../components/AdminLayout/AdminLayout";
 import {
   getCatalogCategories,
   getCatalogProducts,
-  getProductImageCandidates,
 } from "../../services/catalogService";
 import { createProduct, deleteProduct, updateProduct } from "../../services/productService";
-import productImage from "../../img/Maceta-Negra.jpg";
+import {
+  buildAdminProductViewModel,
+  buildProductRequestPayload,
+  filterAdminProductViewModels,
+  getProductFormValidation,
+  handleCatalogImageCandidateFallback,
+  normalizeCatalogCategories,
+} from "../../services/catalogPresentationService";
 
 const EMPTY_PRODUCT_FORM = {
   idProducto: null,
@@ -62,50 +68,12 @@ function AdminProducts() {
   };
 
   const normalizedCategories = useMemo(
-    () =>
-      categoryList
-        .map((category) => ({
-          id: String(category.idCategoria ?? category.id ?? ""),
-          name: category.nombreCategoria ?? category.nombre ?? "Sin nombre",
-        }))
-        .filter((category) => category.id),
+    () => normalizeCatalogCategories(categoryList),
     [categoryList]
   );
 
   const products = useMemo(
-    () =>
-      productList.map((product) => {
-        const id = product.idProducto ?? product.id;
-        const categoryId = String(product.idCategoria ?? "");
-        const categoryName =
-          product.nombreCategoria ||
-          normalizedCategories.find((category) => category.id === categoryId)?.name ||
-          "Sin categoria";
-        const stock = Number(product.cantidadDisponible ?? product.stock ?? 0);
-        const imageCandidates = getProductImageCandidates(product.imagen);
-
-        return {
-          id,
-          idProducto: id,
-          name: product.nombre ?? "Producto sin nombre",
-          nombre: product.nombre ?? "",
-          descripcion: product.descripcion ?? "",
-          price: Number(product.precio) || 0,
-          precio: Number(product.precio) || 0,
-          category: categoryName,
-          categoryId,
-          idCategoria: categoryId,
-          stock,
-          cantidadDisponible: stock,
-          minStock: Number(product.cantidadMinima ?? 0),
-          cantidadMinima: Number(product.cantidadMinima ?? 0),
-          status: product.estado || (stock > 0 ? "Activo" : "Inactivo"),
-          estado: product.estado || (stock > 0 ? "Activo" : "Inactivo"),
-          imagen: product.imagen ?? "",
-          image: imageCandidates[0] || productImage,
-          imageCandidates,
-        };
-      }),
+    () => productList.map((product) => buildAdminProductViewModel(product, normalizedCategories)),
     [productList, normalizedCategories]
   );
 
@@ -115,30 +83,11 @@ function AdminProducts() {
   ];
 
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const matchesSearch = product.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-
-      const matchesCategory =
-        selectedCategory === "Todas" || product.category === selectedCategory;
-
-      return matchesSearch && matchesCategory;
-    });
+    return filterAdminProductViewModels(products, searchTerm, selectedCategory);
   }, [products, searchTerm, selectedCategory]);
 
   const handleImageFallback = (event, imageCandidates) => {
-    const currentIndex = Number(event.currentTarget.dataset.candidateIndex || 0);
-    const nextIndex = currentIndex + 1;
-
-    if (Array.isArray(imageCandidates) && nextIndex < imageCandidates.length) {
-      event.currentTarget.dataset.candidateIndex = String(nextIndex);
-      event.currentTarget.src = imageCandidates[nextIndex];
-      return;
-    }
-
-    event.currentTarget.onerror = null;
-    event.currentTarget.src = productImage;
+    handleCatalogImageCandidateFallback(event, imageCandidates);
   };
 
   const openAddModal = () => {
@@ -192,75 +141,17 @@ function AdminProducts() {
   const handleSaveProduct = async (event) => {
     event.preventDefault();
 
-    if (!newProduct.nombre.trim()) {
+    const validation = getProductFormValidation(newProduct);
+    if (validation) {
       await Swal.fire({
         icon: "warning",
-        title: "Nombre requerido",
-        text: "Ingresa el nombre del producto.",
+        title: validation.title,
+        text: validation.text,
       });
       return;
     }
 
-    if (!newProduct.idCategoria) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Categoria requerida",
-        text: "Selecciona una categoria.",
-      });
-      return;
-    }
-
-    if (!newProduct.imagen.trim()) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Imagen requerida",
-        text: "Ingresa el nombre o ruta de la imagen.",
-      });
-      return;
-    }
-
-    const precio = Number(newProduct.precio);
-    const cantidadDisponible = Number(newProduct.cantidadDisponible);
-    const cantidadMinima = Number(newProduct.cantidadMinima);
-
-    if (Number.isNaN(precio) || precio < 0) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Precio invalido",
-        text: "Ingresa un precio valido.",
-      });
-      return;
-    }
-
-    if (Number.isNaN(cantidadDisponible) || cantidadDisponible < 0) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Cantidad disponible invalida",
-        text: "Ingresa una cantidad disponible valida.",
-      });
-      return;
-    }
-
-    if (Number.isNaN(cantidadMinima) || cantidadMinima < 0) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Cantidad minima invalida",
-        text: "Ingresa una cantidad minima valida.",
-      });
-      return;
-    }
-
-    const payload = {
-      ...(modalMode === "edit" ? { idProducto: Number(newProduct.idProducto) } : {}),
-      nombre: newProduct.nombre.trim(),
-      descripcion: newProduct.descripcion.trim(),
-      precio,
-      imagen: newProduct.imagen.trim(),
-      idCategoria: Number(newProduct.idCategoria),
-      cantidadDisponible,
-      cantidadMinima,
-      estado: "Activo",
-    };
+    const payload = buildProductRequestPayload(newProduct, modalMode);
 
     setSaving(true);
     try {
@@ -529,7 +420,7 @@ function AdminProducts() {
                     Cancelar
                   </button>
                   <button type="submit" className="admin-product-btn" disabled={saving}>
-                    {saving ? (modalMode === "edit" ? "Actualizando..." : "Guardando...") : (modalMode === "edit" ? "Actualizar" : "Guardar")}
+                    {saving ? (modalMode === "edit" ? "Actualizando..." : "Guardando...") : (modalMode === "edit" ? "Actualizar" : "Registrar producto")}
                   </button>
                 </div>
               </form>
