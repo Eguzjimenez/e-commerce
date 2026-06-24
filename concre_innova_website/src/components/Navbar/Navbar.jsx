@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ADMIN_ROUTES, PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 import { getAuth, getUserRole, isLoggedIn, logout } from "../../services/authService";
+import { getCartCount } from "../../services/cartService";
 import { ROLES } from "../../constants/roles";
 
 function Navbar() {
@@ -9,6 +10,7 @@ function Navbar() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [auth, setAuth] = useState(getAuth());
+  const [cartCount, setCartCount] = useState(getCartCount());
 
   useEffect(() => {
     setMenuOpen(false);
@@ -17,9 +19,14 @@ function Navbar() {
 
   useEffect(() => {
     const handleAuthChange = () => setAuth(getAuth());
+    const handleCartChange = () => setCartCount(getCartCount());
     window.addEventListener("authchange", handleAuthChange);
+    window.addEventListener("cartchange", handleCartChange);
 
-    return () => window.removeEventListener("authchange", handleAuthChange);
+    return () => {
+      window.removeEventListener("authchange", handleAuthChange);
+      window.removeEventListener("cartchange", handleCartChange);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -57,6 +64,10 @@ function Navbar() {
           <li>
             <Link to={PUBLIC_ROUTES.CATALOG}>Catalogo</Link>
           </li>
+          <li>
+            <Link to={PRIVATE_ROUTES.CART}>Carrito{cartCount > 0 ? ` (${cartCount})` : ""}</Link>
+          </li>
+          {admin && (
           {authenticated && (
             <li>
               <Link to={PRIVATE_ROUTES.CART}>Carrito</Link>

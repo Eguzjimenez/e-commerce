@@ -137,14 +137,19 @@ function AdminUsers() {
 
   const handleFormChange = (event) => {
     const { name, value } = event.target;
+    const normalizedValue = name === "telefono"
+      ? value.replace(/\D/g, "")
+      : value;
+
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "idRol" ? Number(value) : value,
+      [name]: name === "idRol" ? Number(normalizedValue) : normalizedValue,
     }));
   };
 
   const handleSaveUser = async (event) => {
     event.preventDefault();
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!formData.nombre || !formData.apellido || !formData.correo || !formData.telefono) {
       await Swal.fire({
@@ -155,11 +160,38 @@ function AdminUsers() {
       return;
     }
 
+    if (!emailPattern.test(formData.correo.trim())) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Correo invalido",
+        text: "Ingresa un correo electronico valido.",
+      });
+      return;
+    }
+
+    if (!/^\d+$/.test(formData.telefono) || formData.telefono.length === 0) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Telefono invalido",
+        text: "El telefono solo puede contener numeros.",
+      });
+      return;
+    }
+
     if (modalMode === "add" && !formData.contrasena) {
       await Swal.fire({
         icon: "warning",
         title: "Contrasena requerida",
         text: "Ingresa una contrasena para el nuevo usuario.",
+      });
+      return;
+    }
+
+    if (modalMode === "add" && formData.contrasena.length < 8) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Contrasena invalida",
+        text: "La contrasena debe tener al menos 8 caracteres.",
       });
       return;
     }
@@ -383,6 +415,7 @@ function AdminUsers() {
                     type="email"
                     value={formData.correo}
                     onChange={handleFormChange}
+                    inputMode="email"
                     required
                   />
                 </div>
@@ -390,8 +423,11 @@ function AdminUsers() {
                   <label>Telefono</label>
                   <input
                     name="telefono"
+                    type="tel"
                     value={formData.telefono}
                     onChange={handleFormChange}
+                    inputMode="numeric"
+                    pattern="[0-9]+"
                     required
                   />
                 </div>
@@ -409,23 +445,20 @@ function AdminUsers() {
                     ))}
                   </select>
                 </div>
-                <div className="form-row">
-                  <label>
-                    {modalMode === "add" ? "Contrasena" : "Contrasena (opcional)"}
-                  </label>
-                  <input
-                    name="contrasena"
-                    type="password"
-                    value={formData.contrasena}
-                    onChange={handleFormChange}
-                    placeholder={
-                      modalMode === "edit"
-                        ? "Dejar vacio para no cambiar"
-                        : "Contrasena"
-                    }
-                    {...(modalMode === "add" ? { required: true } : {})}
-                  />
-                </div>
+                {modalMode === "add" && (
+                  <div className="form-row">
+                    <label>Contrasena</label>
+                    <input
+                      name="contrasena"
+                      type="password"
+                      value={formData.contrasena}
+                      onChange={handleFormChange}
+                      placeholder="Contrasena"
+                      minLength="8"
+                      required
+                    />
+                  </div>
+                )}
 
                 <div className="modal-actions">
                   <button type="button" className="secondary" onClick={closeModal}>
