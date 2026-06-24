@@ -10,7 +10,8 @@ import ProductModal from "../../components/ProductModal/ProductModal";
 function Home() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [mode, setMode] = useState("home");
-  const showAdminAccess = getUserRole() === ROLES.ADMINISTRADOR;
+  const userRole = getUserRole();
+  const showStaffAccess = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR].includes(userRole);
 
   return (
     <div>
@@ -33,15 +34,14 @@ function Home() {
       </section>
 
       {/* ACCESO ADMINISTRATIVO */}
-      {showAdminAccess && (
+      {showStaffAccess && (
         <section className="container admin-home-access">
           <div className="admin-home-card">
             <div className="admin-home-card-content">
               <span className="admin-home-badge">Acceso interno</span>
-              <h2>Panel de administración</h2>
+              <h2>{userRole === ROLES.VENDEDOR ? "Panel de ventas" : "Panel de administracion"}</h2>
               <p>
-                Gestiona inventario, productos, categorías, cotizaciones,
-                pedidos, chat, reportes y estadísticas desde un solo lugar.
+                Gestiona las funciones internas disponibles para tu rol desde un solo lugar.
               </p>
             </div>
 
