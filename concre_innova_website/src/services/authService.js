@@ -82,10 +82,26 @@ export async function validateEmail(correo) {
   });
 }
 
-export async function resetPassword({ idUsuario, nuevaContrasena }) {
+export async function requestPasswordResetCode(correo) {
+  return await request("/api/Auth/generate-recovery-token", {
+    method: "POST",
+    body: { correo },
+    skipAuthHeaders: true,
+  });
+}
+
+export async function verifyRecoveryCode({ correo, codigo }) {
+  return await request("/api/Auth/verify-recovery-code", {
+    method: "POST",
+    body: { correo, codigo },
+    skipAuthHeaders: true,
+  });
+}
+
+export async function resetPassword({ recoveryToken, nuevaContrasena }) {
   return await request("/api/Auth/reset-password", {
     method: "POST",
-    body: { idUsuario, nuevaContrasena },
+    body: { recoveryToken, nuevaContrasena },
     skipAuthHeaders: true,
   });
 }
