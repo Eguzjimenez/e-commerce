@@ -19,6 +19,7 @@ import AdminDashboard from "../pages/AdminDashboard/AdminDashboard";
 import AdminInventory from "../pages/AdminInventory/AdminInventory";
 import AdminProducts from "../pages/AdminProducts/AdminProducts";
 import AdminCategories from "../pages/AdminCategories/AdminCategories";
+import AdminProductTypes from "../pages/AdminProductTypes/AdminProductTypes";
 import AdminQuotations from "../pages/AdminQuotations/AdminQuotations";
 import AdminOrders from "../pages/AdminOrders/AdminOrders";
 import AdminChat from "../pages/AdminChat/AdminChat";
@@ -74,6 +75,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={SOLO_ADMIN}>
             <AdminCategories />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.PRODUCT_TYPES}
+        element={
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
+            <AdminProductTypes />
           </ProtectedRoute>
         }
       />

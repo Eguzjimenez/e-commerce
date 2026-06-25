@@ -1,29 +1,29 @@
-import "./AdminCategories.css";
+import "./AdminProductTypes.css";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
-import { getCategoriesAdministracion, createCategory, updateCategory, deleteCategory } from "../../services/categoryService";
+import { getTiposProductoAdministracion, createTipoProducto, updateTipoProducto, deleteTipoProducto } from "../../services/tipoProductoService";
 import {
-  buildCategoryRequestPayload,
-  getCategoryFormValidation,
-  normalizeCatalogCategories,
+  buildTipoProductoRequestPayload,
+  getTipoProductoFormValidation,
+  normalizeCatalogTypes,
 } from "../../services/catalogPresentationService";
 
-const EMPTY_CATEGORY_FORM = {
-  idCategoria: null,
-  nombreCategoria: "",
+const EMPTY_TYPE_FORM = {
+  idTipo: null,
+  nombreTipo: "",
   descripcion: "",
   estado: "Activo",
 };
 
-function AdminCategories() {
-  const [categoryList, setCategoryList] = useState([]);
+function AdminProductTypes() {
+  const [typeList, setTypeList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [modalMode, setModalMode] = useState("add");
-  const [categoryForm, setCategoryForm] = useState(EMPTY_CATEGORY_FORM);
+  const [typeForm, setTypeForm] = useState(EMPTY_TYPE_FORM);
 
   useEffect(() => {
     loadData();
@@ -34,31 +34,31 @@ function AdminCategories() {
     setError("");
 
     try {
-      const response = await getCategoriesAdministracion();
-      setCategoryList(Array.isArray(response) ? response : []);
+      const response = await getTiposProductoAdministracion();
+      setTypeList(Array.isArray(response) ? response : []);
     } catch (loadError) {
-      setError(loadError.message || "No se pudieron cargar las categorias.");
-      setCategoryList([]);
+      setError(loadError.message || "No se pudieron cargar los tipos de producto.");
+      setTypeList([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const categories = normalizeCatalogCategories(categoryList);
+  const types = normalizeCatalogTypes(typeList);
 
   const openAddModal = () => {
     setModalMode("add");
-    setCategoryForm(EMPTY_CATEGORY_FORM);
+    setTypeForm(EMPTY_TYPE_FORM);
     setShowModal(true);
   };
 
-  const openEditModal = (category) => {
+  const openEditModal = (type) => {
     setModalMode("edit");
-    setCategoryForm({
-      idCategoria: category.id,
-      nombreCategoria: category.name,
-      descripcion: category.descripcion,
-      estado: category.estado,
+    setTypeForm({
+      idTipo: type.id,
+      nombreTipo: type.name,
+      descripcion: type.descripcion,
+      estado: type.estado,
     });
     setShowModal(true);
   };
@@ -71,16 +71,16 @@ function AdminCategories() {
 
   const handleFormChange = (event) => {
     const { name, value } = event.target;
-    setCategoryForm((previous) => ({
+    setTypeForm((previous) => ({
       ...previous,
       [name]: value,
     }));
   };
 
-  const handleSaveCategory = async (event) => {
+  const handleSaveType = async (event) => {
     event.preventDefault();
 
-    const validation = getCategoryFormValidation(categoryForm, categories);
+    const validation = getTipoProductoFormValidation(typeForm, types);
     if (validation) {
       await Swal.fire({
         icon: "warning",
@@ -90,25 +90,25 @@ function AdminCategories() {
       return;
     }
 
-    const payload = buildCategoryRequestPayload(categoryForm, modalMode);
+    const payload = buildTipoProductoRequestPayload(typeForm, modalMode);
 
     setSaving(true);
     try {
       if (modalMode === "edit") {
-        await updateCategory(Number(categoryForm.idCategoria), payload);
+        await updateTipoProducto(Number(typeForm.idTipo), payload);
       } else {
-        await createCategory(payload);
+        await createTipoProducto(payload);
       }
 
       setShowModal(false);
 
       await Swal.fire({
         icon: "success",
-        title: modalMode === "edit" ? "Actualizacion exitosa" : "Categoria creada",
+        title: modalMode === "edit" ? "Actualizacion exitosa" : "Tipo creado",
         text:
           modalMode === "edit"
-            ? "La categoria se actualizo correctamente."
-            : "La categoria se registro correctamente.",
+            ? "El tipo de producto se actualizo correctamente."
+            : "El tipo de producto se registro correctamente.",
         timer: 1800,
         showConfirmButton: false,
       });
@@ -121,19 +121,19 @@ function AdminCategories() {
         text:
           saveError.message ||
           (modalMode === "edit"
-            ? "Error al actualizar la categoria."
-            : "Error al crear la categoria."),
+            ? "Error al actualizar el tipo de producto."
+            : "Error al crear el tipo de producto."),
       });
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDeleteCategory = async (category) => {
+  const handleDeleteType = async (type) => {
     const result = await Swal.fire({
       icon: "warning",
-      title: "Eliminar categoria",
-      text: `Deseas eliminar ${category.name}?`,
+      title: "Eliminar tipo de producto",
+      text: `Deseas eliminar ${type.name}?`,
       showCancelButton: true,
       confirmButtonText: "Si, eliminar",
       cancelButtonText: "Cancelar",
@@ -144,67 +144,67 @@ function AdminCategories() {
     }
 
     try {
-      await deleteCategory(Number(category.id));
+      await deleteTipoProducto(Number(type.id));
       await Swal.fire({
         icon: "success",
-        title: "Categoria eliminada",
-        text: "La categoria fue eliminada correctamente.",
+        title: "Tipo eliminado",
+        text: "El tipo de producto fue eliminado correctamente.",
       });
       await loadData();
     } catch (deleteError) {
       await Swal.fire({
         icon: "error",
         title: "No se pudo eliminar",
-        text: deleteError.message || "Error al eliminar la categoria.",
+        text: deleteError.message || "Error al eliminar el tipo de producto.",
       });
     }
   };
 
   return (
-    <AdminLayout title="Gestión de Categorías">
-      <div className="admin-categories-page">
-        <div className="admin-categories-topbar">
+    <AdminLayout title="Gestión de Tipos de Producto">
+      <div className="admin-types-page">
+        <div className="admin-types-topbar">
           <div>
-            <h2 className="admin-section-title">Categorías del catálogo</h2>
+            <h2 className="admin-section-title">Tipos de producto</h2>
             <p className="admin-section-subtitle">
-              Administra los grupos de productos disponibles en la tienda.
+              Administra los tipos disponibles para clasificar los productos.
             </p>
           </div>
 
           <button className="admin-primary-button" onClick={openAddModal}>
-            Agregar categoría
+            Agregar tipo
           </button>
         </div>
 
-        {error && <div className="admin-products-error">{error}</div>}
+        {error && <div className="admin-types-error">{error}</div>}
 
-        <div className="admin-categories-grid">
+        <div className="admin-types-grid">
           {loading && (
-            <div className="admin-products-empty">Cargando categorias...</div>
+            <div className="admin-types-empty">Cargando tipos de producto...</div>
           )}
 
-          {!loading && categories.map((category) => (
-            <div className="admin-category-card" key={category.id}>
-              <div className="admin-category-header">
-                <h3>{category.name}</h3>
+          {!loading && types.map((type) => (
+            <div className="admin-type-card" key={type.id}>
+              <div className="admin-type-header">
+                <h3>{type.name}</h3>
                 <span
-                  className={`admin-category-status ${
-                    category.estado === "Activo" ? "activa" : "inactiva"
+                  className={`admin-type-status ${
+                    type.estado === "Activo" ? "activa" : "inactiva"
                   }`}
                 >
-                  {category.estado === "Activo" ? "Activa" : "Inactiva"}
+                  {type.estado === "Activo" ? "Activo" : "Inactivo"}
                 </span>
               </div>
 
-              <p className="admin-category-description">{category.descripcion || "Sin descripcion"}</p>
+              <p className="admin-type-description">{type.descripcion || "Sin descripcion"}</p>
 
-              <div className="admin-category-actions">
-                <button className="admin-category-btn" onClick={() => openEditModal(category)}>
+              <div className="admin-type-actions">
+                <button className="admin-type-btn" onClick={() => openEditModal(type)}>
                   Editar
                 </button>
                 <button
-                  className="admin-category-btn danger"
-                  onClick={() => handleDeleteCategory(category)}
+                  className="admin-type-btn danger"
+                  onClick={() => handleDeleteType(type)}
                 >
                   Eliminar
                 </button>
@@ -212,8 +212,8 @@ function AdminCategories() {
             </div>
           ))}
 
-          {!loading && categories.length === 0 && (
-            <div className="admin-products-empty">No hay categorias registradas.</div>
+          {!loading && types.length === 0 && (
+            <div className="admin-types-empty">No hay tipos de producto registrados.</div>
           )}
         </div>
 
@@ -221,19 +221,19 @@ function AdminCategories() {
           <div className="admin-modal-backdrop" onClick={closeModal}>
             <div className="admin-modal" onClick={(event) => event.stopPropagation()}>
               <div className="admin-modal-header">
-                <h3>{modalMode === "edit" ? "Editar categoria" : "Nueva categoria"}</h3>
+                <h3>{modalMode === "edit" ? "Editar tipo de producto" : "Nuevo tipo de producto"}</h3>
                 <button className="admin-modal-close" onClick={closeModal} disabled={saving}>
                   ×
                 </button>
               </div>
 
-              <form className="admin-modal-form" onSubmit={handleSaveCategory}>
+              <form className="admin-modal-form" onSubmit={handleSaveType}>
                 <label>
                   Nombre
                   <input
                     type="text"
-                    name="nombreCategoria"
-                    value={categoryForm.nombreCategoria}
+                    name="nombreTipo"
+                    value={typeForm.nombreTipo}
                     onChange={handleFormChange}
                     required
                   />
@@ -243,7 +243,7 @@ function AdminCategories() {
                   Descripcion
                   <textarea
                     name="descripcion"
-                    value={categoryForm.descripcion}
+                    value={typeForm.descripcion}
                     onChange={handleFormChange}
                     rows="3"
                   />
@@ -252,7 +252,7 @@ function AdminCategories() {
                 {modalMode === "edit" && (
                   <label>
                     Estado
-                    <select name="estado" value={categoryForm.estado} onChange={handleFormChange}>
+                    <select name="estado" value={typeForm.estado} onChange={handleFormChange}>
                       <option value="Activo">Activo</option>
                       <option value="Inactivo">Inactivo</option>
                     </select>
@@ -260,11 +260,11 @@ function AdminCategories() {
                 )}
 
                 <div className="admin-modal-actions">
-                  <button type="button" className="admin-category-btn secondary" onClick={closeModal} disabled={saving}>
+                  <button type="button" className="admin-type-btn secondary" onClick={closeModal} disabled={saving}>
                     Cancelar
                   </button>
-                  <button type="submit" className="admin-category-btn" disabled={saving}>
-                    {saving ? (modalMode === "edit" ? "Actualizando..." : "Guardando...") : (modalMode === "edit" ? "Actualizar" : "Registrar categoria")}
+                  <button type="submit" className="admin-type-btn" disabled={saving}>
+                    {saving ? (modalMode === "edit" ? "Actualizando..." : "Guardando...") : (modalMode === "edit" ? "Actualizar" : "Registrar tipo")}
                   </button>
                 </div>
               </form>
@@ -276,4 +276,4 @@ function AdminCategories() {
   );
 }
 
-export default AdminCategories;
+export default AdminProductTypes;

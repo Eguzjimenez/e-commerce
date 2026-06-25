@@ -5,10 +5,19 @@ import AdminLayout from "../../components/AdminLayout/AdminLayout";
 import {
   getCatalogCategories,
   getCatalogProducts,
-  getProductImageCandidates,
+  getCatalogTypes,
 } from "../../services/catalogService";
 import { createProduct, deleteProduct, updateProduct } from "../../services/productService";
-import productImage from "../../img/Maceta-Negra.jpg";
+import {
+  buildAdminProductViewModel,
+  buildProductRequestPayload,
+  CATALOG_FILTER_OPTIONS,
+  filterAdminProductViewModels,
+  getProductFormValidation,
+  handleCatalogImageCandidateFallback,
+  normalizeCatalogCategories,
+  normalizeCatalogTypes,
+} from "../../services/catalogPresentationService";
 
 const EMPTY_PRODUCT_FORM = {
   idProducto: null,
@@ -17,6 +26,10 @@ const EMPTY_PRODUCT_FORM = {
   precio: "",
   imagen: "",
   idCategoria: "",
+  idTipo: "",
+  tamano: "",
+  material: "",
+  caracteristicas: "",
   cantidadDisponible: "",
   cantidadMinima: "",
 };
@@ -24,6 +37,7 @@ const EMPTY_PRODUCT_FORM = {
 function AdminProducts() {
   const [productList, setProductList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
+  const [typeList, setTypeList] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [loading, setLoading] = useState(true);
@@ -45,67 +59,37 @@ function AdminProducts() {
     setError("");
 
     try {
-      const [productsResponse, categoriesResponse] = await Promise.all([
+      const [productsResponse, categoriesResponse, typesResponse] = await Promise.all([
         getCatalogProducts(),
         getCatalogCategories(),
+        getCatalogTypes(),
       ]);
 
       setProductList(Array.isArray(productsResponse) ? productsResponse : []);
       setCategoryList(Array.isArray(categoriesResponse) ? categoriesResponse : []);
+      setTypeList(Array.isArray(typesResponse) ? typesResponse : []);
     } catch (loadError) {
       setError(loadError.message || "No se pudieron cargar los productos.");
       setProductList([]);
       setCategoryList([]);
+      setTypeList([]);
     } finally {
       setLoading(false);
     }
   };
 
   const normalizedCategories = useMemo(
-    () =>
-      categoryList
-        .map((category) => ({
-          id: String(category.idCategoria ?? category.id ?? ""),
-          name: category.nombreCategoria ?? category.nombre ?? "Sin nombre",
-        }))
-        .filter((category) => category.id),
+    () => normalizeCatalogCategories(categoryList),
     [categoryList]
   );
 
-  const products = useMemo(
-    () =>
-      productList.map((product) => {
-        const id = product.idProducto ?? product.id;
-        const categoryId = String(product.idCategoria ?? "");
-        const categoryName =
-          product.nombreCategoria ||
-          normalizedCategories.find((category) => category.id === categoryId)?.name ||
-          "Sin categoria";
-        const stock = Number(product.cantidadDisponible ?? product.stock ?? 0);
-        const imageCandidates = getProductImageCandidates(product.imagen);
+  const normalizedTypes = useMemo(
+    () => normalizeCatalogTypes(typeList),
+    [typeList]
+  );
 
-        return {
-          id,
-          idProducto: id,
-          name: product.nombre ?? "Producto sin nombre",
-          nombre: product.nombre ?? "",
-          descripcion: product.descripcion ?? "",
-          price: Number(product.precio) || 0,
-          precio: Number(product.precio) || 0,
-          category: categoryName,
-          categoryId,
-          idCategoria: categoryId,
-          stock,
-          cantidadDisponible: stock,
-          minStock: Number(product.cantidadMinima ?? 0),
-          cantidadMinima: Number(product.cantidadMinima ?? 0),
-          status: product.estado || (stock > 0 ? "Activo" : "Inactivo"),
-          estado: product.estado || (stock > 0 ? "Activo" : "Inactivo"),
-          imagen: product.imagen ?? "",
-          image: imageCandidates[0] || productImage,
-          imageCandidates,
-        };
-      }),
+  const products = useMemo(
+    () => productList.map((product) => buildAdminProductViewModel(product, normalizedCategories)),
     [productList, normalizedCategories]
   );
 
@@ -115,30 +99,11 @@ function AdminProducts() {
   ];
 
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const matchesSearch = product.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-
-      const matchesCategory =
-        selectedCategory === "Todas" || product.category === selectedCategory;
-
-      return matchesSearch && matchesCategory;
-    });
+    return filterAdminProductViewModels(products, searchTerm, selectedCategory);
   }, [products, searchTerm, selectedCategory]);
 
   const handleImageFallback = (event, imageCandidates) => {
-    const currentIndex = Number(event.currentTarget.dataset.candidateIndex || 0);
-    const nextIndex = currentIndex + 1;
-
-    if (Array.isArray(imageCandidates) && nextIndex < imageCandidates.length) {
-      event.currentTarget.dataset.candidateIndex = String(nextIndex);
-      event.currentTarget.src = imageCandidates[nextIndex];
-      return;
-    }
-
-    event.currentTarget.onerror = null;
-    event.currentTarget.src = productImage;
+    handleCatalogImageCandidateFallback(event, imageCandidates);
   };
 
   const openAddModal = () => {
@@ -159,6 +124,10 @@ function AdminProducts() {
       precio: String(product.precio),
       imagen: product.imagen,
       idCategoria: product.idCategoria,
+      idTipo: product.idTipo,
+      tamano: product.tamano,
+      material: product.material,
+      caracteristicas: product.caracteristicas,
       cantidadDisponible: String(product.cantidadDisponible),
       cantidadMinima: String(product.cantidadMinima),
     });
@@ -192,75 +161,17 @@ function AdminProducts() {
   const handleSaveProduct = async (event) => {
     event.preventDefault();
 
-    if (!newProduct.nombre.trim()) {
+    const validation = getProductFormValidation(newProduct);
+    if (validation) {
       await Swal.fire({
         icon: "warning",
-        title: "Nombre requerido",
-        text: "Ingresa el nombre del producto.",
+        title: validation.title,
+        text: validation.text,
       });
       return;
     }
 
-    if (!newProduct.idCategoria) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Categoria requerida",
-        text: "Selecciona una categoria.",
-      });
-      return;
-    }
-
-    if (!newProduct.imagen.trim()) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Imagen requerida",
-        text: "Ingresa el nombre o ruta de la imagen.",
-      });
-      return;
-    }
-
-    const precio = Number(newProduct.precio);
-    const cantidadDisponible = Number(newProduct.cantidadDisponible);
-    const cantidadMinima = Number(newProduct.cantidadMinima);
-
-    if (Number.isNaN(precio) || precio < 0) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Precio invalido",
-        text: "Ingresa un precio valido.",
-      });
-      return;
-    }
-
-    if (Number.isNaN(cantidadDisponible) || cantidadDisponible < 0) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Cantidad disponible invalida",
-        text: "Ingresa una cantidad disponible valida.",
-      });
-      return;
-    }
-
-    if (Number.isNaN(cantidadMinima) || cantidadMinima < 0) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Cantidad minima invalida",
-        text: "Ingresa una cantidad minima valida.",
-      });
-      return;
-    }
-
-    const payload = {
-      ...(modalMode === "edit" ? { idProducto: Number(newProduct.idProducto) } : {}),
-      nombre: newProduct.nombre.trim(),
-      descripcion: newProduct.descripcion.trim(),
-      precio,
-      imagen: newProduct.imagen.trim(),
-      idCategoria: Number(newProduct.idCategoria),
-      cantidadDisponible,
-      cantidadMinima,
-      estado: "Activo",
-    };
+    const payload = buildProductRequestPayload(newProduct, modalMode);
 
     setSaving(true);
     try {
@@ -396,6 +307,9 @@ function AdminProducts() {
                 <div className="admin-product-details">
                   <span>Precio: ${product.price.toFixed(2)}</span>
                   <span>Stock: {product.stock}</span>
+                  <span>Tipo: {product.typeName}</span>
+                  <span>Tamano: {product.tamano}</span>
+                  <span>Material: {product.material}</span>
                 </div>
 
                 <div className="admin-product-actions">
@@ -487,6 +401,46 @@ function AdminProducts() {
                   </label>
 
                   <label>
+                    Tipo de producto
+                    <select
+                      name="idTipo"
+                      value={newProduct.idTipo || ""}
+                      onChange={handleNewProductChange}
+                    >
+                      <option value="">Sin tipo</option>
+                      {normalizedTypes.map((type) => (
+                        <option key={type.id} value={type.id}>
+                          {type.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label>
+                    Tamano
+                    <input
+                      type="text"
+                      name="tamano"
+                      list="product-size-options"
+                      value={newProduct.tamano}
+                      onChange={handleNewProductChange}
+                      placeholder="Ej: Mediano"
+                    />
+                  </label>
+
+                  <label>
+                    Material
+                    <input
+                      type="text"
+                      name="material"
+                      list="product-material-options"
+                      value={newProduct.material}
+                      onChange={handleNewProductChange}
+                      placeholder="Ej: Ceramica"
+                    />
+                  </label>
+
+                  <label>
                     Cantidad disponible
                     <input
                       type="number"
@@ -512,6 +466,33 @@ function AdminProducts() {
 
                 </div>
 
+                <datalist id="product-size-options">
+                  {CATALOG_FILTER_OPTIONS.SIZES.filter((option) => option.value !== "all").map(
+                    (option) => (
+                      <option key={option.value} value={option.value} />
+                    )
+                  )}
+                </datalist>
+
+                <datalist id="product-material-options">
+                  {CATALOG_FILTER_OPTIONS.MATERIALS.filter((option) => option.value !== "all").map(
+                    (option) => (
+                      <option key={option.value} value={option.value} />
+                    )
+                  )}
+                </datalist>
+
+                <label>
+                  Caracteristicas
+                  <textarea
+                    name="caracteristicas"
+                    value={newProduct.caracteristicas}
+                    onChange={handleNewProductChange}
+                    rows="3"
+                    placeholder="Ej: Resistente a la intemperie, apto para exteriores"
+                  />
+                </label>
+
                 <label>
                   Imagen del producto
                   <input
@@ -529,7 +510,7 @@ function AdminProducts() {
                     Cancelar
                   </button>
                   <button type="submit" className="admin-product-btn" disabled={saving}>
-                    {saving ? (modalMode === "edit" ? "Actualizando..." : "Guardando...") : (modalMode === "edit" ? "Actualizar" : "Guardar")}
+                    {saving ? (modalMode === "edit" ? "Actualizando..." : "Guardando...") : (modalMode === "edit" ? "Actualizar" : "Registrar producto")}
                   </button>
                 </div>
               </form>
@@ -559,6 +540,10 @@ function AdminProducts() {
                   <p><strong>Nombre:</strong> {viewProduct.nombre || "-"}</p>
                   <p><strong>Descripcion:</strong> {viewProduct.descripcion || "-"}</p>
                   <p><strong>Categoria:</strong> {viewProduct.category || "-"}</p>
+                  <p><strong>Tipo:</strong> {viewProduct.typeName || "-"}</p>
+                  <p><strong>Tamano:</strong> {viewProduct.tamano || "-"}</p>
+                  <p><strong>Material:</strong> {viewProduct.material || "-"}</p>
+                  <p><strong>Caracteristicas:</strong> {viewProduct.caracteristicas || "-"}</p>
                   <p><strong>Precio:</strong> ${viewProduct.price.toFixed(2)}</p>
                   <p><strong>Cantidad disponible:</strong> {viewProduct.cantidadDisponible}</p>
                   <p><strong>Estado:</strong> {viewProduct.estado || "Activo"}</p>
