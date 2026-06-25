@@ -43,6 +43,12 @@ export async function getCatalogProducts(options = {}) {
     ordenarPor: options.sortBy,
     direccionOrden: options.sortDirection,
     idCategoria: options.categoryId,
+    precioMinimo: options.minPrice,
+    precioMaximo: options.maxPrice,
+    disponibilidad: options.availability,
+    tamano: options.size,
+    material: options.material,
+    tipo: options.type,
   });
 }
 

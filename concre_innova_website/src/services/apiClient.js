@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || "https://localhost:7258";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5222";
 const AUTH_STORAGE_KEY = "concre_innova_auth";
 
 function getAuthHeaders() {

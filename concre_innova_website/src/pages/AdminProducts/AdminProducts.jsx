@@ -10,6 +10,7 @@ import { createProduct, deleteProduct, updateProduct } from "../../services/prod
 import {
   buildAdminProductViewModel,
   buildProductRequestPayload,
+  CATALOG_FILTER_OPTIONS,
   filterAdminProductViewModels,
   getProductFormValidation,
   handleCatalogImageCandidateFallback,
@@ -23,6 +24,8 @@ const EMPTY_PRODUCT_FORM = {
   precio: "",
   imagen: "",
   idCategoria: "",
+  tamano: "",
+  material: "",
   cantidadDisponible: "",
   cantidadMinima: "",
 };
@@ -108,6 +111,8 @@ function AdminProducts() {
       precio: String(product.precio),
       imagen: product.imagen,
       idCategoria: product.idCategoria,
+      tamano: product.tamano,
+      material: product.material,
       cantidadDisponible: String(product.cantidadDisponible),
       cantidadMinima: String(product.cantidadMinima),
     });
@@ -287,6 +292,8 @@ function AdminProducts() {
                 <div className="admin-product-details">
                   <span>Precio: ${product.price.toFixed(2)}</span>
                   <span>Stock: {product.stock}</span>
+                  <span>Tamano: {product.tamano}</span>
+                  <span>Material: {product.material}</span>
                 </div>
 
                 <div className="admin-product-actions">
@@ -378,6 +385,30 @@ function AdminProducts() {
                   </label>
 
                   <label>
+                    Tamano
+                    <input
+                      type="text"
+                      name="tamano"
+                      list="product-size-options"
+                      value={newProduct.tamano}
+                      onChange={handleNewProductChange}
+                      placeholder="Ej: Mediano"
+                    />
+                  </label>
+
+                  <label>
+                    Material
+                    <input
+                      type="text"
+                      name="material"
+                      list="product-material-options"
+                      value={newProduct.material}
+                      onChange={handleNewProductChange}
+                      placeholder="Ej: Ceramica"
+                    />
+                  </label>
+
+                  <label>
                     Cantidad disponible
                     <input
                       type="number"
@@ -402,6 +433,22 @@ function AdminProducts() {
                   </label>
 
                 </div>
+
+                <datalist id="product-size-options">
+                  {CATALOG_FILTER_OPTIONS.SIZES.filter((option) => option.value !== "all").map(
+                    (option) => (
+                      <option key={option.value} value={option.value} />
+                    )
+                  )}
+                </datalist>
+
+                <datalist id="product-material-options">
+                  {CATALOG_FILTER_OPTIONS.MATERIALS.filter((option) => option.value !== "all").map(
+                    (option) => (
+                      <option key={option.value} value={option.value} />
+                    )
+                  )}
+                </datalist>
 
                 <label>
                   Imagen del producto
@@ -450,6 +497,8 @@ function AdminProducts() {
                   <p><strong>Nombre:</strong> {viewProduct.nombre || "-"}</p>
                   <p><strong>Descripcion:</strong> {viewProduct.descripcion || "-"}</p>
                   <p><strong>Categoria:</strong> {viewProduct.category || "-"}</p>
+                  <p><strong>Tamano:</strong> {viewProduct.tamano || "-"}</p>
+                  <p><strong>Material:</strong> {viewProduct.material || "-"}</p>
                   <p><strong>Precio:</strong> ${viewProduct.price.toFixed(2)}</p>
                   <p><strong>Cantidad disponible:</strong> {viewProduct.cantidadDisponible}</p>
                   <p><strong>Estado:</strong> {viewProduct.estado || "Activo"}</p>
