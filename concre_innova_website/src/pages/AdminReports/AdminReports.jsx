@@ -2,8 +2,7 @@ import "./AdminReports.css";
 import { useMemo, useState } from "react";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
 
-function AdminReports() {
-  const reportData = [
+const reportData = [
     {
       id: 1,
       fecha: "2026-04-01",
@@ -52,8 +51,9 @@ function AdminReports() {
       pedidos: 20,
       ingresos: 199.8
     }
-  ];
+];
 
+function AdminReports() {
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("Todas");
   const [busqueda, setBusqueda] = useState("");
 

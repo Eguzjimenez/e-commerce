@@ -2,8 +2,7 @@ import "./AdminInventory.css";
 import { useMemo, useState } from "react";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
 
-function AdminInventory() {
-  const inventoryData = [
+const inventoryData = [
     {
       id: 1,
       name: "Macetero de cerámica negro",
@@ -46,8 +45,9 @@ function AdminInventory() {
       currentStock: 4,
       minimumStock: 7
     }
-  ];
+];
 
+function AdminInventory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
 

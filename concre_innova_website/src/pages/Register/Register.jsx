@@ -105,7 +105,11 @@ function Register() {
           <span className="logo-text">Concre Innova</span>
         </div>
 
-        <h2>Crear Cuenta</h2>
+        <div className="auth-heading">
+          <span>Cliente</span>
+          <h1>Crear cuenta</h1>
+          <p>Registra tus datos para comprar y guardar informacion de contacto.</p>
+        </div>
 
         <form className="register-form" onSubmit={handleSubmit}>
           <input

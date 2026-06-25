@@ -2,11 +2,17 @@ export const PUBLIC_ROUTES = {
   HOME: "/",
   CATALOG: "/catalog",
   PRODUCT: "/product",
+  PRODUCT_DETAIL: "/product/:idProducto",
+  FAVORITES: "/favorites",
   LOGIN: "/login",
   REGISTER: "/register",
   FORGOT_PASSWORD: "/forgot-password",
   CHAT: "/chat"
 };
+
+export function buildProductDetailRoute(idProducto) {
+  return `${PUBLIC_ROUTES.PRODUCT}/${idProducto}`;
+}
 
 export const PRIVATE_ROUTES = {
   CART: "/cart",

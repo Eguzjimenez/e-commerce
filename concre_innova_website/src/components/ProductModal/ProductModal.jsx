@@ -7,8 +7,8 @@ function ProductModal({ product, mode, onClose, onAddToCart, onRemoveFromCart })
   if (!product) return null;
 
   const isCart = mode === "cart";
-
   const images = product.images || [product.img];
+  const productName = product.nombre || product.name || "Producto";
 
   const stock = Number(product.stock);
   const hasNumericStock = !Number.isNaN(stock);
@@ -28,33 +28,37 @@ function ProductModal({ product, mode, onClose, onAddToCart, onRemoveFromCart })
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content ios" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close" type="button" onClick={onClose}>
+          x
+        </button>
 
-        <span className="modal-close" onClick={onClose}>×</span>
-
-        <img 
-          src={images[currentImg]} 
-          alt="producto" 
-          className="main-img"
-        />
+        <div className="modal-image-wrap">
+          <img
+            src={images[currentImg]}
+            alt={productName}
+            className="main-img"
+          />
+        </div>
 
         <div className="img-gallery">
           {images.map((img, index) => (
             <img
               key={index}
               src={img}
+              alt={`${productName} vista ${index + 1}`}
               className={currentImg === index ? "active" : ""}
               onClick={() => setCurrentImg(index)}
             />
           ))}
         </div>
 
+        <span className="product-category">Interior | Decoracion</span>
         <h2>{product.name}</h2>
         <p>{product.description || "Maseta color negro"}</p>
         <p className={`product-availability ${availabilityClass}`}>{availabilityText}</p>
 
         <h3>${product.price}</h3>
 
-        {/* 🛒 ACCIONES */}
         {isCart ? (
           <button className="btn btn-danger" onClick={() => onRemoveFromCart?.(product)}>
             Eliminar del carrito
@@ -64,7 +68,6 @@ function ProductModal({ product, mode, onClose, onAddToCart, onRemoveFromCart })
             Agregar al carrito
           </button>
         )}
-
       </div>
     </div>
   );

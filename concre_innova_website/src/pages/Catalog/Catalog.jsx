@@ -1,198 +1,241 @@
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import IMAGEN from "../../img/Maceta-Negra.jpg";
-import ProductModal from "../../components/ProductModal/ProductModal";
 import Swal from "sweetalert2";
 import {
   getCatalogCategories,
   getCatalogProducts,
-  getProductImageCandidates,
 } from "../../services/catalogService";
-import { addToCart } from "../../services/cartService";
+import { addToCart, getCart } from "../../services/cartService";
+import {
+  getFavoriteProductIds,
+  toggleFavorite,
+} from "../../services/favoriteService";
+import {
+  buildCatalogModalProduct,
+  calculateCatalogPriceBounds,
+  CATALOG_FILTER_OPTIONS,
+  filterAndSortCatalogProducts,
+  formatCatalogPrice,
+  getCatalogQueryOptions,
+  getCatalogProductAttributeText,
+  getCatalogProductAvailabilityClass,
+  getCatalogProductAvailabilityText,
+  getCatalogProductCategoryName,
+  getCatalogProductImage,
+  handleCatalogImageFallback,
+  normalizeCatalogCategories,
+  PRODUCT_SORT_OPTIONS,
+} from "../../services/catalogPresentationService";
+import { buildProductDetailRoute, PRIVATE_ROUTES } from "../../routes/routes";
 import "./Catalog.css";
 
 function Catalog() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [mode, setMode] = useState("catalog");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("all");
+  const [selectedSortOrder, setSelectedSortOrder] = useState(PRODUCT_SORT_OPTIONS.NONE);
   const [selectedMinPrice, setSelectedMinPrice] = useState(0);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(0);
+  const [selectedAvailability, setSelectedAvailability] = useState("all");
+  const [selectedSize, setSelectedSize] = useState("all");
+  const [selectedMaterial, setSelectedMaterial] = useState("all");
+  const [selectedType, setSelectedType] = useState("all");
+  const [priceBounds, setPriceBounds] = useState({ min: 0, max: 0 });
+  const [cartItems, setCartItems] = useState([]);
+  const [favoriteProductIds, setFavoriteProductIds] = useState(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
 
-    async function loadCatalogData() {
-      setIsLoading(true);
-      setError("");
-
+    async function loadCatalogFilterData() {
       try {
-        const [productsResponse, categoriesResponse] = await Promise.all([
-          getCatalogProducts(),
+        const [categoriesResponse, productsResponse] = await Promise.all([
           getCatalogCategories(),
+          getCatalogProducts(),
         ]);
 
         if (!isMounted) {
           return;
         }
 
-        setProducts(Array.isArray(productsResponse) ? productsResponse : []);
         setCategories(Array.isArray(categoriesResponse) ? categoriesResponse : []);
+        const nextPriceBounds = calculateCatalogPriceBounds(productsResponse);
+        setPriceBounds(nextPriceBounds);
+        setSelectedMinPrice(nextPriceBounds.min);
+        setSelectedMaxPrice(nextPriceBounds.max);
       } catch (loadError) {
-        if (!isMounted) {
-          return;
-        }
-
-        setError(loadError.message || "No se pudo cargar el catalogo.");
-      } finally {
         if (isMounted) {
-          setIsLoading(false);
+          setError(loadError.message || "No se pudieron cargar las categorias.");
         }
       }
     }
 
-    loadCatalogData();
+    loadCatalogFilterData();
 
     return () => {
       isMounted = false;
     };
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+    const searchDelay = searchTerm.trim() ? 350 : 0;
+
+    const timeoutId = setTimeout(async () => {
+      setIsLoading(true);
+      setError("");
+
+      try {
+        const productsResponse = await getCatalogProducts(
+          getCatalogQueryOptions({
+            searchTerm,
+            selectedSortOrder,
+            selectedCategoryId,
+            selectedMinPrice,
+            selectedMaxPrice,
+            selectedAvailability,
+            selectedSize,
+            selectedMaterial,
+            selectedType,
+            priceBounds,
+          })
+        );
+
+        if (!isMounted) {
+          return;
+        }
+
+        setProducts(Array.isArray(productsResponse) ? productsResponse : []);
+      } catch (loadError) {
+        if (isMounted) {
+          setError(loadError.message || "No se pudo cargar el catalogo.");
+          setProducts([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }, searchDelay);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, [
+    searchTerm,
+    selectedSortOrder,
+    selectedCategoryId,
+    selectedMinPrice,
+    selectedMaxPrice,
+    selectedAvailability,
+    selectedSize,
+    selectedMaterial,
+    selectedType,
+    priceBounds,
+  ]);
+
+  useEffect(() => {
+    const syncCart = () => {
+      setCartItems(getCart());
+    };
+
+    syncCart();
+    window.addEventListener("cartchange", syncCart);
+
+    return () => window.removeEventListener("cartchange", syncCart);
+  }, []);
+
+  useEffect(() => {
+    const syncFavorites = () => {
+      setFavoriteProductIds(new Set(getFavoriteProductIds()));
+    };
+
+    syncFavorites();
+    window.addEventListener("favoriteschange", syncFavorites);
+
+    return () => window.removeEventListener("favoriteschange", syncFavorites);
+  }, []);
+
   const normalizedCategories = useMemo(
-    () =>
-      categories
-        .map((category) => ({
-          id: String(category.idCategoria ?? category.id ?? ""),
-          name: category.nombreCategoria ?? category.nombre ?? "Sin nombre",
-        }))
-        .filter((category) => category.id),
+    () => normalizeCatalogCategories(categories),
     [categories]
   );
 
-  const priceBounds = useMemo(() => {
-    const prices = products
-      .map((product) => Number(product.precio))
-      .filter((price) => !Number.isNaN(price));
-
-    if (prices.length === 0) {
-      return { min: 0, max: 0 };
-    }
-
-    return {
-      min: Math.min(...prices),
-      max: Math.max(...prices),
-    };
+  const filteredProducts = useMemo(() => {
+    return filterAndSortCatalogProducts(products);
   }, [products]);
 
-  useEffect(() => {
-    setSelectedMinPrice(priceBounds.min);
-    setSelectedMaxPrice(priceBounds.max);
-  }, [priceBounds.min, priceBounds.max]);
+  const activeCategoryName =
+    selectedCategoryId === "all"
+      ? "Todos"
+      : normalizedCategories.find((category) => category.id === selectedCategoryId)?.name ||
+        "Categoria";
 
-  const filteredProducts = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
-    const min = Number(selectedMinPrice);
-    const max = Number(selectedMaxPrice);
-    const hasMinPrice = !Number.isNaN(min);
-    const hasMaxPrice = !Number.isNaN(max);
+  const cartSubtotal = useMemo(
+    () =>
+      cartItems.reduce(
+        (total, item) => total + (Number(item.precio) || 0) * (Number(item.cantidad) || 1),
+        0
+      ),
+    [cartItems]
+  );
 
-    return products.filter((product) => {
-      const categoryId = String(product.idCategoria ?? "");
-      const matchesCategory =
-        selectedCategoryId === "all" || categoryId === selectedCategoryId;
-      const productPrice = Number(product.precio) || 0;
+  const cartPreview = cartItems.slice(0, 3);
 
-      const matchesMinPrice = !hasMinPrice || productPrice >= min;
-      const matchesMaxPrice = !hasMaxPrice || productPrice <= max;
-
-      if (!matchesCategory || !matchesMinPrice || !matchesMaxPrice) {
-        return false;
-      }
-
-      if (!term) {
-        return true;
-      }
-
-      const searchableText = [
-        product.nombre,
-        product.descripcion,
-        product.nombreCategoria,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      return searchableText.includes(term);
-    });
-  }, [products, searchTerm, selectedCategoryId, selectedMinPrice, selectedMaxPrice]);
+  const priceRangeSpan = Math.max(priceBounds.max - priceBounds.min, 1);
+  const minPercent = ((selectedMinPrice - priceBounds.min) / priceRangeSpan) * 100;
+  const maxPercent = ((selectedMaxPrice - priceBounds.min) / priceRangeSpan) * 100;
 
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedCategoryId("all");
+    setSelectedSortOrder(PRODUCT_SORT_OPTIONS.NONE);
     setSelectedMinPrice(priceBounds.min);
     setSelectedMaxPrice(priceBounds.max);
+    setSelectedAvailability("all");
+    setSelectedSize("all");
+    setSelectedMaterial("all");
+    setSelectedType("all");
   };
 
   const handleMinPriceChange = (event) => {
     const nextMin = Number(event.target.value);
-
-    if (nextMin > selectedMaxPrice) {
-      setSelectedMinPrice(selectedMaxPrice);
-      return;
-    }
-
-    setSelectedMinPrice(nextMin);
+    setSelectedMinPrice(Math.min(nextMin, selectedMaxPrice));
   };
 
   const handleMaxPriceChange = (event) => {
     const nextMax = Number(event.target.value);
-
-    if (nextMax < selectedMinPrice) {
-      setSelectedMaxPrice(selectedMinPrice);
-      return;
-    }
-
-    setSelectedMaxPrice(nextMax);
+    setSelectedMaxPrice(Math.max(nextMax, selectedMinPrice));
   };
 
-  const formatPrice = (price) =>
-    new Intl.NumberFormat("es-CR", {
-      style: "currency",
-      currency: "CRC",
-      minimumFractionDigits: 0,
-    }).format(Number(price) || 0);
+  const openProduct = (product) => {
+    navigate(buildProductDetailRoute(product.idProducto));
+  };
 
-  const formatColonNumber = (price) =>
-    `₡${new Intl.NumberFormat("en-US", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(Number(price) || 0)}`;
+  const handleToggleFavorite = async (event, product) => {
+    event.stopPropagation();
+    const result = toggleFavorite(product);
+    setFavoriteProductIds(new Set(result.favorites.map((favorite) => favorite.idProducto)));
 
-  const buildModalProduct = (product) => {
-    const imageCandidates = getProductImageCandidates(product.imagen);
-
-    return {
-      idProducto: product.idProducto,
-      name: product.nombre,
-      nombre: product.nombre,
-      price: Number(product.precio) || 0,
-      precio: Number(product.precio) || 0,
-      img: imageCandidates[0] || IMAGEN,
-      images: imageCandidates.length ? [...imageCandidates, IMAGEN] : [IMAGEN],
-      description: product.descripcion,
-      descripcion: product.descripcion,
-      imagen: product.imagen,
-      imageName: product.imagen,
-      availability: product.disponibilidad,
-      stock: Number(product.stock),
-    };
+    await Swal.fire({
+      icon: "success",
+      title: result.isFavorite ? "Agregado a favoritos" : "Eliminado de favoritos",
+      text: result.isFavorite
+        ? `${product.nombre} fue guardado en favoritos.`
+        : `${product.nombre} fue removido de favoritos.`,
+      timer: 1300,
+      showConfirmButton: false,
+    });
   };
 
   const handleAddToCart = async (product) => {
     addToCart(product, 1);
+
     await Swal.fire({
       icon: "success",
       title: "Agregado al carrito",
@@ -202,201 +245,300 @@ function Catalog() {
     });
   };
 
-  const handleImageFallback = (event, imageName) => {
-    const imageElement = event.currentTarget;
-    const imageCandidates = getProductImageCandidates(imageName);
-    const currentIndex = Number(imageElement.dataset.candidateIndex || 0);
-    const nextIndex = currentIndex + 1;
-
-    if (nextIndex < imageCandidates.length) {
-      imageElement.dataset.candidateIndex = String(nextIndex);
-      imageElement.src = imageCandidates[nextIndex];
-      return;
-    }
-
-    imageElement.onerror = null;
-    imageElement.src = IMAGEN;
-  };
-
-  const getAvailabilityClass = (availability, stock) => {
-    const stockNumber = Number(stock);
-    const normalizedAvailabilityText = String(availability || "").trim().toLowerCase();
-
-    if (normalizedAvailabilityText.includes("agotad") || stockNumber === 0) {
-      return "catalog-stock--out";
-    }
-
-    if (normalizedAvailabilityText.includes("disponible")) {
-      return "catalog-stock--in";
-    }
-
-    if (!Number.isNaN(stockNumber) || /^\d+/.test(normalizedAvailabilityText)) {
-      return "catalog-stock--low";
-    }
-
-    return "catalog-stock--out";
-  };
-
-  const priceRangeSpan = Math.max(priceBounds.max - priceBounds.min, 1);
-  const minPercent = ((selectedMinPrice - priceBounds.min) / priceRangeSpan) * 100;
-  const maxPercent = ((selectedMaxPrice - priceBounds.min) / priceRangeSpan) * 100;
-
   return (
-    <div className="container">
-      <h1>Catálogo</h1>
+    <div className="catalog-page catalog-shop">
+      <section className="catalog-shop-header">
+        <div>
+          <h1>Catalogo</h1>
+          <p>Filtros visibles, busqueda clara y carrito persistente.</p>
+        </div>
 
-      <div className="catalog-layout">
-        <aside className="catalog-sidebar">
-          <div className="catalog-filters">
-            <input
-              className="input"
-              placeholder="Buscar productos..."
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-            />
+        <form
+          className="catalog-shop-search-form"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <input
+            className="input catalog-shop-search"
+            placeholder="Buscar plantas, flores o macetas"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+          <button type="submit">Buscar</button>
+        </form>
+      </section>
 
-            <div className="catalog-price-filter">
-              <h3 className="catalog-price-title">Filtro Por Precio</h3>
+      <section className="catalog-shop-layout">
+        <aside className="catalog-filter-panel" aria-label="Filtros de catalogo">
+          <h2>Filtros</h2>
 
-              <div className="catalog-price-slider">
-                <div className="catalog-price-slider-track" />
-                <div
-                  className="catalog-price-slider-range"
-                  style={{
-                    left: `${minPercent}%`,
-                    right: `${100 - maxPercent}%`,
-                  }}
-                />
-
-                <input
-                  className="catalog-range-input catalog-range-input--min"
-                  type="range"
-                  min={priceBounds.min}
-                  max={priceBounds.max}
-                  step="1"
-                  value={selectedMinPrice}
-                  onChange={handleMinPriceChange}
-                  aria-label="Precio minimo"
-                />
-
-                <input
-                  className="catalog-range-input catalog-range-input--max"
-                  type="range"
-                  min={priceBounds.min}
-                  max={priceBounds.max}
-                  step="1"
-                  value={selectedMaxPrice}
-                  onChange={handleMaxPriceChange}
-                  aria-label="Precio maximo"
-                />
-              </div>
-
-              <p className="catalog-price-label">
-                Precio: {formatColonNumber(selectedMinPrice)} — {formatColonNumber(selectedMaxPrice)}
-              </p>
-            </div>
-
-            <div
-              className="catalog-categories"
-              role="radiogroup"
-              aria-label="Filtrar por categoria"
+          <div className="catalog-filter-list" role="radiogroup" aria-label="Categoria">
+            <button
+              type="button"
+              className={selectedCategoryId === "all" ? "active" : ""}
+              onClick={() => setSelectedCategoryId("all")}
             >
-              <label className="catalog-radio-option" htmlFor="category-all">
-                <input
-                  id="category-all"
-                  type="radio"
-                  name="catalog-category"
-                  value="all"
-                  checked={selectedCategoryId === "all"}
-                  onChange={(event) => setSelectedCategoryId(event.target.value)}
-                />
-                <span>Todas las categorias</span>
-              </label>
+              <span />
+              Todas
+            </button>
 
-              {normalizedCategories.map((category) => (
-                <label
-                  key={category.id}
-                  className="catalog-radio-option"
-                  htmlFor={`category-${category.id}`}
-                >
-                  <input
-                    id={`category-${category.id}`}
-                    type="radio"
-                    name="catalog-category"
-                    value={category.id}
-                    checked={selectedCategoryId === category.id}
-                    onChange={(event) => setSelectedCategoryId(event.target.value)}
-                  />
-                  <span>{category.name}</span>
-                </label>
-              ))}
-            </div>
-
-            <div className="catalog-filter-actions">
-              <button type="button" className="btn" onClick={clearFilters}>
-                Limpiar filtros
+            {normalizedCategories.map((category) => (
+              <button
+                type="button"
+                key={category.id}
+                className={selectedCategoryId === category.id ? "active" : ""}
+                onClick={() => setSelectedCategoryId(category.id)}
+              >
+                <span />
+                {category.name}
               </button>
-            </div>
+            ))}
           </div>
+
+          <div className="catalog-price-filter">
+            <strong>Rango de precio</strong>
+            <div className="catalog-price-slider">
+              <div className="catalog-price-slider-track" />
+              <div
+                className="catalog-price-slider-range"
+                style={{
+                  left: `${minPercent}%`,
+                  right: `${100 - maxPercent}%`,
+                }}
+              />
+
+              <input
+                className="catalog-range-input catalog-range-input--min"
+                type="range"
+                min={priceBounds.min}
+                max={priceBounds.max}
+                step="1"
+                value={selectedMinPrice}
+                onChange={handleMinPriceChange}
+                aria-label="Precio minimo"
+              />
+
+              <input
+                className="catalog-range-input catalog-range-input--max"
+                type="range"
+                min={priceBounds.min}
+                max={priceBounds.max}
+                step="1"
+                value={selectedMaxPrice}
+                onChange={handleMaxPriceChange}
+                aria-label="Precio maximo"
+              />
+            </div>
+            <p className="catalog-price-label">
+              {formatCatalogPrice(selectedMinPrice)} - {formatCatalogPrice(selectedMaxPrice)}
+            </p>
+          </div>
+
+          <div className="catalog-attribute-filter">
+            <strong>Atributos</strong>
+
+            <label>
+              Tipo
+              <select
+                value={selectedType}
+                onChange={(event) => setSelectedType(event.target.value)}
+              >
+                {CATALOG_FILTER_OPTIONS.TYPES.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Tamano
+              <select
+                value={selectedSize}
+                onChange={(event) => setSelectedSize(event.target.value)}
+              >
+                {CATALOG_FILTER_OPTIONS.SIZES.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Material
+              <select
+                value={selectedMaterial}
+                onChange={(event) => setSelectedMaterial(event.target.value)}
+              >
+                {CATALOG_FILTER_OPTIONS.MATERIALS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Disponibilidad
+              <select
+                value={selectedAvailability}
+                onChange={(event) => setSelectedAvailability(event.target.value)}
+              >
+                {CATALOG_FILTER_OPTIONS.AVAILABILITY.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <button type="button" className="catalog-clear-button" onClick={clearFilters}>
+            Limpiar seleccion
+          </button>
         </aside>
 
-        <section className="catalog-results">
-          {isLoading && <p className="catalog-status">Cargando catalogo...</p>}
+        <div className="catalog-product-area">
+          <div className="catalog-product-toolbar">
+            <span>
+              {filteredProducts.length} producto
+              {filteredProducts.length !== 1 ? "s" : ""}
+            </span>
+            <div className="catalog-toolbar-controls">
+              <span>{activeCategoryName}</span>
+              <select
+                value={selectedSortOrder}
+                onChange={(event) => setSelectedSortOrder(event.target.value)}
+                aria-label="Ordenar productos"
+              >
+                <option value={PRODUCT_SORT_OPTIONS.NONE}>Orden original</option>
+                <option value={PRODUCT_SORT_OPTIONS.PRICE_ASC}>Precio: menor a mayor</option>
+                <option value={PRODUCT_SORT_OPTIONS.PRICE_DESC}>Precio: mayor a menor</option>
+              </select>
+            </div>
+          </div>
 
+          {isLoading && <p className="catalog-status">Cargando catalogo...</p>}
           {!isLoading && error && <p className="catalog-error">{error}</p>}
 
-          {!isLoading && !error && filteredProducts.length === 0 && (
-            <p className="catalog-status">No se encontraron productos.</p>
-          )}
-
-          <div className="grid">
-            {!isLoading &&
-              !error &&
-              filteredProducts.map((product) => (
-                <div
-                  className="card"
-                  key={product.idProducto}
-                  onClick={() => {
-                    setSelectedProduct(buildModalProduct(product));
-                    setMode("catalog");
-                  }}
-                >
-                  <img
-                    src={getProductImageCandidates(product.imagen)[0] || IMAGEN}
-                    alt={product.nombre}
-                    onError={(event) => handleImageFallback(event, product.imagen)}
-                  />
-                  <h3>{product.nombre}</h3>
-                  <p>{formatPrice(product.precio)}</p>
-                  <p
-                    className={`catalog-stock ${getAvailabilityClass(
-                      product.disponibilidad,
-                      product.stock
-                    )}`}
-                  >
-                    {product.disponibilidad}
-                  </p>
-                  <button
-                    className="btn"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleAddToCart(product);
+          {!isLoading && !error && (
+            <div className="catalog-product-grid">
+              {filteredProducts.map((product, index) => {
+                const isFavorite = favoriteProductIds.has(Number(product.idProducto));
+                return (
+                  <article
+                    className="catalog-shop-card"
+                    key={product.idProducto}
+                    style={{ "--card-index": index }}
+                    onClick={() => openProduct(product)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && event.target === event.currentTarget) {
+                        openProduct(product);
+                      }
                     }}
+                    tabIndex={0}
                   >
-                    Agregar
-                  </button>
-                </div>
-              ))}
-          </div>
-        </section>
-      </div>
+                    <div className="catalog-card-visual">
+                      <span className="product-rating">
+                        {getCatalogProductAvailabilityText(product)}
+                      </span>
+                      <button
+                        type="button"
+                        className={`catalog-favorite-button ${isFavorite ? "active" : ""}`}
+                        aria-label={
+                          isFavorite
+                            ? `Eliminar ${product.nombre} de favoritos`
+                            : `Agregar ${product.nombre} a favoritos`
+                        }
+                        aria-pressed={isFavorite}
+                        onClick={(event) => handleToggleFavorite(event, product)}
+                      >
+                        {isFavorite ? "\u2665" : "\u2661"}
+                      </button>
+                      <img
+                        src={getCatalogProductImage(product)}
+                        alt={product.nombre}
+                        className="catalog-card-image"
+                        onError={(event) => handleCatalogImageFallback(event, product.imagen)}
+                      />
+                    </div>
 
-      <ProductModal
-        product={selectedProduct}
-        mode={mode}
-        onClose={() => setSelectedProduct(null)}
-        onAddToCart={handleAddToCart}
-      />
+                    <div className="catalog-card-body">
+                      <span className="product-category">
+                        {getCatalogProductCategoryName(product, normalizedCategories)}
+                      </span>
+                      <h3>{product.nombre}</h3>
+                      <p>{product.descripcion || "Producto para interiores y exteriores."}</p>
+                      <div className="catalog-product-attributes">
+                        <span>Tamano: {getCatalogProductAttributeText(product, "tamano")}</span>
+                        <span>Material: {getCatalogProductAttributeText(product, "material")}</span>
+                      </div>
+                      <p className={`catalog-stock ${getCatalogProductAvailabilityClass(product)}`}>
+                        {getCatalogProductAvailabilityText(product)}
+                      </p>
+
+                      <div className="catalog-card-footer">
+                        <strong>{formatCatalogPrice(product.precio)}</strong>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleAddToCart(buildCatalogModalProduct(product));
+                          }}
+                        >
+                          Agregar
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+
+              {filteredProducts.length === 0 && (
+                <div className="catalog-empty">
+                  <h3>No hay productos con esos filtros</h3>
+                  <p>Prueba otra categoria o limpia la busqueda.</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <aside className="catalog-cart-panel" aria-label="Resumen de carrito">
+          <div className="catalog-cart-header">
+            <h2>Carrito</h2>
+            <span>
+              {cartItems.length} producto{cartItems.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+
+          <div className="catalog-cart-list">
+            {cartPreview.map((product, index) => (
+              <div className="catalog-cart-item" key={product.idProducto}>
+                <span className={`cart-color cart-color-${(index % 3) + 1}`} />
+                <div>
+                  <strong>{product.nombre}</strong>
+                  <p>{formatCatalogPrice(product.precio)}</p>
+                </div>
+              </div>
+            ))}
+
+            {cartPreview.length === 0 && (
+              <p className="catalog-cart-empty">Aun no hay productos agregados.</p>
+            )}
+          </div>
+
+          <div className="catalog-cart-total">
+            <span>Subtotal</span>
+            <strong>{formatCatalogPrice(cartSubtotal)}</strong>
+          </div>
+
+          <Link to={PRIVATE_ROUTES.CART} className="catalog-checkout-button">
+            Ver carrito
+          </Link>
+        </aside>
+      </section>
+
     </div>
   );
 }

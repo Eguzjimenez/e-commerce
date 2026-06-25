@@ -2,8 +2,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ADMIN_ROUTES, PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 import { getAuth, getUserRole, isLoggedIn, logout } from "../../services/authService";
+import { isStaffRole } from "../../constants/roleAccess";
 import { getCartCount } from "../../services/cartService";
-import { ROLES } from "../../constants/roles";
+import { getFavoriteCount } from "../../services/favoriteService";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -11,21 +12,27 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [auth, setAuth] = useState(getAuth());
   const [cartCount, setCartCount] = useState(getCartCount());
+  const [favoriteCount, setFavoriteCount] = useState(getFavoriteCount());
 
   useEffect(() => {
     setMenuOpen(false);
     setAuth(getAuth());
+    setCartCount(getCartCount());
+    setFavoriteCount(getFavoriteCount());
   }, [location.pathname]);
 
   useEffect(() => {
     const handleAuthChange = () => setAuth(getAuth());
     const handleCartChange = () => setCartCount(getCartCount());
+    const handleFavoritesChange = () => setFavoriteCount(getFavoriteCount());
     window.addEventListener("authchange", handleAuthChange);
     window.addEventListener("cartchange", handleCartChange);
+    window.addEventListener("favoriteschange", handleFavoritesChange);
 
     return () => {
       window.removeEventListener("authchange", handleAuthChange);
       window.removeEventListener("cartchange", handleCartChange);
+      window.removeEventListener("favoriteschange", handleFavoritesChange);
     };
   }, []);
 
@@ -37,7 +44,7 @@ function Navbar() {
 
   const authenticated = isLoggedIn() && auth;
   const userRole = getUserRole();
-  const staff = [ROLES.ADMINISTRADOR, ROLES.VENDEDOR].includes(userRole);
+  const staff = isStaffRole(userRole);
 
   return (
     <nav className="navbar">
@@ -65,14 +72,15 @@ function Navbar() {
             <Link to={PUBLIC_ROUTES.CATALOG}>Catalogo</Link>
           </li>
           <li>
-            <Link to={PRIVATE_ROUTES.CART}>Carrito{cartCount > 0 ? ` (${cartCount})` : ""}</Link>
+            <Link to={PRIVATE_ROUTES.CART}>
+              Carrito{cartCount > 0 ? ` (${cartCount})` : ""}
+            </Link>
           </li>
-          {admin && (
-          {authenticated && (
-            <li>
-              <Link to={PRIVATE_ROUTES.CART}>Carrito</Link>
-            </li>
-          )}
+          <li>
+            <Link to={PUBLIC_ROUTES.FAVORITES}>
+              Mis Favoritos{favoriteCount > 0 ? ` (${favoriteCount})` : ""}
+            </Link>
+          </li>
           {staff && (
             <li>
               <Link to={ADMIN_ROUTES.DASHBOARD}>Panel</Link>
