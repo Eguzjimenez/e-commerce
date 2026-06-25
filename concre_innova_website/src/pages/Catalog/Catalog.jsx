@@ -12,9 +12,12 @@ import {
 } from "../../services/favoriteService";
 import {
   buildCatalogModalProduct,
+  calculateCatalogPriceBounds,
+  CATALOG_FILTER_OPTIONS,
   filterAndSortCatalogProducts,
   formatCatalogPrice,
   getCatalogQueryOptions,
+  getCatalogProductAttributeText,
   getCatalogProductAvailabilityClass,
   getCatalogProductAvailabilityText,
   getCatalogProductCategoryName,
@@ -35,6 +38,11 @@ function Catalog() {
   const [selectedSortOrder, setSelectedSortOrder] = useState(PRODUCT_SORT_OPTIONS.NONE);
   const [selectedMinPrice, setSelectedMinPrice] = useState(0);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(0);
+  const [selectedAvailability, setSelectedAvailability] = useState("all");
+  const [selectedSize, setSelectedSize] = useState("all");
+  const [selectedMaterial, setSelectedMaterial] = useState("all");
+  const [selectedType, setSelectedType] = useState("all");
+  const [priceBounds, setPriceBounds] = useState({ min: 0, max: 0 });
   const [cartItems, setCartItems] = useState([]);
   const [favoriteProductIds, setFavoriteProductIds] = useState(new Set());
   const [isLoading, setIsLoading] = useState(true);
@@ -43,15 +51,22 @@ function Catalog() {
   useEffect(() => {
     let isMounted = true;
 
-    async function loadCategories() {
+    async function loadCatalogFilterData() {
       try {
-        const categoriesResponse = await getCatalogCategories();
+        const [categoriesResponse, productsResponse] = await Promise.all([
+          getCatalogCategories(),
+          getCatalogProducts(),
+        ]);
 
         if (!isMounted) {
           return;
         }
 
         setCategories(Array.isArray(categoriesResponse) ? categoriesResponse : []);
+        const nextPriceBounds = calculateCatalogPriceBounds(productsResponse);
+        setPriceBounds(nextPriceBounds);
+        setSelectedMinPrice(nextPriceBounds.min);
+        setSelectedMaxPrice(nextPriceBounds.max);
       } catch (loadError) {
         if (isMounted) {
           setError(loadError.message || "No se pudieron cargar las categorias.");
@@ -59,7 +74,7 @@ function Catalog() {
       }
     }
 
-    loadCategories();
+    loadCatalogFilterData();
 
     return () => {
       isMounted = false;
@@ -76,7 +91,18 @@ function Catalog() {
 
       try {
         const productsResponse = await getCatalogProducts(
-          getCatalogQueryOptions(searchTerm, selectedSortOrder)
+          getCatalogQueryOptions({
+            searchTerm,
+            selectedSortOrder,
+            selectedCategoryId,
+            selectedMinPrice,
+            selectedMaxPrice,
+            selectedAvailability,
+            selectedSize,
+            selectedMaterial,
+            selectedType,
+            priceBounds,
+          })
         );
 
         if (!isMounted) {
@@ -100,7 +126,18 @@ function Catalog() {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [searchTerm, selectedSortOrder]);
+  }, [
+    searchTerm,
+    selectedSortOrder,
+    selectedCategoryId,
+    selectedMinPrice,
+    selectedMaxPrice,
+    selectedAvailability,
+    selectedSize,
+    selectedMaterial,
+    selectedType,
+    priceBounds,
+  ]);
 
   useEffect(() => {
     const syncCart = () => {
@@ -129,42 +166,9 @@ function Catalog() {
     [categories]
   );
 
-  const priceBounds = useMemo(() => {
-    const prices = products
-      .map((product) => Number(product.precio))
-      .filter((price) => !Number.isNaN(price));
-
-    if (prices.length === 0) {
-      return { min: 0, max: 0 };
-    }
-
-    return {
-      min: Math.min(...prices),
-      max: Math.max(...prices),
-    };
-  }, [products]);
-
-  useEffect(() => {
-    setSelectedMinPrice(priceBounds.min);
-    setSelectedMaxPrice(priceBounds.max);
-  }, [priceBounds.min, priceBounds.max]);
-
   const filteredProducts = useMemo(() => {
-    return filterAndSortCatalogProducts(products, {
-      searchTerm,
-      selectedCategoryId,
-      selectedMinPrice,
-      selectedMaxPrice,
-      selectedSortOrder,
-    });
-  }, [
-    products,
-    searchTerm,
-    selectedCategoryId,
-    selectedMinPrice,
-    selectedMaxPrice,
-    selectedSortOrder,
-  ]);
+    return filterAndSortCatalogProducts(products);
+  }, [products]);
 
   const activeCategoryName =
     selectedCategoryId === "all"
@@ -193,6 +197,10 @@ function Catalog() {
     setSelectedSortOrder(PRODUCT_SORT_OPTIONS.NONE);
     setSelectedMinPrice(priceBounds.min);
     setSelectedMaxPrice(priceBounds.max);
+    setSelectedAvailability("all");
+    setSelectedSize("all");
+    setSelectedMaterial("all");
+    setSelectedType("all");
   };
 
   const handleMinPriceChange = (event) => {
@@ -325,6 +333,66 @@ function Catalog() {
             </p>
           </div>
 
+          <div className="catalog-attribute-filter">
+            <strong>Atributos</strong>
+
+            <label>
+              Tipo
+              <select
+                value={selectedType}
+                onChange={(event) => setSelectedType(event.target.value)}
+              >
+                {CATALOG_FILTER_OPTIONS.TYPES.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Tamano
+              <select
+                value={selectedSize}
+                onChange={(event) => setSelectedSize(event.target.value)}
+              >
+                {CATALOG_FILTER_OPTIONS.SIZES.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Material
+              <select
+                value={selectedMaterial}
+                onChange={(event) => setSelectedMaterial(event.target.value)}
+              >
+                {CATALOG_FILTER_OPTIONS.MATERIALS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Disponibilidad
+              <select
+                value={selectedAvailability}
+                onChange={(event) => setSelectedAvailability(event.target.value)}
+              >
+                {CATALOG_FILTER_OPTIONS.AVAILABILITY.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
           <button type="button" className="catalog-clear-button" onClick={clearFilters}>
             Limpiar seleccion
           </button>
@@ -401,6 +469,10 @@ function Catalog() {
                       </span>
                       <h3>{product.nombre}</h3>
                       <p>{product.descripcion || "Producto para interiores y exteriores."}</p>
+                      <div className="catalog-product-attributes">
+                        <span>Tamano: {getCatalogProductAttributeText(product, "tamano")}</span>
+                        <span>Material: {getCatalogProductAttributeText(product, "material")}</span>
+                      </div>
                       <p className={`catalog-stock ${getCatalogProductAvailabilityClass(product)}`}>
                         {getCatalogProductAvailabilityText(product)}
                       </p>

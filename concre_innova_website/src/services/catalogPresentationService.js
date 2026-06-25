@@ -7,6 +7,37 @@ export const PRODUCT_SORT_OPTIONS = {
   PRICE_DESC: "price-desc",
 };
 
+export const CATALOG_FILTER_OPTIONS = {
+  TYPES: [
+    { value: "all", label: "Todos" },
+    { value: "Macetas", label: "Macetas" },
+    { value: "Plantas", label: "Plantas" },
+  ],
+  SIZES: [
+    { value: "all", label: "Todos" },
+    { value: "20cm", label: "20cm" },
+    { value: "30cm", label: "30cm" },
+    { value: "Mediano", label: "Mediano" },
+    { value: "Grande", label: "Grande" },
+    { value: "XL", label: "XL" },
+    { value: "No especificado", label: "No especificado" },
+  ],
+  MATERIALS: [
+    { value: "all", label: "Todos" },
+    { value: "Ceramica", label: "Ceramica" },
+    { value: "Marmol", label: "Marmol" },
+    { value: "Terracota", label: "Terracota" },
+    { value: "Concreto", label: "Concreto" },
+    { value: "Natural", label: "Natural" },
+    { value: "No especificado", label: "No especificado" },
+  ],
+  AVAILABILITY: [
+    { value: "all", label: "Todas" },
+    { value: "disponible", label: "Disponibles" },
+    { value: "agotado", label: "Agotados" },
+  ],
+};
+
 export function normalizeCatalogCategories(categories) {
   return (Array.isArray(categories) ? categories : [])
     .map((category) => ({
@@ -74,6 +105,11 @@ export function getCatalogProductCategoryName(product, categories) {
   );
 }
 
+export function getCatalogProductAttributeText(product, attributeName) {
+  const value = product?.[attributeName];
+  return typeof value === "string" && value.trim() ? value.trim() : "No especificado";
+}
+
 export function getCatalogProductImage(product) {
   return getProductImageCandidates(product.imagen)[0] || IMAGEN;
 }
@@ -112,8 +148,25 @@ export function buildCatalogModalProduct(product) {
     descripcion: product.descripcion,
     imagen: product.imagen,
     imageName: product.imagen,
+    tamano: getCatalogProductAttributeText(product, "tamano"),
+    material: getCatalogProductAttributeText(product, "material"),
     availability: getCatalogProductAvailabilityText(product),
     stock: getCatalogProductStock(product),
+  };
+}
+
+export function calculateCatalogPriceBounds(products) {
+  const prices = (Array.isArray(products) ? products : [])
+    .map((product) => Number(product.precio))
+    .filter((price) => !Number.isNaN(price));
+
+  if (prices.length === 0) {
+    return { min: 0, max: 0 };
+  }
+
+  return {
+    min: Math.min(...prices),
+    max: Math.max(...prices),
   };
 }
 
@@ -135,6 +188,8 @@ export function buildAdminProductViewModel(product, categories) {
     category: categoryName === "Producto" ? "Sin categoria" : categoryName,
     categoryId,
     idCategoria: categoryId,
+    tamano: getCatalogProductAttributeText(product, "tamano"),
+    material: getCatalogProductAttributeText(product, "material"),
     stock,
     cantidadDisponible: stock,
     minStock: Number(product.cantidadMinima ?? 0),
@@ -147,79 +202,76 @@ export function buildAdminProductViewModel(product, categories) {
   };
 }
 
-export function getCatalogQueryOptions(searchTerm, sortOrder) {
-  const options = {
-    searchTerm: searchTerm.trim(),
-  };
+export function getCatalogQueryOptions({
+  searchTerm = "",
+  selectedSortOrder = PRODUCT_SORT_OPTIONS.NONE,
+  selectedCategoryId = "all",
+  selectedMinPrice,
+  selectedMaxPrice,
+  selectedAvailability = "all",
+  selectedSize = "all",
+  selectedMaterial = "all",
+  selectedType = "all",
+  priceBounds = { min: 0, max: 0 },
+} = {}) {
+  const options = {};
+  const normalizedSearchTerm = searchTerm.trim();
+  const minPrice = Number(selectedMinPrice);
+  const maxPrice = Number(selectedMaxPrice);
+  const minimumBound = Number(priceBounds.min);
+  const maximumBound = Number(priceBounds.max);
+  const hasPriceBounds =
+    !Number.isNaN(minimumBound) &&
+    !Number.isNaN(maximumBound) &&
+    maximumBound > minimumBound;
 
-  if (sortOrder === PRODUCT_SORT_OPTIONS.PRICE_ASC) {
+  if (normalizedSearchTerm) {
+    options.searchTerm = normalizedSearchTerm;
+  }
+
+  if (selectedSortOrder === PRODUCT_SORT_OPTIONS.PRICE_ASC) {
     options.sortBy = "precio";
     options.sortDirection = "asc";
   }
 
-  if (sortOrder === PRODUCT_SORT_OPTIONS.PRICE_DESC) {
+  if (selectedSortOrder === PRODUCT_SORT_OPTIONS.PRICE_DESC) {
     options.sortBy = "precio";
     options.sortDirection = "desc";
+  }
+
+  if (selectedCategoryId !== "all") {
+    options.categoryId = selectedCategoryId;
+  }
+
+  if (!Number.isNaN(minPrice) && (!hasPriceBounds || minPrice > minimumBound)) {
+    options.minPrice = minPrice;
+  }
+
+  if (!Number.isNaN(maxPrice) && maxPrice > 0 && (!hasPriceBounds || maxPrice < maximumBound)) {
+    options.maxPrice = maxPrice;
+  }
+
+  if (selectedAvailability !== "all") {
+    options.availability = selectedAvailability;
+  }
+
+  if (selectedSize !== "all") {
+    options.size = selectedSize;
+  }
+
+  if (selectedMaterial !== "all") {
+    options.material = selectedMaterial;
+  }
+
+  if (selectedType !== "all") {
+    options.type = selectedType;
   }
 
   return options;
 }
 
-export function filterAndSortCatalogProducts(products, filters) {
-  const {
-    searchTerm,
-    selectedCategoryId,
-    selectedMinPrice,
-    selectedMaxPrice,
-    selectedSortOrder,
-  } = filters;
-  const term = searchTerm.trim().toLowerCase();
-  const min = Number(selectedMinPrice);
-  const max = Number(selectedMaxPrice);
-  const hasMinPrice = !Number.isNaN(min);
-  const hasMaxPrice = !Number.isNaN(max);
-
-  const filteredProducts = (Array.isArray(products) ? products : []).filter((product) => {
-    const categoryId = String(product.idCategoria ?? "");
-    const matchesCategory =
-      selectedCategoryId === "all" || categoryId === selectedCategoryId;
-    const productPrice = Number(product.precio) || 0;
-    const matchesMinPrice = !hasMinPrice || productPrice >= min;
-    const matchesMaxPrice = !hasMaxPrice || productPrice <= max;
-
-    if (!matchesCategory || !matchesMinPrice || !matchesMaxPrice) {
-      return false;
-    }
-
-    if (!term) {
-      return true;
-    }
-
-    const searchableText = [
-      product.nombre,
-      product.descripcion,
-      product.nombreCategoria,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-
-    return searchableText.includes(term);
-  });
-
-  if (selectedSortOrder === PRODUCT_SORT_OPTIONS.PRICE_ASC) {
-    return [...filteredProducts].sort((first, second) =>
-      (Number(first.precio) || 0) - (Number(second.precio) || 0)
-    );
-  }
-
-  if (selectedSortOrder === PRODUCT_SORT_OPTIONS.PRICE_DESC) {
-    return [...filteredProducts].sort((first, second) =>
-      (Number(second.precio) || 0) - (Number(first.precio) || 0)
-    );
-  }
-
-  return filteredProducts;
+export function filterAndSortCatalogProducts(products) {
+  return Array.isArray(products) ? products : [];
 }
 
 export function filterAdminProductViewModels(products, searchTerm, selectedCategory) {
@@ -256,6 +308,20 @@ export function getProductFormValidation(productForm) {
     };
   }
 
+  if (hasInvalidAttributeLength(productForm.tamano)) {
+    return {
+      title: "Tamano invalido",
+      text: "El tamano no puede superar 80 caracteres.",
+    };
+  }
+
+  if (hasInvalidAttributeLength(productForm.material)) {
+    return {
+      title: "Material invalido",
+      text: "El material no puede superar 80 caracteres.",
+    };
+  }
+
   const precio = Number(productForm.precio);
   const cantidadDisponible = Number(productForm.cantidadDisponible);
   const cantidadMinima = Number(productForm.cantidadMinima);
@@ -284,6 +350,10 @@ export function getProductFormValidation(productForm) {
   return null;
 }
 
+function hasInvalidAttributeLength(value) {
+  return typeof value === "string" && value.trim().length > 80;
+}
+
 export function buildProductRequestPayload(productForm, modalMode) {
   const payload = {
     nombre: productForm.nombre.trim(),
@@ -291,6 +361,8 @@ export function buildProductRequestPayload(productForm, modalMode) {
     precio: Number(productForm.precio),
     imagen: productForm.imagen.trim(),
     idCategoria: Number(productForm.idCategoria),
+    tamano: String(productForm.tamano || "").trim(),
+    material: String(productForm.material || "").trim(),
     cantidadDisponible: Number(productForm.cantidadDisponible),
     cantidadMinima: Number(productForm.cantidadMinima),
     estado: "Activo",

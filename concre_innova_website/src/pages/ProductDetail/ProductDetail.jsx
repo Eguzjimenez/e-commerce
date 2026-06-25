@@ -6,6 +6,7 @@ import { addToCart } from "../../services/cartService";
 import {
   buildCatalogModalProduct,
   formatCatalogPrice,
+  getCatalogProductAttributeText,
   getCatalogProductAvailabilityClass,
   getCatalogProductAvailabilityText,
   getCatalogProductCategoryName,
@@ -148,6 +149,14 @@ function ProductDetail() {
           <div>
             <dt>Categoria</dt>
             <dd>{getCatalogProductCategoryName(product, normalizedCategories)}</dd>
+          </div>
+          <div>
+            <dt>Tamano</dt>
+            <dd>{getCatalogProductAttributeText(product, "tamano")}</dd>
+          </div>
+          <div>
+            <dt>Material</dt>
+            <dd>{getCatalogProductAttributeText(product, "material")}</dd>
           </div>
           <div>
             <dt>Referencia</dt>
