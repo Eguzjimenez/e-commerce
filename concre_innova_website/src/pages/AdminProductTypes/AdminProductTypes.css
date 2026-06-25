@@ -1,10 +1,10 @@
-.admin-categories-page {
+.admin-types-page {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.admin-categories-topbar {
+.admin-types-topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -24,13 +24,13 @@
   font-size: 0.95rem;
 }
 
-.admin-categories-grid {
+.admin-types-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
 }
 
-.admin-category-card {
+.admin-type-card {
   background: var(--navy-900);
   border: 1px solid rgba(175, 192, 213, 0.08);
   border-radius: 20px;
@@ -41,32 +41,27 @@
   gap: 16px;
 }
 
-.admin-category-header {
+.admin-type-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
 }
 
-.admin-category-header h3 {
+.admin-type-header h3 {
   margin: 0;
   color: #ffffff;
   font-size: 1.1rem;
 }
 
-.admin-category-description {
+.admin-type-description {
   margin: 0;
   color: var(--blue-muted);
   line-height: 1.5;
   font-size: 0.94rem;
 }
 
-.admin-category-info {
-  color: #dce6dd;
-  font-size: 0.92rem;
-}
-
-.admin-category-status {
+.admin-type-status {
   padding: 7px 11px;
   border-radius: 999px;
   font-size: 0.8rem;
@@ -74,23 +69,23 @@
   white-space: nowrap;
 }
 
-.admin-category-status.activa {
+.admin-type-status.activa {
   background-color: #183c30;
   color: #7de39b;
 }
 
-.admin-category-status.inactiva {
+.admin-type-status.inactiva {
   background-color: #3a1717;
   color: #ff8f84;
 }
 
-.admin-category-actions {
+.admin-type-actions {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
 }
 
-.admin-category-btn {
+.admin-type-btn {
   border: none;
   background-color: var(--terracotta);
   color: white;
@@ -101,16 +96,16 @@
   font-weight: 800;
 }
 
-.admin-category-btn.secondary {
+.admin-type-btn.secondary {
   background-color: var(--navy-700);
   color: var(--blue-muted);
 }
 
-.admin-category-btn.danger {
+.admin-type-btn.danger {
   background-color: var(--danger);
 }
 
-.admin-products-error {
+.admin-types-error {
   background: #fde8e8;
   color: #b42318;
   border: 1px solid #f8c6c6;
@@ -118,7 +113,7 @@
   padding: 12px 14px;
 }
 
-.admin-products-empty {
+.admin-types-empty {
   background: var(--navy-900);
   border-radius: 18px;
   padding: 24px;
@@ -203,18 +198,18 @@
 }
 
 @media (max-width: 1100px) {
-  .admin-categories-grid {
+  .admin-types-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 700px) {
-  .admin-categories-topbar {
+  .admin-types-topbar {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .admin-categories-grid {
+  .admin-types-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -5,6 +5,7 @@ import AdminLayout from "../../components/AdminLayout/AdminLayout";
 import {
   getCatalogCategories,
   getCatalogProducts,
+  getCatalogTypes,
 } from "../../services/catalogService";
 import { createProduct, deleteProduct, updateProduct } from "../../services/productService";
 import {
@@ -15,6 +16,7 @@ import {
   getProductFormValidation,
   handleCatalogImageCandidateFallback,
   normalizeCatalogCategories,
+  normalizeCatalogTypes,
 } from "../../services/catalogPresentationService";
 
 const EMPTY_PRODUCT_FORM = {
@@ -24,8 +26,10 @@ const EMPTY_PRODUCT_FORM = {
   precio: "",
   imagen: "",
   idCategoria: "",
+  idTipo: "",
   tamano: "",
   material: "",
+  caracteristicas: "",
   cantidadDisponible: "",
   cantidadMinima: "",
 };
@@ -33,6 +37,7 @@ const EMPTY_PRODUCT_FORM = {
 function AdminProducts() {
   const [productList, setProductList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
+  const [typeList, setTypeList] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [loading, setLoading] = useState(true);
@@ -54,17 +59,20 @@ function AdminProducts() {
     setError("");
 
     try {
-      const [productsResponse, categoriesResponse] = await Promise.all([
+      const [productsResponse, categoriesResponse, typesResponse] = await Promise.all([
         getCatalogProducts(),
         getCatalogCategories(),
+        getCatalogTypes(),
       ]);
 
       setProductList(Array.isArray(productsResponse) ? productsResponse : []);
       setCategoryList(Array.isArray(categoriesResponse) ? categoriesResponse : []);
+      setTypeList(Array.isArray(typesResponse) ? typesResponse : []);
     } catch (loadError) {
       setError(loadError.message || "No se pudieron cargar los productos.");
       setProductList([]);
       setCategoryList([]);
+      setTypeList([]);
     } finally {
       setLoading(false);
     }
@@ -73,6 +81,11 @@ function AdminProducts() {
   const normalizedCategories = useMemo(
     () => normalizeCatalogCategories(categoryList),
     [categoryList]
+  );
+
+  const normalizedTypes = useMemo(
+    () => normalizeCatalogTypes(typeList),
+    [typeList]
   );
 
   const products = useMemo(
@@ -111,8 +124,10 @@ function AdminProducts() {
       precio: String(product.precio),
       imagen: product.imagen,
       idCategoria: product.idCategoria,
+      idTipo: product.idTipo,
       tamano: product.tamano,
       material: product.material,
+      caracteristicas: product.caracteristicas,
       cantidadDisponible: String(product.cantidadDisponible),
       cantidadMinima: String(product.cantidadMinima),
     });
@@ -292,6 +307,7 @@ function AdminProducts() {
                 <div className="admin-product-details">
                   <span>Precio: ${product.price.toFixed(2)}</span>
                   <span>Stock: {product.stock}</span>
+                  <span>Tipo: {product.typeName}</span>
                   <span>Tamano: {product.tamano}</span>
                   <span>Material: {product.material}</span>
                 </div>
@@ -385,6 +401,22 @@ function AdminProducts() {
                   </label>
 
                   <label>
+                    Tipo de producto
+                    <select
+                      name="idTipo"
+                      value={newProduct.idTipo || ""}
+                      onChange={handleNewProductChange}
+                    >
+                      <option value="">Sin tipo</option>
+                      {normalizedTypes.map((type) => (
+                        <option key={type.id} value={type.id}>
+                          {type.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label>
                     Tamano
                     <input
                       type="text"
@@ -451,6 +483,17 @@ function AdminProducts() {
                 </datalist>
 
                 <label>
+                  Caracteristicas
+                  <textarea
+                    name="caracteristicas"
+                    value={newProduct.caracteristicas}
+                    onChange={handleNewProductChange}
+                    rows="3"
+                    placeholder="Ej: Resistente a la intemperie, apto para exteriores"
+                  />
+                </label>
+
+                <label>
                   Imagen del producto
                   <input
                     type="text"
@@ -497,8 +540,10 @@ function AdminProducts() {
                   <p><strong>Nombre:</strong> {viewProduct.nombre || "-"}</p>
                   <p><strong>Descripcion:</strong> {viewProduct.descripcion || "-"}</p>
                   <p><strong>Categoria:</strong> {viewProduct.category || "-"}</p>
+                  <p><strong>Tipo:</strong> {viewProduct.typeName || "-"}</p>
                   <p><strong>Tamano:</strong> {viewProduct.tamano || "-"}</p>
                   <p><strong>Material:</strong> {viewProduct.material || "-"}</p>
+                  <p><strong>Caracteristicas:</strong> {viewProduct.caracteristicas || "-"}</p>
                   <p><strong>Precio:</strong> ${viewProduct.price.toFixed(2)}</p>
                   <p><strong>Cantidad disponible:</strong> {viewProduct.cantidadDisponible}</p>
                   <p><strong>Estado:</strong> {viewProduct.estado || "Activo"}</p>

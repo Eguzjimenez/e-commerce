@@ -43,6 +43,7 @@ export async function getCatalogProducts(options = {}) {
     ordenarPor: options.sortBy,
     direccionOrden: options.sortDirection,
     idCategoria: options.categoryId,
+    idTipo: options.typeId,
     precioMinimo: options.minPrice,
     precioMaximo: options.maxPrice,
     disponibilidad: options.availability,
@@ -81,6 +82,13 @@ export async function getCatalogCategories() {
     "/api/Categorias",
     "/api/Categoria",
     "/api/Catalogo/categorias",
+  ]);
+}
+
+export async function getCatalogTypes() {
+  return await requestWithFallback([
+    "/api/TiposProducto",
+    "/api/Catalogo/tipos-producto",
   ]);
 }
 

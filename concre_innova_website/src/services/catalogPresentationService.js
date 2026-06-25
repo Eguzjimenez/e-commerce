@@ -43,8 +43,21 @@ export function normalizeCatalogCategories(categories) {
     .map((category) => ({
       id: String(category.idCategoria ?? category.id ?? ""),
       name: category.nombreCategoria ?? category.nombre ?? "Sin nombre",
+      descripcion: category.descripcion ?? "",
+      estado: category.estado ?? "Activo",
     }))
     .filter((category) => category.id);
+}
+
+export function normalizeCatalogTypes(types) {
+  return (Array.isArray(types) ? types : [])
+    .map((type) => ({
+      id: String(type.idTipo ?? type.id ?? ""),
+      name: type.nombreTipo ?? type.nombre ?? "Sin nombre",
+      descripcion: type.descripcion ?? "",
+      estado: type.estado ?? "Activo",
+    }))
+    .filter((type) => type.id);
 }
 
 export function getCatalogProductId(product) {
@@ -176,6 +189,7 @@ export function buildAdminProductViewModel(product, categories) {
   const categoryName = getCatalogProductCategoryName(product, categories);
   const stock = getCatalogProductStock(product);
   const imageCandidates = getProductImageCandidates(product.imagen);
+  const typeId = product.idTipo != null ? String(product.idTipo) : "";
 
   return {
     id,
@@ -188,8 +202,13 @@ export function buildAdminProductViewModel(product, categories) {
     category: categoryName === "Producto" ? "Sin categoria" : categoryName,
     categoryId,
     idCategoria: categoryId,
+    typeId,
+    idTipo: typeId,
+    typeName: product.nombreTipo || "Sin tipo",
+    nombreTipo: product.nombreTipo ?? "",
     tamano: getCatalogProductAttributeText(product, "tamano"),
     material: getCatalogProductAttributeText(product, "material"),
+    caracteristicas: product.caracteristicas ?? "",
     stock,
     cantidadDisponible: stock,
     minStock: Number(product.cantidadMinima ?? 0),
@@ -322,14 +341,21 @@ export function getProductFormValidation(productForm) {
     };
   }
 
+  if (String(productForm.caracteristicas || "").trim().length > 500) {
+    return {
+      title: "Caracteristicas invalidas",
+      text: "Las caracteristicas no pueden superar 500 caracteres.",
+    };
+  }
+
   const precio = Number(productForm.precio);
   const cantidadDisponible = Number(productForm.cantidadDisponible);
   const cantidadMinima = Number(productForm.cantidadMinima);
 
-  if (Number.isNaN(precio) || precio < 0) {
+  if (Number.isNaN(precio) || precio <= 0) {
     return {
       title: "Precio invalido",
-      text: "Ingresa un precio valido.",
+      text: "Ingresa un precio numerico mayor a cero.",
     };
   }
 
@@ -361,8 +387,10 @@ export function buildProductRequestPayload(productForm, modalMode) {
     precio: Number(productForm.precio),
     imagen: productForm.imagen.trim(),
     idCategoria: Number(productForm.idCategoria),
+    idTipo: productForm.idTipo ? Number(productForm.idTipo) : null,
     tamano: String(productForm.tamano || "").trim(),
     material: String(productForm.material || "").trim(),
+    caracteristicas: String(productForm.caracteristicas || "").trim(),
     cantidadDisponible: Number(productForm.cantidadDisponible),
     cantidadMinima: Number(productForm.cantidadMinima),
     estado: "Activo",
@@ -370,6 +398,114 @@ export function buildProductRequestPayload(productForm, modalMode) {
 
   if (modalMode === "edit") {
     payload.idProducto = Number(productForm.idProducto);
+  }
+
+  return payload;
+}
+
+export function getCategoryFormValidation(categoryForm, existingCategories = []) {
+  const nombre = String(categoryForm.nombreCategoria || "").trim();
+
+  if (!nombre) {
+    return {
+      title: "Nombre requerido",
+      text: "Ingresa el nombre de la categoria.",
+    };
+  }
+
+  if (nombre.length > 100) {
+    return {
+      title: "Nombre invalido",
+      text: "El nombre de la categoria no puede superar 100 caracteres.",
+    };
+  }
+
+  const isDuplicate = existingCategories.some(
+    (category) =>
+      String(category.name || "").trim().toLowerCase() === nombre.toLowerCase() &&
+      String(category.id) !== String(categoryForm.idCategoria || "")
+  );
+
+  if (isDuplicate) {
+    return {
+      title: "Categoria duplicada",
+      text: "Ya existe una categoria con ese nombre.",
+    };
+  }
+
+  if (String(categoryForm.descripcion || "").trim().length > 255) {
+    return {
+      title: "Descripcion invalida",
+      text: "La descripcion no puede superar 255 caracteres.",
+    };
+  }
+
+  return null;
+}
+
+export function buildCategoryRequestPayload(categoryForm, modalMode) {
+  const payload = {
+    nombreCategoria: String(categoryForm.nombreCategoria || "").trim(),
+    descripcion: String(categoryForm.descripcion || "").trim(),
+  };
+
+  if (modalMode === "edit") {
+    payload.idCategoria = Number(categoryForm.idCategoria);
+    payload.estado = categoryForm.estado || "Activo";
+  }
+
+  return payload;
+}
+
+export function getTipoProductoFormValidation(tipoForm, existingTypes = []) {
+  const nombre = String(tipoForm.nombreTipo || "").trim();
+
+  if (!nombre) {
+    return {
+      title: "Nombre requerido",
+      text: "Ingresa el nombre del tipo de producto.",
+    };
+  }
+
+  if (nombre.length > 100) {
+    return {
+      title: "Nombre invalido",
+      text: "El nombre del tipo de producto no puede superar 100 caracteres.",
+    };
+  }
+
+  const isDuplicate = existingTypes.some(
+    (type) =>
+      String(type.name || "").trim().toLowerCase() === nombre.toLowerCase() &&
+      String(type.id) !== String(tipoForm.idTipo || "")
+  );
+
+  if (isDuplicate) {
+    return {
+      title: "Tipo duplicado",
+      text: "Ya existe un tipo de producto con ese nombre.",
+    };
+  }
+
+  if (String(tipoForm.descripcion || "").trim().length > 255) {
+    return {
+      title: "Descripcion invalida",
+      text: "La descripcion no puede superar 255 caracteres.",
+    };
+  }
+
+  return null;
+}
+
+export function buildTipoProductoRequestPayload(tipoForm, modalMode) {
+  const payload = {
+    nombreTipo: String(tipoForm.nombreTipo || "").trim(),
+    descripcion: String(tipoForm.descripcion || "").trim(),
+  };
+
+  if (modalMode === "edit") {
+    payload.idTipo = Number(tipoForm.idTipo);
+    payload.estado = tipoForm.estado || "Activo";
   }
 
   return payload;

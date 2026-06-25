@@ -24,6 +24,11 @@ export const ADMIN_NAV_ITEMS = [
     roles: ROLE_GROUPS.ADMIN_ONLY,
   },
   {
+    to: ADMIN_ROUTES.PRODUCT_TYPES,
+    label: "Tipos de producto",
+    roles: ROLE_GROUPS.ADMIN_ONLY,
+  },
+  {
     to: ADMIN_ROUTES.QUOTATIONS,
     label: "Cotizaciones",
     roles: ROLE_GROUPS.STAFF,
