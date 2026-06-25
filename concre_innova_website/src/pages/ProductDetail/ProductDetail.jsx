@@ -1,7 +1,11 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
-import { getCatalogCategories, getCatalogProductById } from "../../services/catalogService";
+import {
+  getCatalogCategories,
+  getCatalogProductById,
+  getRelatedCatalogProducts,
+} from "../../services/catalogService";
 import { addToCart } from "../../services/cartService";
 import {
   buildCatalogModalProduct,
@@ -14,12 +18,13 @@ import {
   handleCatalogImageFallback,
   normalizeCatalogCategories,
 } from "../../services/catalogPresentationService";
-import { PUBLIC_ROUTES } from "../../routes/routes";
+import { buildProductDetailRoute, PUBLIC_ROUTES } from "../../routes/routes";
 import "./ProductDetail.css";
 
 function ProductDetail() {
   const { idProducto } = useParams();
   const [product, setProduct] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(Boolean(idProducto));
   const [error, setError] = useState("");
@@ -30,6 +35,8 @@ function ProductDetail() {
     async function loadProductDetail() {
       if (!idProducto) {
         setIsLoading(false);
+        setProduct(null);
+        setRelatedProducts([]);
         setError("Selecciona un producto desde el catalogo.");
         return;
       }
@@ -38,9 +45,11 @@ function ProductDetail() {
       setError("");
 
       try {
-        const [productResponse, categoriesResponse] = await Promise.all([
+        const relatedProductsRequest = getRelatedCatalogProducts(idProducto).catch(() => []);
+        const [productResponse, categoriesResponse, relatedProductsResponse] = await Promise.all([
           getCatalogProductById(idProducto),
           getCatalogCategories(),
+          relatedProductsRequest,
         ]);
 
         if (!isMounted) {
@@ -49,15 +58,18 @@ function ProductDetail() {
 
         if (!productResponse) {
           setProduct(null);
+          setRelatedProducts([]);
           setError("No se encontro el producto solicitado.");
           return;
         }
 
         setProduct(productResponse);
+        setRelatedProducts(Array.isArray(relatedProductsResponse) ? relatedProductsResponse : []);
         setCategories(Array.isArray(categoriesResponse) ? categoriesResponse : []);
       } catch (loadError) {
         if (isMounted) {
           setProduct(null);
+          setRelatedProducts([]);
           setError(loadError.message || "No se pudo cargar el detalle del producto.");
         }
       } finally {
@@ -119,58 +131,94 @@ function ProductDetail() {
   const availabilityClass = getCatalogProductAvailabilityClass(product);
 
   return (
-    <div className="product-detail-page container">
-      <div className="product-detail-media product-visual">
-        <span className={`product-rating ${availabilityClass}`}>
-          {getCatalogProductAvailabilityText(product)}
-        </span>
-        <img
-          src={getCatalogProductImage(product)}
-          alt={product.nombre}
-          onError={(event) => handleCatalogImageFallback(event, product.imagen)}
-        />
+    <>
+      <div className="product-detail-page container">
+        <div className="product-detail-media product-visual">
+          <span className={`product-rating ${availabilityClass}`}>
+            {getCatalogProductAvailabilityText(product)}
+          </span>
+          <img
+            src={getCatalogProductImage(product)}
+            alt={product.nombre}
+            onError={(event) => handleCatalogImageFallback(event, product.imagen)}
+          />
+        </div>
+
+        <div className="product-detail-info">
+          <Link to={PUBLIC_ROUTES.CATALOG} className="product-detail-back">
+            Volver al catalogo
+          </Link>
+          <span className="product-category">
+            {getCatalogProductCategoryName(product, normalizedCategories)}
+          </span>
+          <h1>{product.nombre}</h1>
+          <p>{product.descripcion || "Producto para interiores y exteriores."}</p>
+
+          <dl className="product-detail-specs">
+            <div>
+              <dt>Disponibilidad</dt>
+              <dd>{getCatalogProductAvailabilityText(product)}</dd>
+            </div>
+            <div>
+              <dt>Categoria</dt>
+              <dd>{getCatalogProductCategoryName(product, normalizedCategories)}</dd>
+            </div>
+            <div>
+              <dt>Tamano</dt>
+              <dd>{getCatalogProductAttributeText(product, "tamano")}</dd>
+            </div>
+            <div>
+              <dt>Material</dt>
+              <dd>{getCatalogProductAttributeText(product, "material")}</dd>
+            </div>
+            <div>
+              <dt>Referencia</dt>
+              <dd>#{product.idProducto}</dd>
+            </div>
+          </dl>
+
+          <h2>{formatCatalogPrice(product.precio)}</h2>
+
+          <button className="btn" type="button" onClick={handleAddToCart}>
+            Agregar al carrito
+          </button>
+        </div>
       </div>
 
-      <div className="product-detail-info">
-        <Link to={PUBLIC_ROUTES.CATALOG} className="product-detail-back">
-          Volver al catalogo
-        </Link>
-        <span className="product-category">
-          {getCatalogProductCategoryName(product, normalizedCategories)}
-        </span>
-        <h1>{product.nombre}</h1>
-        <p>{product.descripcion || "Producto para interiores y exteriores."}</p>
+      {relatedProducts.length > 0 && (
+        <section className="product-related-section container">
+          <div className="product-related-header">
+            <h2>Productos relacionados</h2>
+            <Link to={PUBLIC_ROUTES.CATALOG}>Ver catalogo</Link>
+          </div>
 
-        <dl className="product-detail-specs">
-          <div>
-            <dt>Disponibilidad</dt>
-            <dd>{getCatalogProductAvailabilityText(product)}</dd>
+          <div className="product-related-grid">
+            {relatedProducts.map((relatedProduct) => (
+              <Link
+                className="product-related-card"
+                key={relatedProduct.idProducto}
+                to={buildProductDetailRoute(relatedProduct.idProducto)}
+              >
+                <img
+                  src={getCatalogProductImage(relatedProduct)}
+                  alt={relatedProduct.nombre}
+                  onError={(event) => handleCatalogImageFallback(event, relatedProduct.imagen)}
+                />
+                <div>
+                  <span>{getCatalogProductCategoryName(relatedProduct, normalizedCategories)}</span>
+                  <h3>{relatedProduct.nombre}</h3>
+                  <p>
+                    {getCatalogProductAttributeText(relatedProduct, "tamano")} -{" "}
+                    {getCatalogProductAttributeText(relatedProduct, "material")}
+                  </p>
+                  <strong>{formatCatalogPrice(relatedProduct.precio)}</strong>
+                </div>
+              </Link>
+            ))}
           </div>
-          <div>
-            <dt>Categoria</dt>
-            <dd>{getCatalogProductCategoryName(product, normalizedCategories)}</dd>
-          </div>
-          <div>
-            <dt>Tamano</dt>
-            <dd>{getCatalogProductAttributeText(product, "tamano")}</dd>
-          </div>
-          <div>
-            <dt>Material</dt>
-            <dd>{getCatalogProductAttributeText(product, "material")}</dd>
-          </div>
-          <div>
-            <dt>Referencia</dt>
-            <dd>#{product.idProducto}</dd>
-          </div>
-        </dl>
-
-        <h2>{formatCatalogPrice(product.precio)}</h2>
-
-        <button className="btn" type="button" onClick={handleAddToCart}>
-          Agregar al carrito
-        </button>
-      </div>
-    </div>
+        </section>
+      )}
+    </>
   );
 }
 
