@@ -24,6 +24,7 @@ export const ADMIN_ROUTES = {
   INVENTORY: "/admin/inventory",
   PRODUCTS: "/admin/products",
   CATEGORIES: "/admin/categories",
+  PRODUCT_TYPES: "/admin/product-types",
   QUOTATIONS: "/admin/quotations",
   ORDERS: "/admin/orders",
   CHAT: "/admin/chat",
