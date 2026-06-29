@@ -54,7 +54,7 @@ export async function login({ correo, contrasena }) {
     correo,
     idUsuario: data?.idUsuario ?? null,
     idRol: data?.idRol ?? null,
-    nombreRol: ROL_ID_MAP[data?.idRol] ?? null,
+    nombreRol: data?.nombreRol || ROL_ID_MAP[data?.idRol] || null,
     token,
     codigo: data?.codigo,
     mensaje: data?.mensaje,
@@ -135,7 +135,7 @@ export function isVendor() {
 
 export function isLoggedIn() {
   const auth = getAuth();
-  return Boolean(auth?.codigo === 1 && auth?.idUsuario && auth?.idRol !== 4);
+  return Boolean(auth?.codigo === 1 && auth?.idUsuario && auth?.idRol !== 4 && auth?.token);
 }
 
 export async function verifyStoredRecoveryToken() {

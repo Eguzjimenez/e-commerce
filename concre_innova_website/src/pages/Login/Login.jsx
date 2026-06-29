@@ -5,7 +5,6 @@ import "sweetalert2/dist/sweetalert2.min.css";
 import { login as loginUser } from "../../services/authService";
 import { ADMIN_ROUTES } from "../../routes/routes";
 import "./Login.css";
-import { registerBitacora } from "../../services/bitacoraService";
 import { isStaffRole } from "../../constants/roleAccess";
 
 function Login() {
@@ -24,13 +23,6 @@ function Login() {
     try {
       const auth = await loginUser({ correo, contrasena });
       if (auth.codigo === 1) {
-        await registerBitacora({
-          idUsuario: auth.idUsuario,
-          tablaAfectada: "Usuarios",
-          operacion: "LOGIN",
-          descripcion: `Inicio de sesion exitoso: ${auth.correo}`,
-        });
-
         await Swal.fire({
           icon: "success",
           title: "Bienvenido",

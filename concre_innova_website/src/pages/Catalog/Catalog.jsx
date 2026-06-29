@@ -4,10 +4,11 @@ import Swal from "sweetalert2";
 import {
   getCatalogCategories,
   getCatalogProducts,
+  getCatalogTypes,
 } from "../../services/catalogService";
 import { addToCart, getCart } from "../../services/cartService";
 import {
-  getFavoriteProductIds,
+  getFavoriteProductIdsAsync,
   toggleFavorite,
 } from "../../services/favoriteService";
 import {
@@ -24,6 +25,7 @@ import {
   getCatalogProductImage,
   handleCatalogImageFallback,
   normalizeCatalogCategories,
+  normalizeCatalogTypes,
   PRODUCT_SORT_OPTIONS,
 } from "../../services/catalogPresentationService";
 import { buildProductDetailRoute, PRIVATE_ROUTES } from "../../routes/routes";
@@ -33,6 +35,7 @@ function Catalog() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [productTypes, setProductTypes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("all");
   const [selectedSortOrder, setSelectedSortOrder] = useState(PRODUCT_SORT_OPTIONS.NONE);
@@ -41,7 +44,7 @@ function Catalog() {
   const [selectedAvailability, setSelectedAvailability] = useState("all");
   const [selectedSize, setSelectedSize] = useState("all");
   const [selectedMaterial, setSelectedMaterial] = useState("all");
-  const [selectedType, setSelectedType] = useState("all");
+  const [selectedTypeId, setSelectedTypeId] = useState("all");
   const [priceBounds, setPriceBounds] = useState({ min: 0, max: 0 });
   const [cartItems, setCartItems] = useState([]);
   const [favoriteProductIds, setFavoriteProductIds] = useState(new Set());
@@ -53,9 +56,10 @@ function Catalog() {
 
     async function loadCatalogFilterData() {
       try {
-        const [categoriesResponse, productsResponse] = await Promise.all([
+        const [categoriesResponse, productsResponse, typesResponse] = await Promise.all([
           getCatalogCategories(),
           getCatalogProducts(),
+          getCatalogTypes(),
         ]);
 
         if (!isMounted) {
@@ -63,6 +67,7 @@ function Catalog() {
         }
 
         setCategories(Array.isArray(categoriesResponse) ? categoriesResponse : []);
+        setProductTypes(Array.isArray(typesResponse) ? typesResponse : []);
         const nextPriceBounds = calculateCatalogPriceBounds(productsResponse);
         setPriceBounds(nextPriceBounds);
         setSelectedMinPrice(nextPriceBounds.min);
@@ -100,7 +105,7 @@ function Catalog() {
             selectedAvailability,
             selectedSize,
             selectedMaterial,
-            selectedType,
+            selectedTypeId,
             priceBounds,
           })
         );
@@ -135,7 +140,7 @@ function Catalog() {
     selectedAvailability,
     selectedSize,
     selectedMaterial,
-    selectedType,
+    selectedTypeId,
     priceBounds,
   ]);
 
@@ -151,19 +156,33 @@ function Catalog() {
   }, []);
 
   useEffect(() => {
-    const syncFavorites = () => {
-      setFavoriteProductIds(new Set(getFavoriteProductIds()));
+    const syncFavorites = async () => {
+      try {
+        const favoriteIds = await getFavoriteProductIdsAsync();
+        setFavoriteProductIds(new Set(favoriteIds));
+      } catch {
+        setFavoriteProductIds(new Set());
+      }
     };
 
     syncFavorites();
-    window.addEventListener("favoriteschange", syncFavorites);
+    const handleFavoritesChange = () => {
+      syncFavorites();
+    };
 
-    return () => window.removeEventListener("favoriteschange", syncFavorites);
+    window.addEventListener("favoriteschange", handleFavoritesChange);
+
+    return () => window.removeEventListener("favoriteschange", handleFavoritesChange);
   }, []);
 
   const normalizedCategories = useMemo(
     () => normalizeCatalogCategories(categories),
     [categories]
+  );
+
+  const normalizedProductTypes = useMemo(
+    () => normalizeCatalogTypes(productTypes),
+    [productTypes]
   );
 
   const filteredProducts = useMemo(() => {
@@ -200,7 +219,7 @@ function Catalog() {
     setSelectedAvailability("all");
     setSelectedSize("all");
     setSelectedMaterial("all");
-    setSelectedType("all");
+    setSelectedTypeId("all");
   };
 
   const handleMinPriceChange = (event) => {
@@ -219,7 +238,7 @@ function Catalog() {
 
   const handleToggleFavorite = async (event, product) => {
     event.stopPropagation();
-    const result = toggleFavorite(product);
+    const result = await toggleFavorite(product);
     setFavoriteProductIds(new Set(result.favorites.map((favorite) => favorite.idProducto)));
 
     await Swal.fire({
@@ -339,12 +358,13 @@ function Catalog() {
             <label>
               Tipo
               <select
-                value={selectedType}
-                onChange={(event) => setSelectedType(event.target.value)}
+                value={selectedTypeId}
+                onChange={(event) => setSelectedTypeId(event.target.value)}
               >
-                {CATALOG_FILTER_OPTIONS.TYPES.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
+                <option value="all">Todos</option>
+                {normalizedProductTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
                   </option>
                 ))}
               </select>

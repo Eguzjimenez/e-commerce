@@ -77,6 +77,10 @@ export async function getRelatedCatalogProducts(idProducto, limit = 4) {
   });
 }
 
+export async function getCatalogProductVariants(idProducto) {
+  return await request(`/api/Productos/${idProducto}/variantes`, { method: "GET" });
+}
+
 export async function getCatalogCategories() {
   return await requestWithFallback([
     "/api/Categorias",

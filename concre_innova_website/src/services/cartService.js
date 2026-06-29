@@ -22,7 +22,12 @@ export function saveCart(cart) {
 export function addToCart(product, quantity = 1) {
   const cart = getCart();
   const idProducto = Number(product.idProducto ?? product.id);
-  const existingItem = cart.find((item) => Number(item.idProducto) === idProducto);
+  const idVariante = product.idVariante != null ? Number(product.idVariante) : null;
+  const existingItem = cart.find(
+    (item) =>
+      Number(item.idProducto) === idProducto &&
+      Number(item.idVariante || 0) === Number(idVariante || 0)
+  );
 
   if (existingItem) {
     existingItem.cantidad += quantity;
@@ -33,6 +38,10 @@ export function addToCart(product, quantity = 1) {
       descripcion: product.descripcion ?? product.description ?? "",
       precio: Number(product.precio ?? product.price) || 0,
       imagen: product.imagen ?? product.imageName ?? product.img ?? "",
+      idVariante,
+      nombreVariante: product.nombreVariante ?? "",
+      tamano: product.tamano ?? "",
+      material: product.material ?? "",
       cantidad: quantity,
     });
   }
@@ -70,6 +79,7 @@ export function getCartCount() {
 export function getCartPayloadForAuth() {
   return getCart().map((item) => ({
     productoId: Number(item.idProducto),
+    varianteId: item.idVariante ? Number(item.idVariante) : null,
     cantidad: Number(item.cantidad) || 1,
   }));
 }

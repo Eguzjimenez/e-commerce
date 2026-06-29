@@ -1,0 +1,95 @@
+.admin-permissions-page {
+  display: grid;
+  gap: 24px;
+}
+
+.admin-permissions-toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.admin-permissions-toolbar label {
+  display: grid;
+  gap: 8px;
+  min-width: 260px;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.admin-permissions-toolbar select {
+  border: 1px solid rgba(15, 27, 45, 0.12);
+  border-radius: 8px;
+  padding: 12px;
+  background: #ffffff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.admin-permissions-status,
+.admin-permissions-error {
+  border-radius: 8px;
+  padding: 18px;
+  background: #ffffff;
+  box-shadow: var(--shadow-soft);
+}
+
+.admin-permissions-error {
+  color: #a23a2a;
+}
+
+.admin-permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.admin-permission-group {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(15, 27, 45, 0.08);
+  border-radius: 8px;
+  padding: 18px;
+  background: #ffffff;
+  box-shadow: var(--shadow-soft);
+}
+
+.admin-permission-group h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.05rem;
+}
+
+.admin-permission-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  color: var(--ink);
+}
+
+.admin-permission-item input {
+  margin-top: 4px;
+}
+
+.admin-permission-item span {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-permission-item small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+@media (max-width: 720px) {
+  .admin-permissions-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-permissions-toolbar label {
+    min-width: 0;
+  }
+}

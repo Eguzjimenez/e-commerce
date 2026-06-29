@@ -31,6 +31,7 @@ export const ADMIN_ROUTES = {
   REPORTS: "/admin/reports",
   STATISTICS: "/admin/statistics",
   USERS: "/admin/users",
-  BITACORA: "/admin/bitacora"
+  BITACORA: "/admin/bitacora",
+  PERMISSIONS: "/admin/permissions"
 };
 

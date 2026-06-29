@@ -7,6 +7,7 @@ import {
   resetPassword,
   verifyRecoveryCode,
 } from "../../services/authService";
+import { getPasswordPolicyMessage } from "../../services/passwordPolicyService";
 
 function ForgotPassword() {
   const [step, setStep] = useState(1);
@@ -75,8 +76,10 @@ function ForgotPassword() {
       return;
     }
 
-    if (password.length < 8) {
-      await Swal.fire({ icon: "warning", title: "Contrasena debil", text: "La contrasena debe tener minimo 8 caracteres" });
+    const passwordMessage = getPasswordPolicyMessage(password);
+
+    if (passwordMessage) {
+      await Swal.fire({ icon: "warning", title: "Contrasena debil", text: passwordMessage });
       return;
     }
 
@@ -158,13 +161,13 @@ function ForgotPassword() {
             <div className="auth-heading">
               <span>Seguridad</span>
               <h1>Nueva contrasena</h1>
-              <p>Usa una clave de minimo 8 caracteres.</p>
+              <p>Usa una clave de minimo 8 caracteres, con mayuscula, minuscula, numero y simbolo.</p>
             </div>
 
             <input
               className="forgot-input"
               type="password"
-              placeholder="Nueva contrasena (min. 8 caracteres)"
+              placeholder="Nueva contrasena segura"
               required
               minLength="8"
               value={password}

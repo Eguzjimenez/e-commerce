@@ -6,6 +6,8 @@ import "./AdminBitacora.css";
 // Etiquetas con color por tipo de operación
 const OPERACION_BADGE = {
   LOGIN:       { label: "Login",       color: "badge-blue"   },
+  LOGIN_SUCCESS: { label: "Login exitoso", color: "badge-blue" },
+  LOGIN_FAILED: { label: "Login fallido", color: "badge-red" },
   INSERT:      { label: "Inserción",   color: "badge-green"  },
   UPDATE:      { label: "Actualización", color: "badge-yellow" },
   DELETE:      { label: "Eliminación", color: "badge-red"    },

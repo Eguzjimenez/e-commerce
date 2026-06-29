@@ -49,6 +49,11 @@ export const ADMIN_NAV_ITEMS = [
     roles: ROLE_GROUPS.ADMIN_ONLY,
   },
   {
+    to: ADMIN_ROUTES.PERMISSIONS,
+    label: "Permisos",
+    roles: ROLE_GROUPS.ADMIN_ONLY,
+  },
+  {
     to: ADMIN_ROUTES.REPORTS,
     label: "Reportes",
     roles: ROLE_GROUPS.ADMIN_ONLY,

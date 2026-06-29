@@ -28,7 +28,7 @@ function Favorites() {
       setIsLoading(true);
       setError("");
 
-      const storedFavorites = getFavorites();
+      const storedFavorites = await getFavorites();
 
       try {
         const catalogProducts = await getCatalogProducts();
@@ -51,8 +51,8 @@ function Favorites() {
 
     loadFavorites();
 
-    const handleFavoritesChange = () => {
-      setFavorites(getFavorites());
+    const handleFavoritesChange = async () => {
+      setFavorites(await getFavorites());
     };
 
     window.addEventListener("favoriteschange", handleFavoritesChange);
@@ -76,7 +76,7 @@ function Favorites() {
   };
 
   const handleRemoveFavorite = async (product) => {
-    const nextFavorites = removeFavorite(product.idProducto);
+    const nextFavorites = await removeFavorite(product.idProducto);
     setFavorites(nextFavorites);
 
     await Swal.fire({

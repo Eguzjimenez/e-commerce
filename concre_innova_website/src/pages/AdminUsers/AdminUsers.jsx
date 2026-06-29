@@ -12,6 +12,7 @@ import {
 import "./AdminUsers.css";
 import { registerBitacora } from "../../services/bitacoraService";
 import { getAuth } from "../../services/authService";
+import { getPasswordPolicyMessage } from "../../services/passwordPolicyService";
 
 const roleNames = {
   1: "Administrador",
@@ -187,11 +188,15 @@ function AdminUsers() {
       return;
     }
 
-    if (modalMode === "add" && formData.contrasena.length < 8) {
+    const passwordMessage = modalMode === "add"
+      ? getPasswordPolicyMessage(formData.contrasena)
+      : "";
+
+    if (passwordMessage) {
       await Swal.fire({
         icon: "warning",
         title: "Contrasena invalida",
-        text: "La contrasena debe tener al menos 8 caracteres.",
+        text: passwordMessage,
       });
       return;
     }

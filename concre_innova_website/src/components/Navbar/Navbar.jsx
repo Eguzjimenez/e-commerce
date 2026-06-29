@@ -4,7 +4,7 @@ import { ADMIN_ROUTES, PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes
 import { getAuth, getUserRole, isLoggedIn, logout } from "../../services/authService";
 import { isStaffRole } from "../../constants/roleAccess";
 import { getCartCount } from "../../services/cartService";
-import { getFavoriteCount } from "../../services/favoriteService";
+import { getFavoriteCountAsync } from "../../services/favoriteService";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -12,19 +12,25 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [auth, setAuth] = useState(getAuth());
   const [cartCount, setCartCount] = useState(getCartCount());
-  const [favoriteCount, setFavoriteCount] = useState(getFavoriteCount());
+  const [favoriteCount, setFavoriteCount] = useState(0);
 
   useEffect(() => {
     setMenuOpen(false);
     setAuth(getAuth());
     setCartCount(getCartCount());
-    setFavoriteCount(getFavoriteCount());
+    getFavoriteCountAsync().then(setFavoriteCount).catch(() => setFavoriteCount(0));
   }, [location.pathname]);
 
   useEffect(() => {
-    const handleAuthChange = () => setAuth(getAuth());
+    const refreshFavoriteCount = () => {
+      getFavoriteCountAsync().then(setFavoriteCount).catch(() => setFavoriteCount(0));
+    };
+    const handleAuthChange = () => {
+      setAuth(getAuth());
+      refreshFavoriteCount();
+    };
     const handleCartChange = () => setCartCount(getCartCount());
-    const handleFavoritesChange = () => setFavoriteCount(getFavoriteCount());
+    const handleFavoritesChange = refreshFavoriteCount;
     window.addEventListener("authchange", handleAuthChange);
     window.addEventListener("cartchange", handleCartChange);
     window.addEventListener("favoriteschange", handleFavoritesChange);

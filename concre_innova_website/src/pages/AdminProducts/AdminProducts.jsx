@@ -7,7 +7,7 @@ import {
   getCatalogProducts,
   getCatalogTypes,
 } from "../../services/catalogService";
-import { createProduct, deleteProduct, updateProduct } from "../../services/productService";
+import { createProduct, deleteProduct, updateProduct, uploadProductImage } from "../../services/productService";
 import {
   buildAdminProductViewModel,
   buildProductRequestPayload,
@@ -46,6 +46,7 @@ function AdminProducts() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewProduct, setViewProduct] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [modalMode, setModalMode] = useState("add");
 
   const [newProduct, setNewProduct] = useState(EMPTY_PRODUCT_FORM);
@@ -156,6 +157,40 @@ function AdminProducts() {
       ...previous,
       [name]: value,
     }));
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setImageUploading(true);
+
+    try {
+      const imagePath = await uploadProductImage(file);
+      setNewProduct((previous) => ({
+        ...previous,
+        imagen: imagePath,
+      }));
+
+      await Swal.fire({
+        icon: "success",
+        title: "Imagen cargada",
+        text: "La imagen se cargo correctamente.",
+        timer: 1400,
+        showConfirmButton: false,
+      });
+    } catch (uploadError) {
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo cargar la imagen",
+        text: uploadError.message || "Verifica el archivo seleccionado.",
+      });
+    } finally {
+      setImageUploading(false);
+      event.target.value = "";
+    }
   };
 
   const handleSaveProduct = async (event) => {
@@ -505,12 +540,22 @@ function AdminProducts() {
                   />
                 </label>
 
+                <label>
+                  Cargar imagen
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    onChange={handleImageUpload}
+                    disabled={imageUploading || saving}
+                  />
+                </label>
+
                 <div className="admin-modal-actions">
                   <button type="button" className="admin-product-btn secondary" onClick={closeAddModal} disabled={saving}>
                     Cancelar
                   </button>
-                  <button type="submit" className="admin-product-btn" disabled={saving}>
-                    {saving ? (modalMode === "edit" ? "Actualizando..." : "Guardando...") : (modalMode === "edit" ? "Actualizar" : "Registrar producto")}
+                  <button type="submit" className="admin-product-btn" disabled={saving || imageUploading}>
+                    {imageUploading ? "Cargando imagen..." : (saving ? (modalMode === "edit" ? "Actualizando..." : "Guardando...") : (modalMode === "edit" ? "Actualizar" : "Registrar producto"))}
                   </button>
                 </div>
               </form>
