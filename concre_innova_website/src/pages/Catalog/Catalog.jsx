@@ -266,7 +266,18 @@ function Catalog() {
   const handleToggleFavorite = async (event, product) => {
     event.stopPropagation();
     const result = await toggleFavorite(product);
-    setFavoriteProductIds(new Set(result.favorites.map((favorite) => favorite.idProducto)));
+    setFavoriteProductIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+      const idProducto = Number(result.idProducto ?? product.idProducto);
+
+      if (result.isFavorite) {
+        nextIds.add(idProducto);
+      } else {
+        nextIds.delete(idProducto);
+      }
+
+      return nextIds;
+    });
 
     await Swal.fire({
       icon: "success",

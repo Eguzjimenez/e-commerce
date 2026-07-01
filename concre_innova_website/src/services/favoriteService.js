@@ -3,8 +3,8 @@ import { request } from "./apiClient";
 const FAVORITES_STORAGE_KEY = "concre_innova_favorites";
 const AUTH_STORAGE_KEY = "concre_innova_auth";
 
-function notifyFavoritesChanged() {
-  window.dispatchEvent(new Event("favoriteschange"));
+function notifyFavoritesChanged(detail = {}) {
+  window.dispatchEvent(new CustomEvent("favoriteschange", { detail }));
 }
 
 function hasAuthenticatedUser() {
@@ -45,9 +45,9 @@ export function getLocalFavorites() {
   }
 }
 
-export function saveLocalFavorites(favorites) {
+export function saveLocalFavorites(favorites, detail = {}) {
   localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
-  notifyFavoritesChanged();
+  notifyFavoritesChanged(detail);
 }
 
 export async function getFavorites() {
@@ -66,6 +66,13 @@ export function getFavoriteProductIds() {
 }
 
 export async function getFavoriteProductIdsAsync() {
+  if (hasAuthenticatedUser()) {
+    const favoriteIds = await request("/api/Favoritos/ids", { method: "GET" });
+    return Array.isArray(favoriteIds)
+      ? favoriteIds.map((idProducto) => Number(idProducto)).filter(Boolean)
+      : [];
+  }
+
   const favorites = await getFavorites();
   return favorites.map((favorite) => Number(favorite.idProducto));
 }
@@ -75,7 +82,12 @@ export function getFavoriteCount() {
 }
 
 export async function getFavoriteCountAsync() {
-  return (await getFavorites()).length;
+  if (!hasAuthenticatedUser()) {
+    return getFavoriteCount();
+  }
+
+  const response = await request("/api/Favoritos/count", { method: "GET" });
+  return Number(response?.count) || 0;
 }
 
 export function isFavoriteProduct(idProducto) {
@@ -89,16 +101,24 @@ export async function addFavorite(product) {
 
   if (!favoriteProduct) {
     return {
-      favorites: await getFavorites(),
+      favorites: hasAuthenticatedUser() ? null : getLocalFavorites(),
       added: false,
     };
   }
 
   if (hasAuthenticatedUser()) {
-    await request(`/api/Favoritos/${favoriteProduct.idProducto}`, { method: "POST" });
-    const favorites = await getFavorites();
-    notifyFavoritesChanged();
-    return { favorites, added: true };
+    const response = await request(`/api/Favoritos/${favoriteProduct.idProducto}`, { method: "POST" });
+    notifyFavoritesChanged({
+      idProducto: favoriteProduct.idProducto,
+      isFavorite: true,
+    });
+
+    return {
+      favorite: favoriteProduct,
+      favorites: null,
+      added: true,
+      response,
+    };
   }
 
   const favorites = getLocalFavorites();
@@ -114,47 +134,66 @@ export async function addFavorite(product) {
   }
 
   const nextFavorites = [...favorites, favoriteProduct];
-  saveLocalFavorites(nextFavorites);
+  saveLocalFavorites(nextFavorites, {
+    idProducto: favoriteProduct.idProducto,
+    isFavorite: true,
+  });
 
   return {
+    favorite: favoriteProduct,
     favorites: nextFavorites,
     added: true,
   };
 }
 
 export async function removeFavorite(idProducto) {
+  const normalizedProductId = Number(idProducto);
+
   if (hasAuthenticatedUser()) {
-    await request(`/api/Favoritos/${idProducto}`, { method: "DELETE" });
-    const favorites = await getFavorites();
-    notifyFavoritesChanged();
-    return favorites;
+    await request(`/api/Favoritos/${normalizedProductId}`, { method: "DELETE" });
+    notifyFavoritesChanged({
+      idProducto: normalizedProductId,
+      isFavorite: false,
+    });
+
+    return {
+      favorites: null,
+      idProducto: normalizedProductId,
+      removed: true,
+    };
   }
 
   const nextFavorites = getLocalFavorites().filter(
-    (favorite) => Number(favorite.idProducto) !== Number(idProducto)
+    (favorite) => Number(favorite.idProducto) !== normalizedProductId
   );
-  saveLocalFavorites(nextFavorites);
-  return nextFavorites;
+  saveLocalFavorites(nextFavorites, {
+    idProducto: normalizedProductId,
+    isFavorite: false,
+  });
+
+  return {
+    favorites: nextFavorites,
+    idProducto: normalizedProductId,
+    removed: true,
+  };
 }
 
 export async function toggleFavorite(product) {
   const idProducto = Number(product?.idProducto ?? product?.id);
-  const favorites = await getFavorites();
-  const alreadySaved = favorites.some(
-    (favorite) => Number(favorite.idProducto) === idProducto
-  );
+  const favoriteIds = await getFavoriteProductIdsAsync();
+  const alreadySaved = favoriteIds.some((favoriteId) => favoriteId === idProducto);
 
   if (alreadySaved) {
-    const nextFavorites = await removeFavorite(idProducto);
+    const result = await removeFavorite(idProducto);
     return {
-      favorites: nextFavorites,
+      ...result,
       isFavorite: false,
     };
   }
 
   const result = await addFavorite(product);
   return {
-    favorites: result.favorites,
+    ...result,
     isFavorite: true,
   };
 }
