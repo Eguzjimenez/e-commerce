@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
+import PaginationControls from "../../components/PaginationControls/PaginationControls";
 import {
   deactivateUser,
   getRoles,
@@ -13,6 +14,9 @@ import "./AdminUsers.css";
 import { registerBitacora } from "../../services/bitacoraService";
 import { getAuth } from "../../services/authService";
 import { getPasswordPolicyMessage } from "../../services/passwordPolicyService";
+import { DEFAULT_PAGINATION, normalizePaginatedResponse } from "../../services/paginationService";
+
+const ADMIN_USERS_PAGE_SIZE = 25;
 
 const roleNames = {
   1: "Administrador",
@@ -33,6 +37,12 @@ function AdminUsers() {
   const [roles, setRoles] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("Todos");
+  const [loading, setLoading] = useState(true);
+  const [userPage, setUserPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    ...DEFAULT_PAGINATION,
+    pageSize: ADMIN_USERS_PAGE_SIZE,
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -49,37 +59,64 @@ function AdminUsers() {
   });
 
   useEffect(() => {
-    loadData();
+    loadRoles();
   }, []);
 
-  const loadData = async () => {
+  useEffect(() => {
+    loadUsers(userPage);
+  }, [userPage, searchTerm, selectedRole]);
+
+  const loadRoles = async () => {
     try {
-      const [usersData, rolesData] = await Promise.all([getUserList(), getRoles()]);
-      setUsers(Array.isArray(usersData) ? usersData : []);
+      const rolesData = await getRoles();
       setRoles(Array.isArray(rolesData) ? rolesData : []);
     } catch (error) {
       await Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.message || "No se pudo cargar la informacion de usuarios.",
+        text: error.message || "No se pudieron cargar los roles.",
       });
     }
   };
 
+  const loadUsers = async (page = userPage) => {
+    setLoading(true);
+
+    try {
+      const usersData = await getUserList({
+        page,
+        pageSize: ADMIN_USERS_PAGE_SIZE,
+        searchTerm,
+        roleId: selectedRole === "Todos" ? undefined : selectedRole,
+      });
+      const pagedUsers = normalizePaginatedResponse(
+        usersData,
+        page,
+        ADMIN_USERS_PAGE_SIZE
+      );
+
+      setUsers(pagedUsers.items);
+      setPagination(pagedUsers);
+    } catch (error) {
+      setUsers([]);
+      setPagination({
+        ...DEFAULT_PAGINATION,
+        pageNumber: page,
+        pageSize: ADMIN_USERS_PAGE_SIZE,
+      });
+      await Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "No se pudo cargar la informacion de usuarios.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredUsers = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-    return users.filter((user) => {
-      const matchesSearch = [user.nombre, user.apellido, user.correo, user.telefono]
-        .join(" ")
-        .toLowerCase()
-        .includes(term);
-
-      const matchesRole =
-        selectedRole === "Todos" || user.idRol === Number(selectedRole);
-
-      return matchesSearch && matchesRole;
-    });
-  }, [searchTerm, selectedRole, users]);
+    return users;
+  }, [users]);
 
   const openAddModal = () => {
     setModalMode("add");
@@ -226,7 +263,8 @@ function AdminUsers() {
             : "Los datos del usuario se han actualizado correctamente.",
       });
       closeModal();
-      await loadData();
+      setUserPage(1);
+      await loadUsers(1);
     } catch (error) {
       await Swal.fire({
         icon: "error",
@@ -257,7 +295,7 @@ function AdminUsers() {
         title: "Usuario inactivado",
         text: "El usuario fue marcado como inactivo.",
       });
-      await loadData();
+      await loadUsers(userPage);
     } catch (error) {
       await Swal.fire({
         icon: "error",
@@ -295,14 +333,20 @@ function AdminUsers() {
                 type="text"
                 placeholder="Buscar usuario"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setUserPage(1);
+                }}
               />
             </div>
 
             <select
               className="admin-users-role-filter"
               value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
+              onChange={(e) => {
+                setSelectedRole(e.target.value);
+                setUserPage(1);
+              }}
             >
               <option value="Todos">Todos los roles</option>
               {roles.map((role) => (
@@ -318,6 +362,10 @@ function AdminUsers() {
           </button>
         </div>
 
+        <p className="admin-users-count">
+          {pagination.totalItems} usuario{pagination.totalItems !== 1 ? "s" : ""} encontrado{pagination.totalItems !== 1 ? "s" : ""}
+        </p>
+
         <div className="admin-table-wrapper">
           <table className="admin-users-table">
             <thead>
@@ -330,7 +378,13 @@ function AdminUsers() {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user) => (
+              {loading ? (
+                <tr>
+                  <td colSpan="5" className="admin-empty-row">
+                    Cargando usuarios...
+                  </td>
+                </tr>
+              ) : filteredUsers.map((user) => (
                 <tr key={user.idUsuario}>
                   <td>
                     <button
@@ -371,7 +425,7 @@ function AdminUsers() {
                 </tr>
               ))}
 
-              {filteredUsers.length === 0 && (
+              {!loading && filteredUsers.length === 0 && (
                 <tr>
                   <td colSpan="5" className="admin-empty-row">
                     No se encontraron usuarios.
@@ -381,6 +435,14 @@ function AdminUsers() {
             </tbody>
           </table>
         </div>
+
+        {!loading && pagination.totalItems > ADMIN_USERS_PAGE_SIZE && (
+          <PaginationControls
+            pagination={pagination}
+            isLoading={loading}
+            onPageChange={setUserPage}
+          />
+        )}
 
         {isModalOpen && (
           <div className="admin-modal-overlay">

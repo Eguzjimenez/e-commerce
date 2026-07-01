@@ -50,6 +50,8 @@ export async function getCatalogProducts(options = {}) {
     tamano: options.size,
     material: options.material,
     tipo: options.type,
+    pagina: options.page,
+    tamanoPagina: options.pageSize,
   });
 }
 

@@ -6,6 +6,7 @@ import {
   getCatalogProducts,
   getCatalogTypes,
 } from "../../services/catalogService";
+import PaginationControls from "../../components/PaginationControls/PaginationControls";
 import { addToCart, getCart } from "../../services/cartService";
 import {
   getFavoriteProductIdsAsync,
@@ -28,8 +29,11 @@ import {
   normalizeCatalogTypes,
   PRODUCT_SORT_OPTIONS,
 } from "../../services/catalogPresentationService";
+import { DEFAULT_PAGINATION, normalizePaginatedResponse } from "../../services/paginationService";
 import { buildProductDetailRoute, PRIVATE_ROUTES } from "../../routes/routes";
 import "./Catalog.css";
+
+const CATALOG_PAGE_SIZE = 9;
 
 function Catalog() {
   const navigate = useNavigate();
@@ -50,6 +54,11 @@ function Catalog() {
   const [favoriteProductIds, setFavoriteProductIds] = useState(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [catalogPage, setCatalogPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    ...DEFAULT_PAGINATION,
+    pageSize: CATALOG_PAGE_SIZE,
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -95,8 +104,7 @@ function Catalog() {
       setError("");
 
       try {
-        const productsResponse = await getCatalogProducts(
-          getCatalogQueryOptions({
+        const queryOptions = getCatalogQueryOptions({
             searchTerm,
             selectedSortOrder,
             selectedCategoryId,
@@ -107,18 +115,33 @@ function Catalog() {
             selectedMaterial,
             selectedTypeId,
             priceBounds,
-          })
-        );
+        });
+        const productsResponse = await getCatalogProducts({
+          ...queryOptions,
+          page: catalogPage,
+          pageSize: CATALOG_PAGE_SIZE,
+        });
 
         if (!isMounted) {
           return;
         }
 
-        setProducts(Array.isArray(productsResponse) ? productsResponse : []);
+        const pagedProducts = normalizePaginatedResponse(
+          productsResponse,
+          catalogPage,
+          CATALOG_PAGE_SIZE
+        );
+        setProducts(pagedProducts.items);
+        setPagination(pagedProducts);
       } catch (loadError) {
         if (isMounted) {
           setError(loadError.message || "No se pudo cargar el catalogo.");
           setProducts([]);
+          setPagination({
+            ...DEFAULT_PAGINATION,
+            pageNumber: catalogPage,
+            pageSize: CATALOG_PAGE_SIZE,
+          });
         }
       } finally {
         if (isMounted) {
@@ -142,6 +165,7 @@ function Catalog() {
     selectedMaterial,
     selectedTypeId,
     priceBounds,
+    catalogPage,
   ]);
 
   useEffect(() => {
@@ -220,16 +244,19 @@ function Catalog() {
     setSelectedSize("all");
     setSelectedMaterial("all");
     setSelectedTypeId("all");
+    setCatalogPage(1);
   };
 
   const handleMinPriceChange = (event) => {
     const nextMin = Number(event.target.value);
     setSelectedMinPrice(Math.min(nextMin, selectedMaxPrice));
+    setCatalogPage(1);
   };
 
   const handleMaxPriceChange = (event) => {
     const nextMax = Number(event.target.value);
     setSelectedMaxPrice(Math.max(nextMax, selectedMinPrice));
+    setCatalogPage(1);
   };
 
   const openProduct = (product) => {
@@ -280,7 +307,10 @@ function Catalog() {
             className="input catalog-shop-search"
             placeholder="Buscar plantas, flores o macetas"
             value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
+            onChange={(event) => {
+              setSearchTerm(event.target.value);
+              setCatalogPage(1);
+            }}
           />
           <button type="submit">Buscar</button>
         </form>
@@ -294,7 +324,10 @@ function Catalog() {
             <button
               type="button"
               className={selectedCategoryId === "all" ? "active" : ""}
-              onClick={() => setSelectedCategoryId("all")}
+              onClick={() => {
+                setSelectedCategoryId("all");
+                setCatalogPage(1);
+              }}
             >
               <span />
               Todas
@@ -305,7 +338,10 @@ function Catalog() {
                 type="button"
                 key={category.id}
                 className={selectedCategoryId === category.id ? "active" : ""}
-                onClick={() => setSelectedCategoryId(category.id)}
+                onClick={() => {
+                  setSelectedCategoryId(category.id);
+                  setCatalogPage(1);
+                }}
               >
                 <span />
                 {category.name}
@@ -359,7 +395,10 @@ function Catalog() {
               Tipo
               <select
                 value={selectedTypeId}
-                onChange={(event) => setSelectedTypeId(event.target.value)}
+                onChange={(event) => {
+                  setSelectedTypeId(event.target.value);
+                  setCatalogPage(1);
+                }}
               >
                 <option value="all">Todos</option>
                 {normalizedProductTypes.map((type) => (
@@ -374,7 +413,10 @@ function Catalog() {
               Tamano
               <select
                 value={selectedSize}
-                onChange={(event) => setSelectedSize(event.target.value)}
+                onChange={(event) => {
+                  setSelectedSize(event.target.value);
+                  setCatalogPage(1);
+                }}
               >
                 {CATALOG_FILTER_OPTIONS.SIZES.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -388,7 +430,10 @@ function Catalog() {
               Material
               <select
                 value={selectedMaterial}
-                onChange={(event) => setSelectedMaterial(event.target.value)}
+                onChange={(event) => {
+                  setSelectedMaterial(event.target.value);
+                  setCatalogPage(1);
+                }}
               >
                 {CATALOG_FILTER_OPTIONS.MATERIALS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -402,7 +447,10 @@ function Catalog() {
               Disponibilidad
               <select
                 value={selectedAvailability}
-                onChange={(event) => setSelectedAvailability(event.target.value)}
+                onChange={(event) => {
+                  setSelectedAvailability(event.target.value);
+                  setCatalogPage(1);
+                }}
               >
                 {CATALOG_FILTER_OPTIONS.AVAILABILITY.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -421,14 +469,17 @@ function Catalog() {
         <div className="catalog-product-area">
           <div className="catalog-product-toolbar">
             <span>
-              {filteredProducts.length} producto
-              {filteredProducts.length !== 1 ? "s" : ""}
+              {pagination.totalItems} producto
+              {pagination.totalItems !== 1 ? "s" : ""}
             </span>
             <div className="catalog-toolbar-controls">
               <span>{activeCategoryName}</span>
               <select
                 value={selectedSortOrder}
-                onChange={(event) => setSelectedSortOrder(event.target.value)}
+                onChange={(event) => {
+                  setSelectedSortOrder(event.target.value);
+                  setCatalogPage(1);
+                }}
                 aria-label="Ordenar productos"
               >
                 <option value={PRODUCT_SORT_OPTIONS.NONE}>Orden original</option>
@@ -521,6 +572,14 @@ function Catalog() {
                 </div>
               )}
             </div>
+          )}
+
+          {!isLoading && !error && pagination.totalItems > CATALOG_PAGE_SIZE && (
+            <PaginationControls
+              pagination={pagination}
+              isLoading={isLoading}
+              onPageChange={setCatalogPage}
+            />
           )}
         </div>
 

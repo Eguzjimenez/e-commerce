@@ -1,7 +1,27 @@
 import { request } from "./apiClient";
 
-export async function getUserList() {
-  return await request("/api/Users/UserList", {
+function buildQueryString(params = {}) {
+  const query = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      query.set(key, String(value).trim());
+    }
+  });
+
+  const queryString = query.toString();
+  return queryString ? `?${queryString}` : "";
+}
+
+export async function getUserList(options = {}) {
+  const queryString = buildQueryString({
+    pagina: options.page,
+    tamanoPagina: options.pageSize,
+    busqueda: options.searchTerm,
+    idRol: options.roleId,
+  });
+
+  return await request(`/api/Users/UserList${queryString}`, {
     method: "GET",
   });
 }
