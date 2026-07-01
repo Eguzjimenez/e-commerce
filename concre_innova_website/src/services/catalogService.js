@@ -13,13 +13,16 @@ function buildQueryString(params = {}) {
   return queryString ? `?${queryString}` : "";
 }
 
-async function requestWithFallback(paths, queryParams = {}) {
+async function requestWithFallback(paths, queryParams = {}, requestOptions = {}) {
   let lastError = null;
   const queryString = buildQueryString(queryParams);
 
   for (const path of paths) {
     try {
-      return await request(`${path}${queryString}`, { method: "GET" });
+      return await request(`${path}${queryString}`, {
+        method: "GET",
+        ...requestOptions,
+      });
     } catch (error) {
       lastError = error;
 
@@ -52,6 +55,17 @@ export async function getCatalogProducts(options = {}) {
     tipo: options.type,
     pagina: options.page,
     tamanoPagina: options.pageSize,
+  }, {
+    signal: options.signal,
+  });
+}
+
+export async function getCatalogFilters(options = {}) {
+  return await requestWithFallback([
+    "/api/Productos/filtros",
+    "/api/Catalogo/filtros",
+  ], {}, {
+    signal: options.signal,
   });
 }
 

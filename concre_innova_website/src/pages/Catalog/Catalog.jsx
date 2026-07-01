@@ -2,9 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import {
-  getCatalogCategories,
+  getCatalogFilters,
   getCatalogProducts,
-  getCatalogTypes,
 } from "../../services/catalogService";
 import PaginationControls from "../../components/PaginationControls/PaginationControls";
 import { addToCart, getCart } from "../../services/cartService";
@@ -14,7 +13,6 @@ import {
 } from "../../services/favoriteService";
 import {
   buildCatalogModalProduct,
-  calculateCatalogPriceBounds,
   CATALOG_FILTER_OPTIONS,
   filterAndSortCatalogProducts,
   formatCatalogPrice,
@@ -35,6 +33,20 @@ import "./Catalog.css";
 
 const CATALOG_PAGE_SIZE = 9;
 
+function isAbortError(error) {
+  return error?.name === "AbortError";
+}
+
+function getCatalogFilterPriceBounds(filterResponse) {
+  const min = Number(filterResponse?.precioMinimo ?? filterResponse?.PrecioMinimo) || 0;
+  const max = Number(filterResponse?.precioMaximo ?? filterResponse?.PrecioMaximo) || 0;
+
+  return {
+    min,
+    max: Math.max(min, max),
+  };
+}
+
 function Catalog() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
@@ -54,6 +66,7 @@ function Catalog() {
   const [favoriteProductIds, setFavoriteProductIds] = useState(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filtersReady, setFiltersReady] = useState(false);
   const [catalogPage, setCatalogPage] = useState(1);
   const [pagination, setPagination] = useState({
     ...DEFAULT_PAGINATION,
@@ -62,28 +75,35 @@ function Catalog() {
 
   useEffect(() => {
     let isMounted = true;
+    const abortController = new AbortController();
 
     async function loadCatalogFilterData() {
       try {
-        const [categoriesResponse, productsResponse, typesResponse] = await Promise.all([
-          getCatalogCategories(),
-          getCatalogProducts(),
-          getCatalogTypes(),
-        ]);
+        const filterResponse = await getCatalogFilters({
+          signal: abortController.signal,
+        });
 
-        if (!isMounted) {
+        if (!isMounted || abortController.signal.aborted) {
           return;
         }
 
+        const categoriesResponse = filterResponse?.categorias ?? filterResponse?.Categorias ?? [];
+        const typesResponse =
+          filterResponse?.tiposProducto ?? filterResponse?.TiposProducto ?? [];
+        const nextPriceBounds = getCatalogFilterPriceBounds(filterResponse);
+
         setCategories(Array.isArray(categoriesResponse) ? categoriesResponse : []);
         setProductTypes(Array.isArray(typesResponse) ? typesResponse : []);
-        const nextPriceBounds = calculateCatalogPriceBounds(productsResponse);
         setPriceBounds(nextPriceBounds);
         setSelectedMinPrice(nextPriceBounds.min);
         setSelectedMaxPrice(nextPriceBounds.max);
       } catch (loadError) {
-        if (isMounted) {
+        if (isMounted && !isAbortError(loadError)) {
           setError(loadError.message || "No se pudieron cargar las categorias.");
+        }
+      } finally {
+        if (isMounted && !abortController.signal.aborted) {
+          setFiltersReady(true);
         }
       }
     }
@@ -92,11 +112,17 @@ function Catalog() {
 
     return () => {
       isMounted = false;
+      abortController.abort();
     };
   }, []);
 
   useEffect(() => {
+    if (!filtersReady) {
+      return undefined;
+    }
+
     let isMounted = true;
+    const abortController = new AbortController();
     const searchDelay = searchTerm.trim() ? 350 : 0;
 
     const timeoutId = setTimeout(async () => {
@@ -120,9 +146,10 @@ function Catalog() {
           ...queryOptions,
           page: catalogPage,
           pageSize: CATALOG_PAGE_SIZE,
+          signal: abortController.signal,
         });
 
-        if (!isMounted) {
+        if (!isMounted || abortController.signal.aborted) {
           return;
         }
 
@@ -134,7 +161,7 @@ function Catalog() {
         setProducts(pagedProducts.items);
         setPagination(pagedProducts);
       } catch (loadError) {
-        if (isMounted) {
+        if (isMounted && !isAbortError(loadError)) {
           setError(loadError.message || "No se pudo cargar el catalogo.");
           setProducts([]);
           setPagination({
@@ -153,6 +180,7 @@ function Catalog() {
     return () => {
       isMounted = false;
       clearTimeout(timeoutId);
+      abortController.abort();
     };
   }, [
     searchTerm,
@@ -166,6 +194,7 @@ function Catalog() {
     selectedTypeId,
     priceBounds,
     catalogPage,
+    filtersReady,
   ]);
 
   useEffect(() => {
