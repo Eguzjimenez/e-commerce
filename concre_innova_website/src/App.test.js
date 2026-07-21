@@ -1,9 +1,10 @@
 import { ROLES } from "./constants/roles";
-import { ROLE_GROUPS, isStaffRole } from "./constants/roleAccess";
+import { ROLE_GROUPS, isAdminRole, isVendorRole } from "./constants/roleAccess";
 
-test("defines staff access for administrator and vendor roles", () => {
-  expect(isStaffRole(ROLES.ADMINISTRADOR)).toBe(true);
-  expect(isStaffRole(ROLES.VENDEDOR)).toBe(true);
-  expect(isStaffRole(ROLES.CLIENTE)).toBe(false);
-  expect(ROLE_GROUPS.STAFF).toEqual([ROLES.ADMINISTRADOR, ROLES.VENDEDOR]);
+test("defines administrative access only for administrator role", () => {
+  expect(isAdminRole(ROLES.ADMINISTRADOR)).toBe(true);
+  expect(isAdminRole(ROLES.VENDEDOR)).toBe(false);
+  expect(isAdminRole(ROLES.CLIENTE)).toBe(false);
+  expect(isVendorRole(ROLES.VENDEDOR)).toBe(true);
+  expect(ROLE_GROUPS.ADMIN_ONLY).toEqual([ROLES.ADMINISTRADOR]);
 });

@@ -57,7 +57,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.DASHBOARD}
         element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.STAFF}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
             <AdminDashboard />
           </ProtectedRoute>
         }
@@ -122,7 +122,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.INVENTORY}
         element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.STAFF}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
             <AdminInventory />
           </ProtectedRoute>
         }
@@ -130,7 +130,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.PRODUCTS}
         element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.STAFF}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
             <AdminProducts />
           </ProtectedRoute>
         }
@@ -138,7 +138,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.QUOTATIONS}
         element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.STAFF}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
             <AdminQuotations />
           </ProtectedRoute>
         }
@@ -146,7 +146,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.ORDERS}
         element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.STAFF}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
             <AdminOrders />
           </ProtectedRoute>
         }
@@ -154,7 +154,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.CHAT}
         element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.STAFF}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
             <AdminChat />
           </ProtectedRoute>
         }

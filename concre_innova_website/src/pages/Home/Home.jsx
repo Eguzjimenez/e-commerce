@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import { ADMIN_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 import { getUserRole } from "../../services/authService";
-import { isStaffRole, isVendorRole } from "../../constants/roleAccess";
+import { isAdminRole } from "../../constants/roleAccess";
 import ProductModal from "../../components/ProductModal/ProductModal";
 import { getCatalogCategories, getCatalogProducts } from "../../services/catalogService";
 import { addToCart } from "../../services/cartService";
@@ -49,7 +49,7 @@ function Home() {
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [productsError, setProductsError] = useState("");
   const userRole = getUserRole();
-  const showStaffAccess = isStaffRole(userRole);
+  const showAdminAccess = isAdminRole(userRole);
 
   useEffect(() => {
     const slideTimer = setInterval(() => {
@@ -223,12 +223,12 @@ function Home() {
         </p>
       </section>
 
-      {showStaffAccess && (
+      {showAdminAccess && (
         <section className="container admin-home-access">
           <div className="admin-home-card">
             <div className="admin-home-card-content">
               <span className="admin-home-badge">Acceso interno</span>
-              <h2>{isVendorRole(userRole) ? "Panel de ventas" : "Panel de administracion"}</h2>
+              <h2>Panel de administracion</h2>
               <p>
                 Gestiona las funciones internas disponibles para tu rol desde un solo lugar.
               </p>
