@@ -2,17 +2,17 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import {
-  getCatalogCategories,
+  getCatalogFilters,
   getCatalogProducts,
 } from "../../services/catalogService";
+import PaginationControls from "../../components/PaginationControls/PaginationControls";
 import { addToCart, getCart } from "../../services/cartService";
 import {
-  getFavoriteProductIds,
+  getFavoriteProductIdsAsync,
   toggleFavorite,
 } from "../../services/favoriteService";
 import {
   buildCatalogModalProduct,
-  calculateCatalogPriceBounds,
   CATALOG_FILTER_OPTIONS,
   filterAndSortCatalogProducts,
   formatCatalogPrice,
@@ -24,15 +24,34 @@ import {
   getCatalogProductImage,
   handleCatalogImageFallback,
   normalizeCatalogCategories,
+  normalizeCatalogTypes,
   PRODUCT_SORT_OPTIONS,
 } from "../../services/catalogPresentationService";
+import { DEFAULT_PAGINATION, normalizePaginatedResponse } from "../../services/paginationService";
 import { buildProductDetailRoute, PRIVATE_ROUTES } from "../../routes/routes";
 import "./Catalog.css";
+
+const CATALOG_PAGE_SIZE = 9;
+
+function isAbortError(error) {
+  return error?.name === "AbortError";
+}
+
+function getCatalogFilterPriceBounds(filterResponse) {
+  const min = Number(filterResponse?.precioMinimo ?? filterResponse?.PrecioMinimo) || 0;
+  const max = Number(filterResponse?.precioMaximo ?? filterResponse?.PrecioMaximo) || 0;
+
+  return {
+    min,
+    max: Math.max(min, max),
+  };
+}
 
 function Catalog() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [productTypes, setProductTypes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("all");
   const [selectedSortOrder, setSelectedSortOrder] = useState(PRODUCT_SORT_OPTIONS.NONE);
@@ -41,35 +60,50 @@ function Catalog() {
   const [selectedAvailability, setSelectedAvailability] = useState("all");
   const [selectedSize, setSelectedSize] = useState("all");
   const [selectedMaterial, setSelectedMaterial] = useState("all");
-  const [selectedType, setSelectedType] = useState("all");
+  const [selectedTypeId, setSelectedTypeId] = useState("all");
   const [priceBounds, setPriceBounds] = useState({ min: 0, max: 0 });
   const [cartItems, setCartItems] = useState([]);
   const [favoriteProductIds, setFavoriteProductIds] = useState(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filtersReady, setFiltersReady] = useState(false);
+  const [catalogPage, setCatalogPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    ...DEFAULT_PAGINATION,
+    pageSize: CATALOG_PAGE_SIZE,
+  });
 
   useEffect(() => {
     let isMounted = true;
+    const abortController = new AbortController();
 
     async function loadCatalogFilterData() {
       try {
-        const [categoriesResponse, productsResponse] = await Promise.all([
-          getCatalogCategories(),
-          getCatalogProducts(),
-        ]);
+        const filterResponse = await getCatalogFilters({
+          signal: abortController.signal,
+        });
 
-        if (!isMounted) {
+        if (!isMounted || abortController.signal.aborted) {
           return;
         }
 
+        const categoriesResponse = filterResponse?.categorias ?? filterResponse?.Categorias ?? [];
+        const typesResponse =
+          filterResponse?.tiposProducto ?? filterResponse?.TiposProducto ?? [];
+        const nextPriceBounds = getCatalogFilterPriceBounds(filterResponse);
+
         setCategories(Array.isArray(categoriesResponse) ? categoriesResponse : []);
-        const nextPriceBounds = calculateCatalogPriceBounds(productsResponse);
+        setProductTypes(Array.isArray(typesResponse) ? typesResponse : []);
         setPriceBounds(nextPriceBounds);
         setSelectedMinPrice(nextPriceBounds.min);
         setSelectedMaxPrice(nextPriceBounds.max);
       } catch (loadError) {
-        if (isMounted) {
+        if (isMounted && !isAbortError(loadError)) {
           setError(loadError.message || "No se pudieron cargar las categorias.");
+        }
+      } finally {
+        if (isMounted && !abortController.signal.aborted) {
+          setFiltersReady(true);
         }
       }
     }
@@ -78,11 +112,17 @@ function Catalog() {
 
     return () => {
       isMounted = false;
+      abortController.abort();
     };
   }, []);
 
   useEffect(() => {
+    if (!filtersReady) {
+      return undefined;
+    }
+
     let isMounted = true;
+    const abortController = new AbortController();
     const searchDelay = searchTerm.trim() ? 350 : 0;
 
     const timeoutId = setTimeout(async () => {
@@ -90,8 +130,7 @@ function Catalog() {
       setError("");
 
       try {
-        const productsResponse = await getCatalogProducts(
-          getCatalogQueryOptions({
+        const queryOptions = getCatalogQueryOptions({
             searchTerm,
             selectedSortOrder,
             selectedCategoryId,
@@ -100,20 +139,36 @@ function Catalog() {
             selectedAvailability,
             selectedSize,
             selectedMaterial,
-            selectedType,
+            selectedTypeId,
             priceBounds,
-          })
-        );
+        });
+        const productsResponse = await getCatalogProducts({
+          ...queryOptions,
+          page: catalogPage,
+          pageSize: CATALOG_PAGE_SIZE,
+          signal: abortController.signal,
+        });
 
-        if (!isMounted) {
+        if (!isMounted || abortController.signal.aborted) {
           return;
         }
 
-        setProducts(Array.isArray(productsResponse) ? productsResponse : []);
+        const pagedProducts = normalizePaginatedResponse(
+          productsResponse,
+          catalogPage,
+          CATALOG_PAGE_SIZE
+        );
+        setProducts(pagedProducts.items);
+        setPagination(pagedProducts);
       } catch (loadError) {
-        if (isMounted) {
+        if (isMounted && !isAbortError(loadError)) {
           setError(loadError.message || "No se pudo cargar el catalogo.");
           setProducts([]);
+          setPagination({
+            ...DEFAULT_PAGINATION,
+            pageNumber: catalogPage,
+            pageSize: CATALOG_PAGE_SIZE,
+          });
         }
       } finally {
         if (isMounted) {
@@ -125,6 +180,7 @@ function Catalog() {
     return () => {
       isMounted = false;
       clearTimeout(timeoutId);
+      abortController.abort();
     };
   }, [
     searchTerm,
@@ -135,8 +191,10 @@ function Catalog() {
     selectedAvailability,
     selectedSize,
     selectedMaterial,
-    selectedType,
+    selectedTypeId,
     priceBounds,
+    catalogPage,
+    filtersReady,
   ]);
 
   useEffect(() => {
@@ -151,19 +209,33 @@ function Catalog() {
   }, []);
 
   useEffect(() => {
-    const syncFavorites = () => {
-      setFavoriteProductIds(new Set(getFavoriteProductIds()));
+    const syncFavorites = async () => {
+      try {
+        const favoriteIds = await getFavoriteProductIdsAsync();
+        setFavoriteProductIds(new Set(favoriteIds));
+      } catch {
+        setFavoriteProductIds(new Set());
+      }
     };
 
     syncFavorites();
-    window.addEventListener("favoriteschange", syncFavorites);
+    const handleFavoritesChange = () => {
+      syncFavorites();
+    };
 
-    return () => window.removeEventListener("favoriteschange", syncFavorites);
+    window.addEventListener("favoriteschange", handleFavoritesChange);
+
+    return () => window.removeEventListener("favoriteschange", handleFavoritesChange);
   }, []);
 
   const normalizedCategories = useMemo(
     () => normalizeCatalogCategories(categories),
     [categories]
+  );
+
+  const normalizedProductTypes = useMemo(
+    () => normalizeCatalogTypes(productTypes),
+    [productTypes]
   );
 
   const filteredProducts = useMemo(() => {
@@ -200,17 +272,20 @@ function Catalog() {
     setSelectedAvailability("all");
     setSelectedSize("all");
     setSelectedMaterial("all");
-    setSelectedType("all");
+    setSelectedTypeId("all");
+    setCatalogPage(1);
   };
 
   const handleMinPriceChange = (event) => {
     const nextMin = Number(event.target.value);
     setSelectedMinPrice(Math.min(nextMin, selectedMaxPrice));
+    setCatalogPage(1);
   };
 
   const handleMaxPriceChange = (event) => {
     const nextMax = Number(event.target.value);
     setSelectedMaxPrice(Math.max(nextMax, selectedMinPrice));
+    setCatalogPage(1);
   };
 
   const openProduct = (product) => {
@@ -219,8 +294,19 @@ function Catalog() {
 
   const handleToggleFavorite = async (event, product) => {
     event.stopPropagation();
-    const result = toggleFavorite(product);
-    setFavoriteProductIds(new Set(result.favorites.map((favorite) => favorite.idProducto)));
+    const result = await toggleFavorite(product);
+    setFavoriteProductIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+      const idProducto = Number(result.idProducto ?? product.idProducto);
+
+      if (result.isFavorite) {
+        nextIds.add(idProducto);
+      } else {
+        nextIds.delete(idProducto);
+      }
+
+      return nextIds;
+    });
 
     await Swal.fire({
       icon: "success",
@@ -261,7 +347,10 @@ function Catalog() {
             className="input catalog-shop-search"
             placeholder="Buscar plantas, flores o macetas"
             value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
+            onChange={(event) => {
+              setSearchTerm(event.target.value);
+              setCatalogPage(1);
+            }}
           />
           <button type="submit">Buscar</button>
         </form>
@@ -275,7 +364,10 @@ function Catalog() {
             <button
               type="button"
               className={selectedCategoryId === "all" ? "active" : ""}
-              onClick={() => setSelectedCategoryId("all")}
+              onClick={() => {
+                setSelectedCategoryId("all");
+                setCatalogPage(1);
+              }}
             >
               <span />
               Todas
@@ -286,7 +378,10 @@ function Catalog() {
                 type="button"
                 key={category.id}
                 className={selectedCategoryId === category.id ? "active" : ""}
-                onClick={() => setSelectedCategoryId(category.id)}
+                onClick={() => {
+                  setSelectedCategoryId(category.id);
+                  setCatalogPage(1);
+                }}
               >
                 <span />
                 {category.name}
@@ -339,12 +434,16 @@ function Catalog() {
             <label>
               Tipo
               <select
-                value={selectedType}
-                onChange={(event) => setSelectedType(event.target.value)}
+                value={selectedTypeId}
+                onChange={(event) => {
+                  setSelectedTypeId(event.target.value);
+                  setCatalogPage(1);
+                }}
               >
-                {CATALOG_FILTER_OPTIONS.TYPES.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
+                <option value="all">Todos</option>
+                {normalizedProductTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
                   </option>
                 ))}
               </select>
@@ -354,7 +453,10 @@ function Catalog() {
               Tamano
               <select
                 value={selectedSize}
-                onChange={(event) => setSelectedSize(event.target.value)}
+                onChange={(event) => {
+                  setSelectedSize(event.target.value);
+                  setCatalogPage(1);
+                }}
               >
                 {CATALOG_FILTER_OPTIONS.SIZES.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -368,7 +470,10 @@ function Catalog() {
               Material
               <select
                 value={selectedMaterial}
-                onChange={(event) => setSelectedMaterial(event.target.value)}
+                onChange={(event) => {
+                  setSelectedMaterial(event.target.value);
+                  setCatalogPage(1);
+                }}
               >
                 {CATALOG_FILTER_OPTIONS.MATERIALS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -382,7 +487,10 @@ function Catalog() {
               Disponibilidad
               <select
                 value={selectedAvailability}
-                onChange={(event) => setSelectedAvailability(event.target.value)}
+                onChange={(event) => {
+                  setSelectedAvailability(event.target.value);
+                  setCatalogPage(1);
+                }}
               >
                 {CATALOG_FILTER_OPTIONS.AVAILABILITY.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -401,14 +509,17 @@ function Catalog() {
         <div className="catalog-product-area">
           <div className="catalog-product-toolbar">
             <span>
-              {filteredProducts.length} producto
-              {filteredProducts.length !== 1 ? "s" : ""}
+              {pagination.totalItems} producto
+              {pagination.totalItems !== 1 ? "s" : ""}
             </span>
             <div className="catalog-toolbar-controls">
               <span>{activeCategoryName}</span>
               <select
                 value={selectedSortOrder}
-                onChange={(event) => setSelectedSortOrder(event.target.value)}
+                onChange={(event) => {
+                  setSelectedSortOrder(event.target.value);
+                  setCatalogPage(1);
+                }}
                 aria-label="Ordenar productos"
               >
                 <option value={PRODUCT_SORT_OPTIONS.NONE}>Orden original</option>
@@ -501,6 +612,14 @@ function Catalog() {
                 </div>
               )}
             </div>
+          )}
+
+          {!isLoading && !error && pagination.totalItems > CATALOG_PAGE_SIZE && (
+            <PaginationControls
+              pagination={pagination}
+              isLoading={isLoading}
+              onPageChange={setCatalogPage}
+            />
           )}
         </div>
 

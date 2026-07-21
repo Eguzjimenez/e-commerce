@@ -2,28 +2,70 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ForgotPassword.css";
 import Swal from "sweetalert2";
-import { validateEmail, resetPassword } from "../../services/authService";
+import {
+  requestPasswordResetCode,
+  resetPassword,
+  verifyRecoveryCode,
+} from "../../services/authService";
+import { getPasswordPolicyMessage } from "../../services/passwordPolicyService";
 
 function ForgotPassword() {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
-  const [idUsuario, setIdUsuario] = useState(null);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [recoveryToken, setRecoveryToken] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const navigate = useNavigate();
 
   const handleValidateEmail = async (e) => {
     e.preventDefault();
+    const normalizedEmail = email.trim();
+
     try {
-      const data = await validateEmail(email);
-      if (data?.codigo === 1 && data?.idUsuario) {
-        setIdUsuario(data.idUsuario);
+      const data = await requestPasswordResetCode(normalizedEmail);
+      if (data?.codigo === 1) {
+        setEmail(normalizedEmail);
+        setVerificationCode("");
+        setRecoveryToken("");
         setStep(2);
+        await Swal.fire({
+          icon: "success",
+          title: "Codigo enviado",
+          text: data?.mensaje || "Revisa tu correo para continuar.",
+        });
       } else {
         await Swal.fire({ icon: "warning", title: "Correo", text: data?.mensaje || "Correo no encontrado" });
       }
     } catch (err) {
       await Swal.fire({ icon: "error", title: "Error", text: err.message || "Error validando correo" });
+    }
+  };
+
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = await verifyRecoveryCode({
+        correo: email,
+        codigo: verificationCode,
+      });
+
+      if (data?.codigo === 1 && data?.recoveryToken) {
+        setRecoveryToken(data.recoveryToken);
+        setPassword("");
+        setPasswordConfirm("");
+        setStep(3);
+        await Swal.fire({
+          icon: "success",
+          title: "Codigo verificado",
+          text: data?.mensaje || "Ahora puedes crear una nueva contrasena.",
+        });
+      } else {
+        await Swal.fire({ icon: "warning", title: "Codigo", text: data?.mensaje || "Codigo no valido" });
+      }
+    } catch (err) {
+      await Swal.fire({ icon: "error", title: "Error", text: err.message || "Error validando codigo" });
     }
   };
 
@@ -34,13 +76,15 @@ function ForgotPassword() {
       return;
     }
 
-    if (password.length < 8) {
-      await Swal.fire({ icon: "warning", title: "Contrasena debil", text: "La contrasena debe tener minimo 8 caracteres" });
+    const passwordMessage = getPasswordPolicyMessage(password);
+
+    if (passwordMessage) {
+      await Swal.fire({ icon: "warning", title: "Contrasena debil", text: passwordMessage });
       return;
     }
 
     try {
-      const res = await resetPassword({ idUsuario, nuevaContrasena: password });
+      const res = await resetPassword({ recoveryToken, nuevaContrasena: password });
       if (res?.codigo === 1) {
         await Swal.fire({ icon: "success", title: "Exito", text: res.mensaje || "Contrasena actualizada correctamente" });
         navigate("/login");
@@ -65,7 +109,7 @@ function ForgotPassword() {
             <div className="auth-heading">
               <span>Recuperacion</span>
               <h1>Recuperar contrasena</h1>
-              <p>Ingresa tu correo para validar tu cuenta.</p>
+              <p>Ingresa tu correo para enviarte un codigo de verificacion.</p>
             </div>
 
             <input
@@ -78,23 +122,52 @@ function ForgotPassword() {
             />
 
             <button type="submit" className="forgot-btn">
-              Validar correo
+              Enviar codigo
             </button>
           </form>
         )}
 
         {step === 2 && (
+          <form className="forgot-form" onSubmit={handleVerifyCode}>
+            <div className="auth-heading">
+              <span>Verificacion</span>
+              <h1>Codigo de seguridad</h1>
+              <p>Ingresa el codigo de 6 digitos enviado a {email}.</p>
+            </div>
+
+            <input
+              className="forgot-input"
+              type="text"
+              placeholder="Codigo de verificacion"
+              required
+              maxLength="6"
+              inputMode="numeric"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            />
+
+            <button className="forgot-btn" type="submit">
+              Verificar codigo
+            </button>
+
+            <button className="forgot-link-button" type="button" onClick={handleValidateEmail}>
+              Reenviar codigo
+            </button>
+          </form>
+        )}
+
+        {step === 3 && (
           <form className="forgot-form" onSubmit={handlePasswordChange}>
             <div className="auth-heading">
               <span>Seguridad</span>
               <h1>Nueva contrasena</h1>
-              <p>Usa una clave de minimo 8 caracteres.</p>
+              <p>Usa una clave de minimo 8 caracteres, con mayuscula, minuscula, numero y simbolo.</p>
             </div>
 
             <input
               className="forgot-input"
               type="password"
-              placeholder="Nueva contrasena (min. 8 caracteres)"
+              placeholder="Nueva contrasena segura"
               required
               minLength="8"
               value={password}

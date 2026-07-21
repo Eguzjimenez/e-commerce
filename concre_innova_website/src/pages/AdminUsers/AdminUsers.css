@@ -46,6 +46,12 @@
   color: #f8fbf5;
 }
 
+.admin-users-count {
+  color: #94a3b8;
+  font-size: 0.92rem;
+  margin: -4px 0 0;
+}
+
 .admin-table-wrapper {
   background: rgba(9, 24, 29, 0.96);
   border: 1px solid rgba(191, 219, 199, 0.1);

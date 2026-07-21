@@ -1,7 +1,19 @@
-const FAVORITES_STORAGE_KEY = "concre_innova_favorites";
+import { request } from "./apiClient";
 
-function notifyFavoritesChanged() {
-  window.dispatchEvent(new Event("favoriteschange"));
+const FAVORITES_STORAGE_KEY = "concre_innova_favorites";
+const AUTH_STORAGE_KEY = "concre_innova_auth";
+
+function notifyFavoritesChanged(detail = {}) {
+  window.dispatchEvent(new CustomEvent("favoriteschange", { detail }));
+}
+
+function hasAuthenticatedUser() {
+  try {
+    const auth = JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || "null");
+    return Boolean(auth?.codigo === 1 && auth?.idUsuario && auth?.idRol !== 4 && auth?.token);
+  } catch {
+    return false;
+  }
 }
 
 function normalizeFavoriteProduct(product) {
@@ -12,6 +24,7 @@ function normalizeFavoriteProduct(product) {
   }
 
   return {
+    ...product,
     idProducto,
     nombre: product.nombre ?? product.name ?? "Producto",
     descripcion: product.descripcion ?? product.description ?? "",
@@ -20,7 +33,7 @@ function normalizeFavoriteProduct(product) {
   };
 }
 
-export function getFavorites() {
+export function getLocalFavorites() {
   try {
     const rawFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY);
     const favorites = rawFavorites ? JSON.parse(rawFavorites) : [];
@@ -32,36 +45,83 @@ export function getFavorites() {
   }
 }
 
-export function saveFavorites(favorites) {
+export function saveLocalFavorites(favorites, detail = {}) {
   localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
-  notifyFavoritesChanged();
+  notifyFavoritesChanged(detail);
+}
+
+export async function getFavorites() {
+  if (!hasAuthenticatedUser()) {
+    return getLocalFavorites();
+  }
+
+  const favorites = await request("/api/Favoritos", { method: "GET" });
+  return Array.isArray(favorites)
+    ? favorites.map(normalizeFavoriteProduct).filter(Boolean)
+    : [];
 }
 
 export function getFavoriteProductIds() {
-  return getFavorites().map((favorite) => Number(favorite.idProducto));
+  return getLocalFavorites().map((favorite) => Number(favorite.idProducto));
+}
+
+export async function getFavoriteProductIdsAsync() {
+  if (hasAuthenticatedUser()) {
+    const favoriteIds = await request("/api/Favoritos/ids", { method: "GET" });
+    return Array.isArray(favoriteIds)
+      ? favoriteIds.map((idProducto) => Number(idProducto)).filter(Boolean)
+      : [];
+  }
+
+  const favorites = await getFavorites();
+  return favorites.map((favorite) => Number(favorite.idProducto));
 }
 
 export function getFavoriteCount() {
-  return getFavorites().length;
+  return getLocalFavorites().length;
+}
+
+export async function getFavoriteCountAsync() {
+  if (!hasAuthenticatedUser()) {
+    return getFavoriteCount();
+  }
+
+  const response = await request("/api/Favoritos/count", { method: "GET" });
+  return Number(response?.count) || 0;
 }
 
 export function isFavoriteProduct(idProducto) {
-  return getFavorites().some(
+  return getLocalFavorites().some(
     (favorite) => Number(favorite.idProducto) === Number(idProducto)
   );
 }
 
-export function addFavorite(product) {
+export async function addFavorite(product) {
   const favoriteProduct = normalizeFavoriteProduct(product);
 
   if (!favoriteProduct) {
     return {
-      favorites: getFavorites(),
+      favorites: hasAuthenticatedUser() ? null : getLocalFavorites(),
       added: false,
     };
   }
 
-  const favorites = getFavorites();
+  if (hasAuthenticatedUser()) {
+    const response = await request(`/api/Favoritos/${favoriteProduct.idProducto}`, { method: "POST" });
+    notifyFavoritesChanged({
+      idProducto: favoriteProduct.idProducto,
+      isFavorite: true,
+    });
+
+    return {
+      favorite: favoriteProduct,
+      favorites: null,
+      added: true,
+      response,
+    };
+  }
+
+  const favorites = getLocalFavorites();
   const alreadySaved = favorites.some(
     (favorite) => Number(favorite.idProducto) === favoriteProduct.idProducto
   );
@@ -74,36 +134,66 @@ export function addFavorite(product) {
   }
 
   const nextFavorites = [...favorites, favoriteProduct];
-  saveFavorites(nextFavorites);
+  saveLocalFavorites(nextFavorites, {
+    idProducto: favoriteProduct.idProducto,
+    isFavorite: true,
+  });
 
   return {
+    favorite: favoriteProduct,
     favorites: nextFavorites,
     added: true,
   };
 }
 
-export function removeFavorite(idProducto) {
-  const nextFavorites = getFavorites().filter(
-    (favorite) => Number(favorite.idProducto) !== Number(idProducto)
+export async function removeFavorite(idProducto) {
+  const normalizedProductId = Number(idProducto);
+
+  if (hasAuthenticatedUser()) {
+    await request(`/api/Favoritos/${normalizedProductId}`, { method: "DELETE" });
+    notifyFavoritesChanged({
+      idProducto: normalizedProductId,
+      isFavorite: false,
+    });
+
+    return {
+      favorites: null,
+      idProducto: normalizedProductId,
+      removed: true,
+    };
+  }
+
+  const nextFavorites = getLocalFavorites().filter(
+    (favorite) => Number(favorite.idProducto) !== normalizedProductId
   );
-  saveFavorites(nextFavorites);
-  return nextFavorites;
+  saveLocalFavorites(nextFavorites, {
+    idProducto: normalizedProductId,
+    isFavorite: false,
+  });
+
+  return {
+    favorites: nextFavorites,
+    idProducto: normalizedProductId,
+    removed: true,
+  };
 }
 
-export function toggleFavorite(product) {
+export async function toggleFavorite(product) {
   const idProducto = Number(product?.idProducto ?? product?.id);
+  const favoriteIds = await getFavoriteProductIdsAsync();
+  const alreadySaved = favoriteIds.some((favoriteId) => favoriteId === idProducto);
 
-  if (isFavoriteProduct(idProducto)) {
-    const favorites = removeFavorite(idProducto);
+  if (alreadySaved) {
+    const result = await removeFavorite(idProducto);
     return {
-      favorites,
+      ...result,
       isFavorite: false,
     };
   }
 
-  const result = addFavorite(product);
+  const result = await addFavorite(product);
   return {
-    favorites: result.favorites,
+    ...result,
     isFavorite: true,
   };
 }

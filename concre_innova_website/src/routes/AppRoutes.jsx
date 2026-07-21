@@ -28,6 +28,7 @@ import AdminReports from "../pages/AdminReports/AdminReports";
 import AdminStatistics from "../pages/AdminStatistics/AdminStatistics";
 import AdminUsers from "../pages/AdminUsers/AdminUsers";
 import AdminBitacora from "../pages/AdminBitacora/AdminBitacora";
+import AdminPermissions from "../pages/AdminPermissions/AdminPermissions";
 
 function AppRoutes() {
   return (
@@ -106,6 +107,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
             <AdminBitacora />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.PERMISSIONS}
+        element={
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
+            <AdminPermissions />
           </ProtectedRoute>
         }
       />

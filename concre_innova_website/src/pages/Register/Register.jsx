@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { registerClient } from "../../services/authService";
+import { getPasswordPolicyMessage } from "../../services/passwordPolicyService";
 import "./Register.css";
 
 function Register() {
@@ -51,11 +52,13 @@ function Register() {
       return;
     }
 
-    if (formData.contrasena.length < 8) {
+    const passwordMessage = getPasswordPolicyMessage(formData.contrasena);
+
+    if (passwordMessage) {
       await Swal.fire({
         icon: "warning",
         title: "Contrasena invalida",
-        text: "La contrasena debe tener al menos 8 caracteres.",
+        text: passwordMessage,
       });
       return;
     }

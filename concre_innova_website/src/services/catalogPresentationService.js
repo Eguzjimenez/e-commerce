@@ -230,6 +230,7 @@ export function getCatalogQueryOptions({
   selectedAvailability = "all",
   selectedSize = "all",
   selectedMaterial = "all",
+  selectedTypeId = "all",
   selectedType = "all",
   priceBounds = { min: 0, max: 0 },
 } = {}) {
@@ -280,6 +281,10 @@ export function getCatalogQueryOptions({
 
   if (selectedMaterial !== "all") {
     options.material = selectedMaterial;
+  }
+
+  if (selectedTypeId !== "all") {
+    options.typeId = selectedTypeId;
   }
 
   if (selectedType !== "all") {

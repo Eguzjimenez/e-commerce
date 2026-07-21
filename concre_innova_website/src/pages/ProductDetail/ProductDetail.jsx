@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import {
   getCatalogCategories,
   getCatalogProductById,
+  getCatalogProductVariants,
   getRelatedCatalogProducts,
 } from "../../services/catalogService";
 import { addToCart } from "../../services/cartService";
@@ -25,6 +26,8 @@ function ProductDetail() {
   const { idProducto } = useParams();
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [variants, setVariants] = useState([]);
+  const [selectedVariantId, setSelectedVariantId] = useState("");
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(Boolean(idProducto));
   const [error, setError] = useState("");
@@ -37,6 +40,7 @@ function ProductDetail() {
         setIsLoading(false);
         setProduct(null);
         setRelatedProducts([]);
+        setVariants([]);
         setError("Selecciona un producto desde el catalogo.");
         return;
       }
@@ -46,10 +50,17 @@ function ProductDetail() {
 
       try {
         const relatedProductsRequest = getRelatedCatalogProducts(idProducto).catch(() => []);
-        const [productResponse, categoriesResponse, relatedProductsResponse] = await Promise.all([
+        const variantsRequest = getCatalogProductVariants(idProducto).catch(() => []);
+        const [
+          productResponse,
+          categoriesResponse,
+          relatedProductsResponse,
+          variantsResponse
+        ] = await Promise.all([
           getCatalogProductById(idProducto),
           getCatalogCategories(),
           relatedProductsRequest,
+          variantsRequest,
         ]);
 
         if (!isMounted) {
@@ -59,17 +70,23 @@ function ProductDetail() {
         if (!productResponse) {
           setProduct(null);
           setRelatedProducts([]);
+          setVariants([]);
           setError("No se encontro el producto solicitado.");
           return;
         }
 
         setProduct(productResponse);
         setRelatedProducts(Array.isArray(relatedProductsResponse) ? relatedProductsResponse : []);
+        const normalizedVariants = Array.isArray(variantsResponse) ? variantsResponse : [];
+        const defaultVariant = normalizedVariants.find((variant) => variant.estaDisponible) || normalizedVariants[0];
+        setVariants(normalizedVariants);
+        setSelectedVariantId(defaultVariant ? String(defaultVariant.idVariante) : "");
         setCategories(Array.isArray(categoriesResponse) ? categoriesResponse : []);
       } catch (loadError) {
         if (isMounted) {
           setProduct(null);
           setRelatedProducts([]);
+          setVariants([]);
           setError(loadError.message || "No se pudo cargar el detalle del producto.");
         }
       } finally {
@@ -91,18 +108,48 @@ function ProductDetail() {
     [categories]
   );
 
+  const selectedVariant = useMemo(() => {
+    return variants.find(
+      (variant) => String(variant.idVariante) === String(selectedVariantId)
+    ) || null;
+  }, [selectedVariantId, variants]);
+
   const handleAddToCart = async () => {
     if (!product) {
       return;
     }
 
+    if (selectedVariant && !selectedVariant.estaDisponible) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Variante no disponible",
+        text: "Selecciona una variante disponible para agregarla al carrito.",
+      });
+      return;
+    }
+
     const cartProduct = buildCatalogModalProduct(product);
-    addToCart(cartProduct, 1);
+    const selectedCartProduct = selectedVariant
+      ? {
+          ...cartProduct,
+          idVariante: selectedVariant.idVariante,
+          nombreVariante: selectedVariant.nombreVariante,
+          nombre: `${cartProduct.nombre} - ${selectedVariant.nombreVariante}`,
+          precio: Number(selectedVariant.precio) || cartProduct.precio,
+          price: Number(selectedVariant.precio) || cartProduct.price,
+          imagen: selectedVariant.imagen || cartProduct.imagen,
+          imageName: selectedVariant.imagen || cartProduct.imageName,
+          tamano: selectedVariant.tamano || cartProduct.tamano,
+          material: selectedVariant.material || cartProduct.material,
+          stock: selectedVariant.stock,
+        }
+      : cartProduct;
+    addToCart(selectedCartProduct, 1);
 
     await Swal.fire({
       icon: "success",
       title: "Agregado al carrito",
-      text: `${cartProduct.nombre || cartProduct.name} fue agregado correctamente.`,
+      text: `${selectedCartProduct.nombre || selectedCartProduct.name} fue agregado correctamente.`,
       timer: 1400,
       showConfirmButton: false,
     });
@@ -177,7 +224,27 @@ function ProductDetail() {
             </div>
           </dl>
 
-          <h2>{formatCatalogPrice(product.precio)}</h2>
+          {variants.length > 0 && (
+            <label className="product-detail-variant">
+              Variante
+              <select
+                value={selectedVariantId}
+                onChange={(event) => setSelectedVariantId(event.target.value)}
+              >
+                {variants.map((variant) => (
+                  <option
+                    key={variant.idVariante}
+                    value={variant.idVariante}
+                    disabled={!variant.estaDisponible}
+                  >
+                    {variant.nombreVariante} - {formatCatalogPrice(variant.precio)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
+          <h2>{formatCatalogPrice(selectedVariant?.precio ?? product.precio)}</h2>
 
           <button className="btn" type="button" onClick={handleAddToCart}>
             Agregar al carrito

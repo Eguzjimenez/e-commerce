@@ -2,22 +2,25 @@ import "./AdminProducts.css";
 import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
+import PaginationControls from "../../components/PaginationControls/PaginationControls";
 import {
   getCatalogCategories,
   getCatalogProducts,
   getCatalogTypes,
 } from "../../services/catalogService";
-import { createProduct, deleteProduct, updateProduct } from "../../services/productService";
+import { createProduct, deleteProduct, updateProduct, uploadProductImage } from "../../services/productService";
 import {
   buildAdminProductViewModel,
   buildProductRequestPayload,
   CATALOG_FILTER_OPTIONS,
-  filterAdminProductViewModels,
   getProductFormValidation,
   handleCatalogImageCandidateFallback,
   normalizeCatalogCategories,
   normalizeCatalogTypes,
 } from "../../services/catalogPresentationService";
+import { DEFAULT_PAGINATION, normalizePaginatedResponse } from "../../services/paginationService";
+
+const ADMIN_PRODUCTS_PAGE_SIZE = 9;
 
 const EMPTY_PRODUCT_FORM = {
   idProducto: null,
@@ -39,40 +42,74 @@ function AdminProducts() {
   const [categoryList, setCategoryList] = useState([]);
   const [typeList, setTypeList] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Todas");
+  const [selectedCategoryId, setSelectedCategoryId] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewProduct, setViewProduct] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [modalMode, setModalMode] = useState("add");
+  const [productPage, setProductPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    ...DEFAULT_PAGINATION,
+    pageSize: ADMIN_PRODUCTS_PAGE_SIZE,
+  });
 
   const [newProduct, setNewProduct] = useState(EMPTY_PRODUCT_FORM);
 
   useEffect(() => {
-    loadData();
+    loadLookups();
   }, []);
 
-  const loadData = async () => {
-    setLoading(true);
-    setError("");
+  useEffect(() => {
+    loadProducts(productPage);
+  }, [productPage, searchTerm, selectedCategoryId]);
 
+  const loadLookups = async () => {
     try {
-      const [productsResponse, categoriesResponse, typesResponse] = await Promise.all([
-        getCatalogProducts(),
+      const [categoriesResponse, typesResponse] = await Promise.all([
         getCatalogCategories(),
         getCatalogTypes(),
       ]);
 
-      setProductList(Array.isArray(productsResponse) ? productsResponse : []);
       setCategoryList(Array.isArray(categoriesResponse) ? categoriesResponse : []);
       setTypeList(Array.isArray(typesResponse) ? typesResponse : []);
     } catch (loadError) {
-      setError(loadError.message || "No se pudieron cargar los productos.");
-      setProductList([]);
+      setError(loadError.message || "No se pudieron cargar los catalogos.");
       setCategoryList([]);
       setTypeList([]);
+    }
+  };
+
+  const loadProducts = async (page = productPage) => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const productsResponse = await getCatalogProducts({
+        searchTerm,
+        categoryId: selectedCategoryId === "all" ? undefined : selectedCategoryId,
+        page,
+        pageSize: ADMIN_PRODUCTS_PAGE_SIZE,
+      });
+      const pagedProducts = normalizePaginatedResponse(
+        productsResponse,
+        page,
+        ADMIN_PRODUCTS_PAGE_SIZE
+      );
+
+      setProductList(pagedProducts.items);
+      setPagination(pagedProducts);
+    } catch (loadError) {
+      setError(loadError.message || "No se pudieron cargar los productos.");
+      setProductList([]);
+      setPagination({
+        ...DEFAULT_PAGINATION,
+        pageNumber: page,
+        pageSize: ADMIN_PRODUCTS_PAGE_SIZE,
+      });
     } finally {
       setLoading(false);
     }
@@ -93,14 +130,9 @@ function AdminProducts() {
     [productList, normalizedCategories]
   );
 
-  const categories = [
-    "Todas",
-    ...new Set(products.map((product) => product.category))
-  ];
-
   const filteredProducts = useMemo(() => {
-    return filterAdminProductViewModels(products, searchTerm, selectedCategory);
-  }, [products, searchTerm, selectedCategory]);
+    return products;
+  }, [products]);
 
   const handleImageFallback = (event, imageCandidates) => {
     handleCatalogImageCandidateFallback(event, imageCandidates);
@@ -158,6 +190,40 @@ function AdminProducts() {
     }));
   };
 
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setImageUploading(true);
+
+    try {
+      const imagePath = await uploadProductImage(file);
+      setNewProduct((previous) => ({
+        ...previous,
+        imagen: imagePath,
+      }));
+
+      await Swal.fire({
+        icon: "success",
+        title: "Imagen cargada",
+        text: "La imagen se cargo correctamente.",
+        timer: 1400,
+        showConfirmButton: false,
+      });
+    } catch (uploadError) {
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo cargar la imagen",
+        text: uploadError.message || "Verifica el archivo seleccionado.",
+      });
+    } finally {
+      setImageUploading(false);
+      event.target.value = "";
+    }
+  };
+
   const handleSaveProduct = async (event) => {
     event.preventDefault();
 
@@ -194,7 +260,8 @@ function AdminProducts() {
         showConfirmButton: false,
       });
 
-      loadData().catch(() => {
+      setProductPage(1);
+      loadProducts(1).catch(() => {
         // Si falla la recarga, se muestra error en pantalla principal.
       });
     } catch (createError) {
@@ -233,7 +300,7 @@ function AdminProducts() {
         title: "Producto eliminado",
         text: "El producto fue eliminado correctamente.",
       });
-      await loadData();
+      await loadProducts(productPage);
     } catch (deleteError) {
       await Swal.fire({
         icon: "error",
@@ -253,17 +320,24 @@ function AdminProducts() {
               placeholder="Buscar producto"
               className="admin-products-search"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setProductPage(1);
+              }}
             />
 
             <select
               className="admin-products-select"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              value={selectedCategoryId}
+              onChange={(e) => {
+                setSelectedCategoryId(e.target.value);
+                setProductPage(1);
+              }}
             >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
+              <option value="all">Todas</option>
+              {normalizedCategories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
                 </option>
               ))}
             </select>
@@ -275,6 +349,10 @@ function AdminProducts() {
         </div>
 
         {error && <div className="admin-products-error">{error}</div>}
+
+        <p className="admin-products-count">
+          {pagination.totalItems} producto{pagination.totalItems !== 1 ? "s" : ""} encontrado{pagination.totalItems !== 1 ? "s" : ""}
+        </p>
 
         <div className="admin-products-grid">
           {loading && (
@@ -336,6 +414,14 @@ function AdminProducts() {
             </div>
           )}
         </div>
+
+        {!loading && !error && pagination.totalItems > ADMIN_PRODUCTS_PAGE_SIZE && (
+          <PaginationControls
+            pagination={pagination}
+            isLoading={loading}
+            onPageChange={setProductPage}
+          />
+        )}
 
         {showAddModal && (
           <div className="admin-modal-backdrop" onClick={closeAddModal}>
@@ -505,12 +591,22 @@ function AdminProducts() {
                   />
                 </label>
 
+                <label>
+                  Cargar imagen
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    onChange={handleImageUpload}
+                    disabled={imageUploading || saving}
+                  />
+                </label>
+
                 <div className="admin-modal-actions">
                   <button type="button" className="admin-product-btn secondary" onClick={closeAddModal} disabled={saving}>
                     Cancelar
                   </button>
-                  <button type="submit" className="admin-product-btn" disabled={saving}>
-                    {saving ? (modalMode === "edit" ? "Actualizando..." : "Guardando...") : (modalMode === "edit" ? "Actualizar" : "Registrar producto")}
+                  <button type="submit" className="admin-product-btn" disabled={saving || imageUploading}>
+                    {imageUploading ? "Cargando imagen..." : (saving ? (modalMode === "edit" ? "Actualizando..." : "Guardando...") : (modalMode === "edit" ? "Actualizar" : "Registrar producto"))}
                   </button>
                 </div>
               </form>

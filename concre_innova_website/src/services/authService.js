@@ -54,7 +54,7 @@ export async function login({ correo, contrasena }) {
     correo,
     idUsuario: data?.idUsuario ?? null,
     idRol: data?.idRol ?? null,
-    nombreRol: ROL_ID_MAP[data?.idRol] ?? null,
+    nombreRol: data?.nombreRol || ROL_ID_MAP[data?.idRol] || null,
     token,
     codigo: data?.codigo,
     mensaje: data?.mensaje,
@@ -82,10 +82,26 @@ export async function validateEmail(correo) {
   });
 }
 
-export async function resetPassword({ idUsuario, nuevaContrasena }) {
+export async function requestPasswordResetCode(correo) {
+  return await request("/api/Auth/generate-recovery-token", {
+    method: "POST",
+    body: { correo },
+    skipAuthHeaders: true,
+  });
+}
+
+export async function verifyRecoveryCode({ correo, codigo }) {
+  return await request("/api/Auth/verify-recovery-code", {
+    method: "POST",
+    body: { correo, codigo },
+    skipAuthHeaders: true,
+  });
+}
+
+export async function resetPassword({ recoveryToken, nuevaContrasena }) {
   return await request("/api/Auth/reset-password", {
     method: "POST",
-    body: { idUsuario, nuevaContrasena },
+    body: { recoveryToken, nuevaContrasena },
     skipAuthHeaders: true,
   });
 }
@@ -119,7 +135,7 @@ export function isVendor() {
 
 export function isLoggedIn() {
   const auth = getAuth();
-  return Boolean(auth?.codigo === 1 && auth?.idUsuario && auth?.idRol !== 4);
+  return Boolean(auth?.codigo === 1 && auth?.idUsuario && auth?.idRol !== 4 && auth?.token);
 }
 
 export async function verifyStoredRecoveryToken() {

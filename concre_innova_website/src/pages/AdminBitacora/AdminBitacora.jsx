@@ -1,15 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
+import PaginationControls from "../../components/PaginationControls/PaginationControls";
 import { getBitacora } from "../../services/bitacoraService";
+import { DEFAULT_PAGINATION, normalizePaginatedResponse } from "../../services/paginationService";
 import "./AdminBitacora.css";
+
+const BITACORA_PAGE_SIZE = 50;
 
 // Etiquetas con color por tipo de operación
 const OPERACION_BADGE = {
   LOGIN:       { label: "Login",       color: "badge-blue"   },
+  LOGIN_SUCCESS: { label: "Login exitoso", color: "badge-blue" },
+  LOGIN_FAILED: { label: "Login fallido", color: "badge-red" },
   INSERT:      { label: "Inserción",   color: "badge-green"  },
   UPDATE:      { label: "Actualización", color: "badge-yellow" },
   DELETE:      { label: "Eliminación", color: "badge-red"    },
   ACCESS_DENY: { label: "Acceso denegado", color: "badge-red" },
+  DENIED:      { label: "Acceso denegado", color: "badge-red" },
 };
 
 function getBadge(operacion) {
@@ -32,38 +39,54 @@ function AdminBitacora() {
   const [error, setError]             = useState("");
   const [searchTerm, setSearchTerm]   = useState("");
   const [filterOp, setFilterOp]       = useState("Todos");
+  const [bitacoraPage, setBitacoraPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    ...DEFAULT_PAGINATION,
+    pageSize: BITACORA_PAGE_SIZE,
+  });
 
   useEffect(() => {
-    loadBitacora();
-  }, []);
+    loadBitacora(bitacoraPage);
+  }, [bitacoraPage, searchTerm, filterOp]);
 
-  const loadBitacora = async () => {
+  const loadBitacora = async (page = bitacoraPage) => {
     setLoading(true);
     setError("");
     try {
-      const data = await getBitacora();
-      setRegistros(Array.isArray(data) ? data : []);
+      const data = await getBitacora({
+        page,
+        pageSize: BITACORA_PAGE_SIZE,
+        searchTerm,
+        operation: filterOp === "Todos" ? undefined : filterOp,
+      });
+      const pagedBitacora = normalizePaginatedResponse(
+        data,
+        page,
+        BITACORA_PAGE_SIZE
+      );
+
+      setRegistros(pagedBitacora.items);
+      setPagination(pagedBitacora);
     } catch (err) {
       setError(err.message || "No se pudo cargar la bitácora.");
+      setRegistros([]);
+      setPagination({
+        ...DEFAULT_PAGINATION,
+        pageNumber: page,
+        pageSize: BITACORA_PAGE_SIZE,
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const operaciones = useMemo(() => {
-    const ops = [...new Set(registros.map((r) => r.operacion).filter(Boolean))];
-    return ops;
+    return [...new Set([...Object.keys(OPERACION_BADGE), ...registros.map((r) => r.operacion).filter(Boolean)])];
   }, [registros]);
 
   const filtered = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-    return registros.filter((r) => {
-      const matchSearch = [r.correo, r.nombreUsuario, r.tablaAfectada, r.descripcion, r.ipUsuario]
-        .join(" ").toLowerCase().includes(term);
-      const matchOp = filterOp === "Todos" || r.operacion === filterOp;
-      return matchSearch && matchOp;
-    });
-  }, [registros, searchTerm, filterOp]);
+    return registros;
+  }, [registros]);
 
   return (
     <AdminLayout title="Bitácora de Actividad">
@@ -77,12 +100,18 @@ function AdminBitacora() {
               type="text"
               placeholder="Buscar por usuario, tabla, descripción..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setBitacoraPage(1);
+              }}
             />
             <select
               className="bitacora-op-filter"
               value={filterOp}
-              onChange={(e) => setFilterOp(e.target.value)}
+              onChange={(e) => {
+                setFilterOp(e.target.value);
+                setBitacoraPage(1);
+              }}
             >
               <option value="Todos">Todas las operaciones</option>
               {operaciones.map((op) => (
@@ -90,14 +119,14 @@ function AdminBitacora() {
               ))}
             </select>
           </div>
-          <button className="bitacora-refresh-btn" onClick={loadBitacora}>
+          <button className="bitacora-refresh-btn" onClick={() => loadBitacora(bitacoraPage)}>
             Actualizar
           </button>
         </div>
 
         {/* Contador */}
         <p className="bitacora-count">
-          {filtered.length} registro{filtered.length !== 1 ? "s" : ""} encontrado{filtered.length !== 1 ? "s" : ""}
+          {pagination.totalItems} registro{pagination.totalItems !== 1 ? "s" : ""} encontrado{pagination.totalItems !== 1 ? "s" : ""}
         </p>
 
         {/* Error */}
@@ -150,6 +179,14 @@ function AdminBitacora() {
             </tbody>
           </table>
         </div>
+
+        {!loading && !error && pagination.totalItems > BITACORA_PAGE_SIZE && (
+          <PaginationControls
+            pagination={pagination}
+            isLoading={loading}
+            onPageChange={setBitacoraPage}
+          />
+        )}
       </div>
     </AdminLayout>
   );

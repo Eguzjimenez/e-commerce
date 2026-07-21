@@ -1,11 +1,9 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import { getCatalogProducts } from "../../services/catalogService";
 import { addToCart } from "../../services/cartService";
 import {
   getFavorites,
-  mergeFavoritesWithCatalog,
   removeFavorite,
 } from "../../services/favoriteService";
 import {
@@ -28,18 +26,15 @@ function Favorites() {
       setIsLoading(true);
       setError("");
 
-      const storedFavorites = getFavorites();
-
       try {
-        const catalogProducts = await getCatalogProducts();
-        const currentFavorites = mergeFavoritesWithCatalog(storedFavorites, catalogProducts);
+        const currentFavorites = await getFavorites();
 
         if (isMounted) {
           setFavorites(currentFavorites);
         }
       } catch (loadError) {
         if (isMounted) {
-          setFavorites(storedFavorites);
+          setFavorites([]);
           setError(loadError.message || "No se pudieron actualizar los favoritos.");
         }
       } finally {
@@ -51,8 +46,19 @@ function Favorites() {
 
     loadFavorites();
 
-    const handleFavoritesChange = () => {
-      setFavorites(getFavorites());
+    const handleFavoritesChange = async (event) => {
+      const changedProductId = Number(event.detail?.idProducto);
+
+      if (changedProductId && event.detail?.isFavorite === false) {
+        setFavorites((currentFavorites) =>
+          currentFavorites.filter(
+            (favorite) => Number(favorite.idProducto) !== changedProductId
+          )
+        );
+        return;
+      }
+
+      setFavorites(await getFavorites());
     };
 
     window.addEventListener("favoriteschange", handleFavoritesChange);
@@ -76,8 +82,12 @@ function Favorites() {
   };
 
   const handleRemoveFavorite = async (product) => {
-    const nextFavorites = removeFavorite(product.idProducto);
-    setFavorites(nextFavorites);
+    await removeFavorite(product.idProducto);
+    setFavorites((currentFavorites) =>
+      currentFavorites.filter(
+        (favorite) => Number(favorite.idProducto) !== Number(product.idProducto)
+      )
+    );
 
     await Swal.fire({
       icon: "success",
