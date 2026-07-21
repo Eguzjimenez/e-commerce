@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ADMIN_ROUTES, PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 import { getAuth, getUserRole, isLoggedIn, logout } from "../../services/authService";
-import { isStaffRole } from "../../constants/roleAccess";
+import { isAdminRole } from "../../constants/roleAccess";
 import { getCartCount } from "../../services/cartService";
 import { getFavoriteCountAsync } from "../../services/favoriteService";
 
@@ -50,7 +50,7 @@ function Navbar() {
 
   const authenticated = isLoggedIn() && auth;
   const userRole = getUserRole();
-  const staff = isStaffRole(userRole);
+  const admin = isAdminRole(userRole);
 
   return (
     <nav className="navbar">
@@ -87,7 +87,7 @@ function Navbar() {
               Mis Favoritos{favoriteCount > 0 ? ` (${favoriteCount})` : ""}
             </Link>
           </li>
-          {staff && (
+          {admin && (
             <li>
               <Link to={ADMIN_ROUTES.DASHBOARD}>Panel</Link>
             </li>

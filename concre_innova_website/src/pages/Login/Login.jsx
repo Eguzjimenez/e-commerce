@@ -5,7 +5,7 @@ import "sweetalert2/dist/sweetalert2.min.css";
 import { login as loginUser } from "../../services/authService";
 import { ADMIN_ROUTES } from "../../routes/routes";
 import "./Login.css";
-import { isStaffRole } from "../../constants/roleAccess";
+import { isAdminRole } from "../../constants/roleAccess";
 
 function Login() {
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ function Login() {
 
       const requestedPath = location.state?.from?.pathname;
 
-      if (isStaffRole(auth.nombreRol)) {
+      if (isAdminRole(auth.nombreRol)) {
         navigate(requestedPath?.startsWith("/admin") ? requestedPath : ADMIN_ROUTES.DASHBOARD);
       } else if (requestedPath && !requestedPath.startsWith("/admin")) {
         navigate(requestedPath);
