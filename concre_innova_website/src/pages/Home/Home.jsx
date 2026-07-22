@@ -6,8 +6,8 @@ import { PUBLIC_ROUTES } from "../../routes/routes";
 import ProductModal from "../../components/ProductModal/ProductModal";
 import { getCatalogProducts } from "../../services/catalogService";
 import { addToCart } from "../../services/cartService";
-import heroBotanicalImage from "../../img/figma-hero-botanical.png";
-import macetaNoirImage from "../../img/figma-maceta-noir.png";
+import heroBotanicalImage from "../../img/Hero-background.png";
+import macetaNoirImage from "../../img/Maceta-Negra.jpg";
 import {
   buildCatalogModalProduct,
   formatCatalogPrice,
