@@ -82,6 +82,11 @@ function Navbar() {
               Carrito{cartCount > 0 ? ` (${cartCount})` : ""}
             </Link>
           </li>
+          {authenticated && (
+            <li>
+              <Link to={PRIVATE_ROUTES.MY_ORDERS}>Mis pedidos</Link>
+            </li>
+          )}
           <li>
             <Link to={PUBLIC_ROUTES.FAVORITES}>
               Mis Favoritos{favoriteCount > 0 ? ` (${favoriteCount})` : ""}

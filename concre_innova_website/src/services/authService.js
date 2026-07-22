@@ -53,6 +53,12 @@ export async function login({ correo, contrasena }) {
   const auth = {
     correo,
     idUsuario: data?.idUsuario ?? null,
+    idCliente:
+      data?.idCliente ??
+      data?.cliente?.idCliente ??
+      data?.data?.idCliente ??
+      data?.usuario?.idCliente ??
+      null,
     idRol: data?.idRol ?? null,
     nombreRol: data?.nombreRol || ROL_ID_MAP[data?.idRol] || null,
     token,
@@ -122,6 +128,19 @@ export function getAuth() {
 
 export function getUserId() {
   return getAuth()?.idUsuario ?? null;
+}
+
+export function getClientId() {
+  const auth = getAuth();
+
+  return (
+    auth?.idCliente ??
+    auth?.cliente?.idCliente ??
+    auth?.data?.idCliente ??
+    auth?.usuario?.idCliente ??
+    auth?.idUsuario ??
+    null
+  );
 }
 
 export function getUserRole() {
