@@ -11,8 +11,8 @@
   --petal: #cbb6a0;
   --sand: #efe7d7;
   --bark: #302c25;
-  --muted-figma: #5f5749;
-  --soft-figma: #6b604d;
+  --muted-warm: #5f5749;
+  --soft-warm: #6b604d;
   --line: #ded6c7;
   --line-strong: #d8d0bf;
 
@@ -28,8 +28,8 @@
   --cream-50: var(--paper);
   --cream-100: var(--linen);
   --ink: var(--soil-black);
-  --muted: var(--muted-figma);
-  --soft: var(--soft-figma);
+  --muted: var(--muted-warm);
+  --soft: var(--soft-warm);
   --terracotta: var(--clay);
   --terracotta-dark: #845232;
   --flower: var(--petal);
