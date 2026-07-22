@@ -1,6 +1,7 @@
 import "./Checkout.css";
 import { useEffect, useMemo, useState } from "react";
 import { clearCart, getCart } from "../../services/cartService";
+import { formatCatalogPrice } from "../../services/catalogPresentationService";
 
 function Checkout() {
   const [mensajeExito, setMensajeExito] = useState("");
@@ -18,15 +19,10 @@ function Checkout() {
   }, [productos]);
 
   const finalizarCompra = () => {
-    // Limpia el carrito
     clearCart();
-
-    // Limpia el resumen
     setProductos([]);
-
-    // Muestra el mensaje solicitado
     setMensajeExito(
-      "✅ Compra realizada correctamente. El procedimiento ha concluido de forma adecuada dentro de la plataforma."
+      "Compra realizada correctamente. El procedimiento ha concluido de forma adecuada dentro de la plataforma."
     );
   };
 
@@ -39,67 +35,50 @@ function Checkout() {
           <p>Completa la informacion para finalizar tu compra.</p>
         </div>
 
-        {/* NUEVO - Resumen de productos */}
+        <section className="checkout-summary" aria-label="Resumen de compra">
+          <h3>Resumen de compra</h3>
 
-        <h3>Resumen de compra</h3>
-
-        {productos.length === 0 ? (
-          <p>No hay productos en el carrito.</p>
-        ) : (
-          <>
-            {productos.map((producto) => (
-              <div
-                key={producto.idProducto}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "8px",
-                }}
-              >
-                <span>
-                  {producto.nombre} x{producto.cantidad}
-                </span>
-
-                <span>
-                  $
-                  {(Number(producto.precio) * Number(producto.cantidad)).toFixed(
-                    2
-                  )}
-                </span>
+          {productos.length === 0 ? (
+            <p>No hay productos en el carrito.</p>
+          ) : (
+            <>
+              <div className="checkout-summary-list">
+                {productos.map((producto) => (
+                  <div className="checkout-summary-item" key={producto.idProducto}>
+                    <span>
+                      {producto.nombre} x{producto.cantidad}
+                    </span>
+                    <span>
+                      {formatCatalogPrice(
+                        Number(producto.precio) * Number(producto.cantidad)
+                      )}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
 
-            <hr />
+              <div className="checkout-summary-total">
+                <span>Total</span>
+                <strong>{formatCatalogPrice(total)}</strong>
+              </div>
+            </>
+          )}
+        </section>
 
-            <h3>Total: ${total.toFixed(2)}</h3>
-          </>
-        )}
-
-        {/* FIN NUEVO */}
-
-        <input className="input" placeholder="Nombre" />
-        <input className="input" placeholder="Tarjeta" />
-        <input className="input" placeholder="Direccion" />
+        <div className="checkout-form-fields">
+          <input className="input" placeholder="Nombre" />
+          <input className="input" placeholder="Tarjeta" />
+          <input className="input" placeholder="Direccion" />
+        </div>
 
         <button className="btn" onClick={finalizarCompra}>
           Finalizar compra
         </button>
 
-        {mensajeExito && (
-          <p
-            style={{
-              color: "green",
-              marginTop: "15px",
-              fontWeight: "bold",
-            }}
-          >
-            {mensajeExito}
-          </p>
-        )}
+        {mensajeExito && <p className="checkout-success">{mensajeExito}</p>}
       </div>
     </div>
   );
 }
-
 
 export default Checkout;

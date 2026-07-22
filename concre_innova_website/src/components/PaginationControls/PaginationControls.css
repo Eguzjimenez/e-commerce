@@ -4,12 +4,12 @@
   flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
 .pagination-controls button {
-  border: 0;
-  border-radius: 10px;
+  border: 1px solid var(--forest-ink);
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 800;
   min-height: 38px;
@@ -18,13 +18,19 @@
 }
 
 .pagination-controls button:not(:disabled) {
-  background: var(--terracotta);
-  color: #ffffff;
+  background: var(--forest-ink);
+  color: var(--paper);
+}
+
+.pagination-controls button:not(:disabled):hover {
+  background: var(--clay);
+  border-color: var(--clay);
 }
 
 .pagination-controls button:disabled {
-  background: rgba(148, 163, 184, 0.22);
-  color: #94a3b8;
+  background: #f0eee7;
+  border-color: var(--line);
+  color: var(--soft);
   cursor: not-allowed;
 }
 

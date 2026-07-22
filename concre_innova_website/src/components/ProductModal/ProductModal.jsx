@@ -1,5 +1,6 @@
 import "./ProductModal.css";
 import { useState } from "react";
+import { formatCatalogPrice } from "../../services/catalogPresentationService";
 
 function ProductModal({ product, mode, onClose, onAddToCart, onRemoveFromCart }) {
   const [currentImg, setCurrentImg] = useState(0);
@@ -53,11 +54,11 @@ function ProductModal({ product, mode, onClose, onAddToCart, onRemoveFromCart })
         </div>
 
         <span className="product-category">Interior | Decoracion</span>
-        <h2>{product.name}</h2>
+        <h2>{productName}</h2>
         <p>{product.description || "Maseta color negro"}</p>
         <p className={`product-availability ${availabilityClass}`}>{availabilityText}</p>
 
-        <h3>${product.price}</h3>
+        <h3>{formatCatalogPrice(product.price)}</h3>
 
         {isCart ? (
           <button className="btn btn-danger" onClick={() => onRemoveFromCart?.(product)}>

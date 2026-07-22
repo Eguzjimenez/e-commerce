@@ -1,53 +1,116 @@
 .checkout-page {
-  min-height: calc(100vh - 140px);
+  min-height: calc(100vh - 128px);
   display: grid;
   place-items: center;
   margin-top: 0;
   margin-bottom: 0;
+  padding-top: 56px;
+  padding-bottom: 72px;
 }
 
 .checkout-card {
-  width: min(520px, 100%);
+  width: min(620px, 100%);
   background: var(--paper);
-  border: 1px solid rgba(15, 27, 45, 0.07);
-  border-radius: 26px;
-  padding: 34px;
-  box-shadow: var(--shadow-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: clamp(28px, 5vw, 42px);
 }
 
 .checkout-heading {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .checkout-eyebrow {
   display: inline-flex;
-  color: var(--forest-600);
-  background: var(--sage-100);
-  border-radius: 999px;
-  padding: 7px 12px;
-  font-size: 0.8rem;
-  font-weight: 800;
   margin-bottom: 14px;
 }
 
 .checkout-heading h1 {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   color: var(--ink);
-  font-size: 2.35rem;
+  font-size: clamp(3rem, 6vw, 4rem);
+  line-height: 0.98;
 }
 
 .checkout-heading p {
   margin: 0;
   color: var(--muted);
+  line-height: 1.6;
+}
+
+.checkout-summary {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 24px;
+  padding: 22px 0;
+}
+
+.checkout-summary h3 {
+  color: var(--ink);
+  font-size: 1.9rem;
+  line-height: 1;
+  margin: 0 0 18px;
+}
+
+.checkout-summary p {
+  margin: 0;
+}
+
+.checkout-summary-list {
+  display: grid;
+  gap: 10px;
+}
+
+.checkout-summary-item,
+.checkout-summary-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.checkout-summary-item {
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+
+.checkout-summary-total {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  margin-top: 18px;
+  padding-top: 18px;
+}
+
+.checkout-summary-total span {
+  color: var(--soft);
+  font-weight: 700;
+}
+
+.checkout-summary-total strong {
+  color: var(--forest-ink);
+  font-size: 1.25rem;
+}
+
+.checkout-form-fields {
+  display: grid;
+  gap: 14px;
 }
 
 .checkout-card .input {
   width: 100%;
-  padding: 14px 16px;
-  margin-bottom: 14px;
+  min-height: 48px;
+  padding: 0 16px;
 }
 
 .checkout-card .btn {
   width: 100%;
-  margin-top: 8px;
+  margin-top: 20px;
+}
+
+.checkout-success {
+  background: rgba(37, 108, 61, 0.1);
+  border: 1px solid rgba(37, 108, 61, 0.18);
+  color: var(--success);
+  font-weight: 700;
+  margin: 16px 0 0;
+  padding: 12px 14px;
 }

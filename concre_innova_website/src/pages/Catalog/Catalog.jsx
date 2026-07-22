@@ -1,26 +1,21 @@
-import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Heart, SlidersHorizontal, X } from "lucide-react";
 import Swal from "sweetalert2";
 import {
   getCatalogFilters,
   getCatalogProducts,
 } from "../../services/catalogService";
 import PaginationControls from "../../components/PaginationControls/PaginationControls";
-import { addToCart, getCart } from "../../services/cartService";
 import {
   getFavoriteProductIdsAsync,
   toggleFavorite,
 } from "../../services/favoriteService";
 import {
-  buildCatalogModalProduct,
   CATALOG_FILTER_OPTIONS,
   filterAndSortCatalogProducts,
   formatCatalogPrice,
   getCatalogQueryOptions,
-  getCatalogProductAttributeText,
-  getCatalogProductAvailabilityClass,
-  getCatalogProductAvailabilityText,
-  getCatalogProductCategoryName,
   getCatalogProductImage,
   handleCatalogImageFallback,
   normalizeCatalogCategories,
@@ -28,10 +23,16 @@ import {
   PRODUCT_SORT_OPTIONS,
 } from "../../services/catalogPresentationService";
 import { DEFAULT_PAGINATION, normalizePaginatedResponse } from "../../services/paginationService";
-import { buildProductDetailRoute, PRIVATE_ROUTES } from "../../routes/routes";
+import { buildProductDetailRoute } from "../../routes/routes";
 import "./Catalog.css";
 
 const CATALOG_PAGE_SIZE = 9;
+
+const CATALOG_SORT_FILTER_OPTIONS = [
+  { value: PRODUCT_SORT_OPTIONS.NONE, label: "Orden original" },
+  { value: PRODUCT_SORT_OPTIONS.PRICE_ASC, label: "Precio menor a mayor" },
+  { value: PRODUCT_SORT_OPTIONS.PRICE_DESC, label: "Precio mayor a menor" },
+];
 
 function isAbortError(error) {
   return error?.name === "AbortError";
@@ -49,10 +50,12 @@ function getCatalogFilterPriceBounds(filterResponse) {
 
 function Catalog() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialSearchTerm = new URLSearchParams(location.search).get("search") || "";
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [productTypes, setProductTypes] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [selectedCategoryId, setSelectedCategoryId] = useState("all");
   const [selectedSortOrder, setSelectedSortOrder] = useState(PRODUCT_SORT_OPTIONS.NONE);
   const [selectedMinPrice, setSelectedMinPrice] = useState(0);
@@ -62,8 +65,8 @@ function Catalog() {
   const [selectedMaterial, setSelectedMaterial] = useState("all");
   const [selectedTypeId, setSelectedTypeId] = useState("all");
   const [priceBounds, setPriceBounds] = useState({ min: 0, max: 0 });
-  const [cartItems, setCartItems] = useState([]);
   const [favoriteProductIds, setFavoriteProductIds] = useState(new Set());
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [filtersReady, setFiltersReady] = useState(false);
@@ -117,6 +120,27 @@ function Catalog() {
   }, []);
 
   useEffect(() => {
+    const nextSearchTerm = new URLSearchParams(location.search).get("search") || "";
+    setSearchTerm(nextSearchTerm);
+    setCatalogPage(1);
+  }, [location.search]);
+
+  useEffect(() => {
+    if (!filterDrawerOpen) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setFilterDrawerOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [filterDrawerOpen]);
+
+  useEffect(() => {
     if (!filtersReady) {
       return undefined;
     }
@@ -131,16 +155,16 @@ function Catalog() {
 
       try {
         const queryOptions = getCatalogQueryOptions({
-            searchTerm,
-            selectedSortOrder,
-            selectedCategoryId,
-            selectedMinPrice,
-            selectedMaxPrice,
-            selectedAvailability,
-            selectedSize,
-            selectedMaterial,
-            selectedTypeId,
-            priceBounds,
+          searchTerm,
+          selectedSortOrder,
+          selectedCategoryId,
+          selectedMinPrice,
+          selectedMaxPrice,
+          selectedAvailability,
+          selectedSize,
+          selectedMaterial,
+          selectedTypeId,
+          priceBounds,
         });
         const productsResponse = await getCatalogProducts({
           ...queryOptions,
@@ -198,17 +222,6 @@ function Catalog() {
   ]);
 
   useEffect(() => {
-    const syncCart = () => {
-      setCartItems(getCart());
-    };
-
-    syncCart();
-    window.addEventListener("cartchange", syncCart);
-
-    return () => window.removeEventListener("cartchange", syncCart);
-  }, []);
-
-  useEffect(() => {
     const syncFavorites = async () => {
       try {
         const favoriteIds = await getFavoriteProductIdsAsync();
@@ -247,17 +260,6 @@ function Catalog() {
       ? "Todos"
       : normalizedCategories.find((category) => category.id === selectedCategoryId)?.name ||
         "Categoria";
-
-  const cartSubtotal = useMemo(
-    () =>
-      cartItems.reduce(
-        (total, item) => total + (Number(item.precio) || 0) * (Number(item.cantidad) || 1),
-        0
-      ),
-    [cartItems]
-  );
-
-  const cartPreview = cartItems.slice(0, 3);
 
   const priceRangeSpan = Math.max(priceBounds.max - priceBounds.min, 1);
   const minPercent = ((selectedMinPrice - priceBounds.min) / priceRangeSpan) * 100;
@@ -319,216 +321,28 @@ function Catalog() {
     });
   };
 
-  const handleAddToCart = async (product) => {
-    addToCart(product, 1);
-
-    await Swal.fire({
-      icon: "success",
-      title: "Agregado al carrito",
-      text: `${product.nombre || product.name} fue agregado correctamente.`,
-      timer: 1400,
-      showConfirmButton: false,
-    });
-  };
-
   return (
     <div className="catalog-page catalog-shop">
-      <section className="catalog-shop-header">
+      <section className="catalog-collection-header" aria-labelledby="catalog-title">
         <div>
-          <h1>Catalogo</h1>
-          <p>Filtros visibles, busqueda clara y carrito persistente.</p>
+          <span className="catalog-collection-kicker">{activeCategoryName}</span>
+          <h1 id="catalog-title">
+            Catalogo <span>({pagination.totalItems})</span>
+          </h1>
         </div>
 
-        <form
-          className="catalog-shop-search-form"
-          onSubmit={(event) => event.preventDefault()}
+        <button
+          type="button"
+          className="catalog-filter-trigger"
+          onClick={() => setFilterDrawerOpen(true)}
         >
-          <input
-            className="input catalog-shop-search"
-            placeholder="Buscar plantas, flores o macetas"
-            value={searchTerm}
-            onChange={(event) => {
-              setSearchTerm(event.target.value);
-              setCatalogPage(1);
-            }}
-          />
-          <button type="submit">Buscar</button>
-        </form>
+          <SlidersHorizontal size={21} strokeWidth={1.8} aria-hidden="true" />
+          Filtro
+        </button>
       </section>
 
-      <section className="catalog-shop-layout">
-        <aside className="catalog-filter-panel" aria-label="Filtros de catalogo">
-          <h2>Filtros</h2>
-
-          <div className="catalog-filter-list" role="radiogroup" aria-label="Categoria">
-            <button
-              type="button"
-              className={selectedCategoryId === "all" ? "active" : ""}
-              onClick={() => {
-                setSelectedCategoryId("all");
-                setCatalogPage(1);
-              }}
-            >
-              <span />
-              Todas
-            </button>
-
-            {normalizedCategories.map((category) => (
-              <button
-                type="button"
-                key={category.id}
-                className={selectedCategoryId === category.id ? "active" : ""}
-                onClick={() => {
-                  setSelectedCategoryId(category.id);
-                  setCatalogPage(1);
-                }}
-              >
-                <span />
-                {category.name}
-              </button>
-            ))}
-          </div>
-
-          <div className="catalog-price-filter">
-            <strong>Rango de precio</strong>
-            <div className="catalog-price-slider">
-              <div className="catalog-price-slider-track" />
-              <div
-                className="catalog-price-slider-range"
-                style={{
-                  left: `${minPercent}%`,
-                  right: `${100 - maxPercent}%`,
-                }}
-              />
-
-              <input
-                className="catalog-range-input catalog-range-input--min"
-                type="range"
-                min={priceBounds.min}
-                max={priceBounds.max}
-                step="1"
-                value={selectedMinPrice}
-                onChange={handleMinPriceChange}
-                aria-label="Precio minimo"
-              />
-
-              <input
-                className="catalog-range-input catalog-range-input--max"
-                type="range"
-                min={priceBounds.min}
-                max={priceBounds.max}
-                step="1"
-                value={selectedMaxPrice}
-                onChange={handleMaxPriceChange}
-                aria-label="Precio maximo"
-              />
-            </div>
-            <p className="catalog-price-label">
-              {formatCatalogPrice(selectedMinPrice)} - {formatCatalogPrice(selectedMaxPrice)}
-            </p>
-          </div>
-
-          <div className="catalog-attribute-filter">
-            <strong>Atributos</strong>
-
-            <label>
-              Tipo
-              <select
-                value={selectedTypeId}
-                onChange={(event) => {
-                  setSelectedTypeId(event.target.value);
-                  setCatalogPage(1);
-                }}
-              >
-                <option value="all">Todos</option>
-                {normalizedProductTypes.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              Tamano
-              <select
-                value={selectedSize}
-                onChange={(event) => {
-                  setSelectedSize(event.target.value);
-                  setCatalogPage(1);
-                }}
-              >
-                {CATALOG_FILTER_OPTIONS.SIZES.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              Material
-              <select
-                value={selectedMaterial}
-                onChange={(event) => {
-                  setSelectedMaterial(event.target.value);
-                  setCatalogPage(1);
-                }}
-              >
-                {CATALOG_FILTER_OPTIONS.MATERIALS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              Disponibilidad
-              <select
-                value={selectedAvailability}
-                onChange={(event) => {
-                  setSelectedAvailability(event.target.value);
-                  setCatalogPage(1);
-                }}
-              >
-                {CATALOG_FILTER_OPTIONS.AVAILABILITY.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <button type="button" className="catalog-clear-button" onClick={clearFilters}>
-            Limpiar seleccion
-          </button>
-        </aside>
-
+      <section className="catalog-shop-layout" aria-label="Productos del catalogo">
         <div className="catalog-product-area">
-          <div className="catalog-product-toolbar">
-            <span>
-              {pagination.totalItems} producto
-              {pagination.totalItems !== 1 ? "s" : ""}
-            </span>
-            <div className="catalog-toolbar-controls">
-              <span>{activeCategoryName}</span>
-              <select
-                value={selectedSortOrder}
-                onChange={(event) => {
-                  setSelectedSortOrder(event.target.value);
-                  setCatalogPage(1);
-                }}
-                aria-label="Ordenar productos"
-              >
-                <option value={PRODUCT_SORT_OPTIONS.NONE}>Orden original</option>
-                <option value={PRODUCT_SORT_OPTIONS.PRICE_ASC}>Precio: menor a mayor</option>
-                <option value={PRODUCT_SORT_OPTIONS.PRICE_DESC}>Precio: mayor a menor</option>
-              </select>
-            </div>
-          </div>
-
           {isLoading && <p className="catalog-status">Cargando catalogo...</p>}
           {!isLoading && error && <p className="catalog-error">{error}</p>}
 
@@ -550,9 +364,6 @@ function Catalog() {
                     tabIndex={0}
                   >
                     <div className="catalog-card-visual">
-                      <span className="product-rating">
-                        {getCatalogProductAvailabilityText(product)}
-                      </span>
                       <button
                         type="button"
                         className={`catalog-favorite-button ${isFavorite ? "active" : ""}`}
@@ -564,8 +375,13 @@ function Catalog() {
                         aria-pressed={isFavorite}
                         onClick={(event) => handleToggleFavorite(event, product)}
                       >
-                        {isFavorite ? "\u2665" : "\u2661"}
+                        <Heart
+                          size={18}
+                          strokeWidth={1.8}
+                          fill={isFavorite ? "currentColor" : "none"}
+                        />
                       </button>
+
                       <img
                         src={getCatalogProductImage(product)}
                         alt={product.nombre}
@@ -575,31 +391,8 @@ function Catalog() {
                     </div>
 
                     <div className="catalog-card-body">
-                      <span className="product-category">
-                        {getCatalogProductCategoryName(product, normalizedCategories)}
-                      </span>
                       <h3>{product.nombre}</h3>
-                      <p>{product.descripcion || "Producto para interiores y exteriores."}</p>
-                      <div className="catalog-product-attributes">
-                        <span>Tamano: {getCatalogProductAttributeText(product, "tamano")}</span>
-                        <span>Material: {getCatalogProductAttributeText(product, "material")}</span>
-                      </div>
-                      <p className={`catalog-stock ${getCatalogProductAvailabilityClass(product)}`}>
-                        {getCatalogProductAvailabilityText(product)}
-                      </p>
-
-                      <div className="catalog-card-footer">
-                        <strong>{formatCatalogPrice(product.precio)}</strong>
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleAddToCart(buildCatalogModalProduct(product));
-                          }}
-                        >
-                          Agregar
-                        </button>
-                      </div>
+                      <strong>{formatCatalogPrice(product.precio)}</strong>
                     </div>
                   </article>
                 );
@@ -622,42 +415,270 @@ function Catalog() {
             />
           )}
         </div>
-
-        <aside className="catalog-cart-panel" aria-label="Resumen de carrito">
-          <div className="catalog-cart-header">
-            <h2>Carrito</h2>
-            <span>
-              {cartItems.length} producto{cartItems.length !== 1 ? "s" : ""}
-            </span>
-          </div>
-
-          <div className="catalog-cart-list">
-            {cartPreview.map((product, index) => (
-              <div className="catalog-cart-item" key={product.idProducto}>
-                <span className={`cart-color cart-color-${(index % 3) + 1}`} />
-                <div>
-                  <strong>{product.nombre}</strong>
-                  <p>{formatCatalogPrice(product.precio)}</p>
-                </div>
-              </div>
-            ))}
-
-            {cartPreview.length === 0 && (
-              <p className="catalog-cart-empty">Aun no hay productos agregados.</p>
-            )}
-          </div>
-
-          <div className="catalog-cart-total">
-            <span>Subtotal</span>
-            <strong>{formatCatalogPrice(cartSubtotal)}</strong>
-          </div>
-
-          <Link to={PRIVATE_ROUTES.CART} className="catalog-checkout-button">
-            Ver carrito
-          </Link>
-        </aside>
       </section>
 
+      {filterDrawerOpen && (
+        <div
+          className="catalog-filter-overlay"
+          aria-hidden={!filterDrawerOpen}
+          onClick={() => setFilterDrawerOpen(false)}
+        >
+          <aside
+            className="catalog-filter-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Filtros de catalogo"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="catalog-filter-drawer-header">
+              <h2>Filtros</h2>
+              <button
+                type="button"
+                className="catalog-filter-close"
+                aria-label="Cerrar filtros"
+                onClick={() => setFilterDrawerOpen(false)}
+              >
+                <X size={24} strokeWidth={1.7} />
+              </button>
+            </div>
+
+            <form
+              className="catalog-filter-content"
+              onSubmit={(event) => {
+                event.preventDefault();
+                setFilterDrawerOpen(false);
+              }}
+            >
+              <div className="catalog-filter-scroll">
+                <section className="catalog-filter-section">
+                  <div className="catalog-filter-section-heading">
+                    <span>Busqueda</span>
+                  </div>
+                  <input
+                    className="input catalog-shop-search"
+                    placeholder="Buscar plantas, flores o macetas"
+                    value={searchTerm}
+                    onChange={(event) => {
+                      setSearchTerm(event.target.value);
+                      setCatalogPage(1);
+                    }}
+                  />
+                </section>
+
+                <section className="catalog-filter-section">
+                  <div className="catalog-filter-section-heading">
+                    <span>Categoria</span>
+                  </div>
+                  <div className="catalog-option-grid" role="radiogroup" aria-label="Categoria">
+                    <button
+                      type="button"
+                      className={selectedCategoryId === "all" ? "active" : ""}
+                      onClick={() => {
+                        setSelectedCategoryId("all");
+                        setCatalogPage(1);
+                      }}
+                    >
+                      Todas
+                    </button>
+
+                    {normalizedCategories.map((category) => (
+                      <button
+                        type="button"
+                        key={category.id}
+                        className={selectedCategoryId === category.id ? "active" : ""}
+                        onClick={() => {
+                          setSelectedCategoryId(category.id);
+                          setCatalogPage(1);
+                        }}
+                      >
+                        {category.name}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="catalog-filter-section">
+                  <div className="catalog-filter-section-heading">
+                    <span>Tipo</span>
+                  </div>
+                  <div className="catalog-option-grid" role="radiogroup" aria-label="Tipo">
+                    <button
+                      type="button"
+                      className={selectedTypeId === "all" ? "active" : ""}
+                      onClick={() => {
+                        setSelectedTypeId("all");
+                        setCatalogPage(1);
+                      }}
+                    >
+                      Todos
+                    </button>
+
+                    {normalizedProductTypes.map((type) => (
+                      <button
+                        type="button"
+                        key={type.id}
+                        className={selectedTypeId === type.id ? "active" : ""}
+                        onClick={() => {
+                          setSelectedTypeId(type.id);
+                          setCatalogPage(1);
+                        }}
+                      >
+                        {type.name}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="catalog-filter-section">
+                  <div className="catalog-filter-section-heading">
+                    <span>Tamano</span>
+                  </div>
+                  <div className="catalog-option-grid" role="radiogroup" aria-label="Tamano">
+                    {CATALOG_FILTER_OPTIONS.SIZES.map((option) => (
+                      <button
+                        type="button"
+                        key={option.value}
+                        className={selectedSize === option.value ? "active" : ""}
+                        onClick={() => {
+                          setSelectedSize(option.value);
+                          setCatalogPage(1);
+                        }}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="catalog-filter-section">
+                  <div className="catalog-filter-section-heading">
+                    <span>Material</span>
+                  </div>
+                  <div className="catalog-option-grid" role="radiogroup" aria-label="Material">
+                    {CATALOG_FILTER_OPTIONS.MATERIALS.map((option) => (
+                      <button
+                        type="button"
+                        key={option.value}
+                        className={selectedMaterial === option.value ? "active" : ""}
+                        onClick={() => {
+                          setSelectedMaterial(option.value);
+                          setCatalogPage(1);
+                        }}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="catalog-filter-section">
+                  <div className="catalog-filter-section-heading">
+                    <span>Disponibilidad</span>
+                  </div>
+                  <div
+                    className="catalog-option-grid"
+                    role="radiogroup"
+                    aria-label="Disponibilidad"
+                  >
+                    {CATALOG_FILTER_OPTIONS.AVAILABILITY.map((option) => (
+                      <button
+                        type="button"
+                        key={option.value}
+                        className={selectedAvailability === option.value ? "active" : ""}
+                        onClick={() => {
+                          setSelectedAvailability(option.value);
+                          setCatalogPage(1);
+                        }}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="catalog-filter-section">
+                  <div className="catalog-filter-section-heading">
+                    <span>Precio</span>
+                  </div>
+                  <div className="catalog-price-filter">
+                    <div className="catalog-price-slider">
+                      <div className="catalog-price-slider-track" />
+                      <div
+                        className="catalog-price-slider-range"
+                        style={{
+                          left: `${minPercent}%`,
+                          right: `${100 - maxPercent}%`,
+                        }}
+                      />
+
+                      <input
+                        className="catalog-range-input catalog-range-input--min"
+                        type="range"
+                        min={priceBounds.min}
+                        max={priceBounds.max}
+                        step="1"
+                        value={selectedMinPrice}
+                        onChange={handleMinPriceChange}
+                        aria-label="Precio minimo"
+                      />
+
+                      <input
+                        className="catalog-range-input catalog-range-input--max"
+                        type="range"
+                        min={priceBounds.min}
+                        max={priceBounds.max}
+                        step="1"
+                        value={selectedMaxPrice}
+                        onChange={handleMaxPriceChange}
+                        aria-label="Precio maximo"
+                      />
+                    </div>
+
+                    <p className="catalog-price-label">
+                      {formatCatalogPrice(selectedMinPrice)} -{" "}
+                      {formatCatalogPrice(selectedMaxPrice)}
+                    </p>
+                  </div>
+                </section>
+
+                <section className="catalog-filter-section">
+                  <div className="catalog-filter-section-heading">
+                    <span>Ordenar</span>
+                  </div>
+                  <div
+                    className="catalog-sort-stack"
+                    role="radiogroup"
+                    aria-label="Ordenar productos"
+                  >
+                    {CATALOG_SORT_FILTER_OPTIONS.map((option) => (
+                      <button
+                        type="button"
+                        key={option.value || "none"}
+                        className={selectedSortOrder === option.value ? "active" : ""}
+                        onClick={() => {
+                          setSelectedSortOrder(option.value);
+                          setCatalogPage(1);
+                        }}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              </div>
+
+              <div className="catalog-filter-actions">
+                <button type="button" className="catalog-clear-button" onClick={clearFilters}>
+                  Limpiar
+                </button>
+                <button type="submit" className="catalog-filter-apply">
+                  Aplicar
+                </button>
+              </div>
+            </form>
+          </aside>
+        </div>
+      )}
     </div>
   );
 }

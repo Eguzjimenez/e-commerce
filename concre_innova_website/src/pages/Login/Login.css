@@ -1,21 +1,20 @@
 .login-wrapper {
-  min-height: calc(100vh - 76px);
+  min-height: calc(100vh - 128px);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 34px 20px;
+  padding: 56px 20px 72px;
   background:
-    radial-gradient(circle at 20% 8%, rgba(155, 191, 157, 0.28), transparent 30%),
-    linear-gradient(135deg, var(--cream-50), var(--sage-100));
+    linear-gradient(90deg, rgba(23, 37, 26, 0.08), transparent 38%),
+    var(--linen);
 }
 
 .login-card {
-  width: min(430px, 100%);
+  width: min(460px, 100%);
   background: var(--paper);
-  padding: 34px;
-  border: 1px solid rgba(15, 27, 45, 0.07);
-  border-radius: 26px;
-  box-shadow: var(--shadow-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: clamp(28px, 5vw, 38px);
   text-align: left;
 }
 
@@ -25,72 +24,69 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .logo-icon {
-  font-size: 1rem;
-  color: white;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--forest-600), var(--forest-800));
   width: 42px;
   height: 42px;
-  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  background: var(--forest-ink);
+  color: var(--paper);
+  font-size: 0.9rem;
+  font-weight: 800;
 }
 
 .logo-text {
-  font-size: 1.08rem;
-  font-weight: 800;
   color: var(--ink);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .auth-heading {
-  margin-bottom: 24px;
+  margin-bottom: 26px;
 }
 
 .auth-heading span {
   display: inline-flex;
-  color: var(--forest-600);
-  background: var(--sage-100);
-  border-radius: 999px;
-  padding: 7px 12px;
-  font-size: 0.8rem;
-  font-weight: 800;
   margin-bottom: 14px;
 }
 
 .auth-heading h1,
 .login-card h2 {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   color: var(--ink);
-  font-size: 2rem;
+  font-size: clamp(2.6rem, 7vw, 3.45rem);
+  line-height: 0.98;
 }
 
 .auth-heading p {
   margin: 0;
   color: var(--muted);
-  line-height: 1.55;
+  line-height: 1.58;
 }
 
 .login-form {
   display: grid;
-  gap: 13px;
+  gap: 14px;
 }
 
 .login-input {
   width: 100%;
-  padding: 14px 16px;
+  min-height: 48px;
+  padding: 0 16px;
 }
 
 .login-error {
+  background: rgba(155, 47, 34, 0.08);
+  border: 1px solid rgba(155, 47, 34, 0.18);
   color: var(--danger);
-  background: #ffe9ec;
-  padding: 11px 12px;
-  border-radius: var(--radius-md);
   font-size: 0.92rem;
+  padding: 11px 12px;
 }
 
 .login-btn {
@@ -99,7 +95,7 @@
 }
 
 .login-links {
-  margin-top: 18px;
+  margin-top: 20px;
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -107,10 +103,14 @@
 }
 
 .login-links a {
-  text-decoration: none;
+  color: var(--clay);
   font-size: 0.9rem;
-  color: var(--forest-600);
   font-weight: 700;
+  text-decoration: none;
+}
+
+.login-links a:hover {
+  text-decoration: underline;
 }
 
 @media (max-width: 480px) {

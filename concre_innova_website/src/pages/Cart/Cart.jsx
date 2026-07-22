@@ -8,6 +8,7 @@ import { getProductImageCandidates } from "../../services/catalogService";
 import { isLoggedIn } from "../../services/authService";
 import { getCart, removeFromCart } from "../../services/cartService";
 import { PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
+import { formatCatalogPrice } from "../../services/catalogPresentationService";
 
 function Cart() {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -107,7 +108,7 @@ function Cart() {
               <div className="cart-info">
                 <span className="product-category">Producto seleccionado</span>
                 <h3>{product.name}</h3>
-                <p>${product.price}</p>
+                <p>{formatCatalogPrice(product.price)}</p>
               </div>
 
               <span className="cart-qty">x{product.quantity}</span>
@@ -125,7 +126,7 @@ function Cart() {
 
           <div className="summary-total">
             <span>Total</span>
-            <span>${total}</span>
+            <span>{formatCatalogPrice(total)}</span>
           </div>
 
           <button className="btn checkout-btn" onClick={handleProceedToCheckout}>

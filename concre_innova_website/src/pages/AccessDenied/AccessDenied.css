@@ -1,76 +1,74 @@
 .access-denied-wrapper {
-  min-height: calc(100vh - 76px);
+  min-height: calc(100vh - 128px);
   display: flex;
   justify-content: center;
   align-items: center;
-  background:
-    radial-gradient(circle at 82% 0%, rgba(180, 35, 24, 0.12), transparent 28%),
-    linear-gradient(135deg, var(--cream-50), var(--sage-100));
-  padding: 24px;
+  background: var(--linen);
+  padding: 56px 24px 72px;
 }
 
 .access-denied-card {
-  background: white;
-  padding: 40px 36px;
-  width: min(460px, 100%);
-  border-radius: 26px;
-  box-shadow: var(--shadow-card);
+  width: min(500px, 100%);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: clamp(28px, 5vw, 40px);
   text-align: center;
-  border: 1px solid rgba(15, 27, 45, 0.07);
 }
 
 .access-denied-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  margin: 0 auto 18px;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 20px;
   display: grid;
   place-items: center;
-  background: #ffe9ec;
+  background: rgba(155, 47, 34, 0.1);
+  border: 1px solid rgba(155, 47, 34, 0.18);
   color: var(--danger);
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: 800;
 }
 
 .access-denied-title {
-  margin: 0 0 10px;
-  font-size: 1.9rem;
+  margin: 0 0 12px;
   color: var(--ink);
+  font-size: clamp(2.5rem, 7vw, 3.45rem);
+  line-height: 0.98;
 }
 
 .access-denied-message {
-  font-size: 1rem;
   color: var(--muted);
-  margin-bottom: 24px;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 24px;
 }
 
 .access-denied-detail {
-  background: var(--cream-50);
+  background: #f7f4ed;
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: 28px;
   padding: 16px 20px;
   text-align: left;
-  margin-bottom: 28px;
 }
 
 .access-denied-detail p {
   margin: 6px 0;
-  font-size: 0.9rem;
   color: var(--muted);
+  font-size: 0.9rem;
 }
 
 .access-denied-detail code {
-  background: var(--sage-100);
-  padding: 2px 6px;
-  border-radius: 4px;
+  background: var(--paper);
+  color: var(--forest-ink);
   font-size: 0.85rem;
-  color: var(--forest-600);
+  padding: 2px 6px;
 }
 
 .access-denied-warning {
-  margin-top: 10px !important;
   color: var(--danger) !important;
   font-weight: 700;
+  margin-top: 10px !important;
 }
 
 .access-denied-actions {
@@ -80,21 +78,22 @@
 }
 
 .access-denied-btn {
-  padding: 12px 22px;
+  min-height: 44px;
+  border: 1px solid var(--forest-ink);
   border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 800;
+  padding: 0 22px;
 }
 
 .access-denied-btn.primary {
-  background: var(--terracotta);
-  color: white;
-  box-shadow: var(--shadow-warm);
+  background: var(--forest-ink);
+  color: var(--paper);
 }
 
 .access-denied-btn.secondary {
-  background: var(--sage-100);
-  color: var(--forest-600);
+  background: var(--paper);
+  color: var(--forest-ink);
 }
 
 @media (max-width: 480px) {

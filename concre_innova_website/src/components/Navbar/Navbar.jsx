@@ -1,5 +1,17 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import {
+  Heart,
+  LogOut,
+  Menu,
+  MessageCircle,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
+  UserPlus,
+  UserRound,
+  X,
+} from "lucide-react";
 import { ADMIN_ROUTES, PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 import { getAuth, getUserRole, isLoggedIn, logout } from "../../services/authService";
 import { isAdminRole } from "../../constants/roleAccess";
@@ -13,6 +25,7 @@ function Navbar() {
   const [auth, setAuth] = useState(getAuth());
   const [cartCount, setCartCount] = useState(getCartCount());
   const [favoriteCount, setFavoriteCount] = useState(0);
+  const [navSearchTerm, setNavSearchTerm] = useState("");
 
   useEffect(() => {
     setMenuOpen(false);
@@ -51,69 +64,165 @@ function Navbar() {
   const authenticated = isLoggedIn() && auth;
   const userRole = getUserRole();
   const admin = isAdminRole(userRole);
+  const isActivePath = (path) =>
+    path === PUBLIC_ROUTES.HOME ? location.pathname === path : location.pathname.startsWith(path);
+  const getNavLinkClass = (path, className = "") =>
+    [className, isActivePath(path) ? "active" : ""].filter(Boolean).join(" ");
+
+  const handleNavSearchSubmit = (event) => {
+    event.preventDefault();
+    const trimmedSearch = navSearchTerm.trim();
+    const nextCatalogRoute = trimmedSearch
+      ? `${PUBLIC_ROUTES.CATALOG}?search=${encodeURIComponent(trimmedSearch)}`
+      : PUBLIC_ROUTES.CATALOG;
+
+    navigate(nextCatalogRoute);
+  };
 
   return (
     <nav className="navbar">
       <div className="nav-container">
-        <Link to={PUBLIC_ROUTES.HOME} className="nav-logo">
-          Concre Innova
+        <form className="nav-search-form" onSubmit={handleNavSearchSubmit}>
+          <button type="submit" className="nav-search-button" aria-label="Buscar productos">
+            <Search size={21} strokeWidth={1.8} />
+          </button>
+          <input
+            type="search"
+            placeholder="Search"
+            aria-label="Buscar productos"
+            value={navSearchTerm}
+            onChange={(event) => setNavSearchTerm(event.target.value)}
+          />
+        </form>
+
+        <Link to={PUBLIC_ROUTES.HOME} className="nav-brand-block">
+          <span className="nav-logo">Concre Innova</span>
+          <span className="nav-location">Naranjo, Alajuela</span>
         </Link>
+
+        <div className="nav-utility-actions" aria-label="Accesos rapidos">
+          {!authenticated && (
+            <>
+              <Link
+                to={PUBLIC_ROUTES.LOGIN}
+                className={getNavLinkClass(PUBLIC_ROUTES.LOGIN, "nav-icon-link")}
+                aria-current={isActivePath(PUBLIC_ROUTES.LOGIN) ? "page" : undefined}
+              >
+                <UserRound size={22} strokeWidth={1.75} />
+                <span className="nav-icon-label">Account</span>
+              </Link>
+              <Link
+                to={PUBLIC_ROUTES.REGISTER}
+                className={getNavLinkClass(PUBLIC_ROUTES.REGISTER, "nav-icon-link nav-register-link")}
+                aria-current={isActivePath(PUBLIC_ROUTES.REGISTER) ? "page" : undefined}
+              >
+                <UserPlus size={21} strokeWidth={1.75} />
+                <span className="nav-icon-label">Sign up</span>
+              </Link>
+            </>
+          )}
+
+          {authenticated && (
+            <button className="nav-icon-link nav-logout-button" type="button" onClick={handleLogout}>
+              <LogOut size={21} strokeWidth={1.75} />
+              <span className="nav-icon-label">Salir</span>
+            </button>
+          )}
+
+          <Link
+            to={PRIVATE_ROUTES.CART}
+            className={getNavLinkClass(PRIVATE_ROUTES.CART, "nav-icon-link nav-bag-link")}
+            aria-current={isActivePath(PRIVATE_ROUTES.CART) ? "page" : undefined}
+          >
+            <ShoppingBag size={22} strokeWidth={1.75} />
+            <span className="nav-icon-label">Cart</span>
+            {cartCount > 0 && <span className="nav-count-badge">{cartCount}</span>}
+          </Link>
+        </div>
 
         <button
           className="menu-toggle"
           type="button"
-          aria-label="Abrir menu"
+          aria-label={menuOpen ? "Cerrar menu" : "Abrir menu"}
+          aria-expanded={menuOpen}
           onClick={() => setMenuOpen(!menuOpen)}
         >
-          <span></span>
-          <span></span>
-          <span></span>
+          {menuOpen ? <X size={20} strokeWidth={1.8} /> : <Menu size={20} strokeWidth={1.8} />}
         </button>
-
-        <ul className={`nav-menu ${menuOpen ? "active" : ""}`}>
-          <li>
-            <Link to={PUBLIC_ROUTES.HOME}>Inicio</Link>
-          </li>
-          <li>
-            <Link to={PUBLIC_ROUTES.CATALOG}>Catalogo</Link>
-          </li>
-          <li>
-            <Link to={PRIVATE_ROUTES.CART}>
-              Carrito{cartCount > 0 ? ` (${cartCount})` : ""}
-            </Link>
-          </li>
-          <li>
-            <Link to={PUBLIC_ROUTES.FAVORITES}>
-              Mis Favoritos{favoriteCount > 0 ? ` (${favoriteCount})` : ""}
-            </Link>
-          </li>
-          {admin && (
-            <li>
-              <Link to={ADMIN_ROUTES.DASHBOARD}>Panel</Link>
-            </li>
-          )}
-          <li>
-            <Link to={PUBLIC_ROUTES.CHAT}>Chat</Link>
-          </li>
-          {!authenticated && (
-            <>
-              <li>
-                <Link to={PUBLIC_ROUTES.LOGIN}>Login</Link>
-              </li>
-              <li>
-                <Link to={PUBLIC_ROUTES.REGISTER}>Registro</Link>
-              </li>
-            </>
-          )}
-          {authenticated && (
-            <li>
-              <button className="logout-btn" type="button" onClick={handleLogout}>
-                Cerrar sesion
-              </button>
-            </li>
-          )}
-        </ul>
       </div>
+
+      <ul className={`nav-menu ${menuOpen ? "active" : ""}`}>
+        <li>
+          <Link
+            to={PUBLIC_ROUTES.HOME}
+            className={getNavLinkClass(PUBLIC_ROUTES.HOME)}
+            aria-current={isActivePath(PUBLIC_ROUTES.HOME) ? "page" : undefined}
+          >
+            Inicio
+          </Link>
+        </li>
+        <li>
+          <Link
+            to={PUBLIC_ROUTES.CATALOG}
+            className={getNavLinkClass(PUBLIC_ROUTES.CATALOG)}
+            aria-current={isActivePath(PUBLIC_ROUTES.CATALOG) ? "page" : undefined}
+          >
+            Catalogo
+          </Link>
+        </li>
+        <li>
+          <Link
+            to={PUBLIC_ROUTES.FAVORITES}
+            className={getNavLinkClass(PUBLIC_ROUTES.FAVORITES)}
+            aria-current={isActivePath(PUBLIC_ROUTES.FAVORITES) ? "page" : undefined}
+          >
+            <Heart size={15} strokeWidth={1.8} />
+            Favoritos{favoriteCount > 0 ? ` (${favoriteCount})` : ""}
+          </Link>
+        </li>
+        {admin && (
+          <li>
+            <Link
+              to={ADMIN_ROUTES.DASHBOARD}
+              className={getNavLinkClass(ADMIN_ROUTES.DASHBOARD)}
+              aria-current={isActivePath(ADMIN_ROUTES.DASHBOARD) ? "page" : undefined}
+            >
+              <ShieldCheck size={15} strokeWidth={1.8} />
+              Panel
+            </Link>
+          </li>
+        )}
+        <li>
+          <Link
+            to={PUBLIC_ROUTES.CHAT}
+            className={getNavLinkClass(PUBLIC_ROUTES.CHAT)}
+            aria-current={isActivePath(PUBLIC_ROUTES.CHAT) ? "page" : undefined}
+          >
+            <MessageCircle size={15} strokeWidth={1.8} />
+            Chat
+          </Link>
+        </li>
+        {authenticated && (
+          <li className="nav-menu-auth-action">
+            <button className="logout-btn" type="button" onClick={handleLogout}>
+              <LogOut size={15} strokeWidth={1.8} />
+              Cerrar sesion
+            </button>
+          </li>
+        )}
+        {!authenticated && (
+          <li className="nav-menu-auth-action">
+            <Link
+              to={PUBLIC_ROUTES.REGISTER}
+              className={getNavLinkClass(PUBLIC_ROUTES.REGISTER)}
+              aria-current={isActivePath(PUBLIC_ROUTES.REGISTER) ? "page" : undefined}
+            >
+              <UserPlus size={15} strokeWidth={1.8} />
+              Registro
+            </Link>
+          </li>
+        )}
+      </ul>
     </nav>
   );
 }

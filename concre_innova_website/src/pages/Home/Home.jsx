@@ -2,54 +2,78 @@ import "./Home.css";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
-import { ADMIN_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
-import { getUserRole } from "../../services/authService";
-import { isAdminRole } from "../../constants/roleAccess";
+import { PUBLIC_ROUTES } from "../../routes/routes";
 import ProductModal from "../../components/ProductModal/ProductModal";
-import { getCatalogCategories, getCatalogProducts } from "../../services/catalogService";
+import { getCatalogProducts } from "../../services/catalogService";
 import { addToCart } from "../../services/cartService";
+import heroBotanicalImage from "../../img/figma-hero-botanical.png";
+import macetaNoirImage from "../../img/figma-maceta-noir.png";
 import {
   buildCatalogModalProduct,
   formatCatalogPrice,
-  getCatalogProductAvailabilityText,
-  getCatalogProductCategoryName,
   getCatalogProductImage,
   getFeaturedCatalogProducts,
   handleCatalogImageFallback,
-  normalizeCatalogCategories,
 } from "../../services/catalogPresentationService";
 
 const homeSlides = [
   {
-    label: "Nueva temporada",
-    title: "Naturaleza seleccionada para interiores con caracter",
-    text: "Plantas, flores y macetas listas para transformar salas, terrazas y espacios de trabajo.",
-    highlight: "Coleccion interior",
+    label: "Floristeria y macetas - San Miguel Oeste",
+    title: "Concre Innova",
+    text: "Piezas botanicas, flores y macetas seleccionadas para hogares, terrazas y espacios que buscan una presencia natural, sobria y duradera.",
+    highlight: "Asesoria directa",
   },
   {
-    label: "Regalos verdes",
-    title: "Detalles naturales con presentacion lista",
-    text: "Sets curados para regalar sin complicarse: planta, maceta y acabado decorativo.",
-    highlight: "Listo para entregar",
+    label: "Regalos vivos",
+    title: "Detalles naturales listos para entregar",
+    text: "Sets curados para regalar con planta, maceta, tarjeta y una preparacion cuidada desde Naranjo.",
+    highlight: "Listo para regalo",
   },
   {
-    label: "Espacios vivos",
-    title: "Piezas simples para renovar ambientes",
-    text: "Diseno funcional, materiales sobrios y productos faciles de integrar al hogar.",
+    label: "Espacios con calma",
+    title: "Naturaleza sobria para interiores",
+    text: "Plantas y macetas elegidas por luz, material y uso para integrarse sin exceso visual.",
     highlight: "Bajo cuidado",
   },
 ];
 
+const collectionCards = [
+  {
+    title: "Macetas de autor",
+    text: "Concreto, ceramica y acabados sobrios",
+    image: macetaNoirImage,
+  },
+  {
+    title: "Flores de temporada",
+    text: "Ramos y detalles naturales preparados",
+    image: heroBotanicalImage,
+  },
+  {
+    title: "Plantas interiores",
+    text: "Seleccion para salas, oficinas y terrazas",
+    image: macetaNoirImage,
+  },
+  {
+    title: "Regalos vivos",
+    text: "Set curado: planta, maceta y tarjeta",
+    image: heroBotanicalImage,
+  },
+];
+
+const storyPhotos = [
+  ["Fachada o entrada del local", macetaNoirImage],
+  ["Mesa de trabajo y preparacion", heroBotanicalImage],
+  ["Entorno natural de Naranjo", heroBotanicalImage],
+  ["Detalle de macetas y plantas", macetaNoirImage],
+];
+
 function Home() {
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [mode, setMode] = useState("home");
   const [activeSlide, setActiveSlide] = useState(0);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [productsError, setProductsError] = useState("");
-  const userRole = getUserRole();
-  const showAdminAccess = isAdminRole(userRole);
 
   useEffect(() => {
     const slideTimer = setInterval(() => {
@@ -67,22 +91,17 @@ function Home() {
       setProductsError("");
 
       try {
-        const [productsResponse, categoriesResponse] = await Promise.all([
-          getCatalogProducts(),
-          getCatalogCategories(),
-        ]);
+        const productsResponse = await getCatalogProducts();
 
         if (!isMounted) {
           return;
         }
 
         setProducts(Array.isArray(productsResponse) ? productsResponse : []);
-        setCategories(Array.isArray(categoriesResponse) ? categoriesResponse : []);
       } catch (error) {
         if (isMounted) {
           setProductsError(error.message || "No se pudieron cargar los productos destacados.");
           setProducts([]);
-          setCategories([]);
         }
       } finally {
         if (isMounted) {
@@ -98,18 +117,14 @@ function Home() {
     };
   }, []);
 
-  const normalizedCategories = useMemo(
-    () => normalizeCatalogCategories(categories),
-    [categories]
-  );
-
   const featuredProducts = useMemo(
     () => getFeaturedCatalogProducts(products, 6),
     [products]
   );
 
   const currentSlide = homeSlides[activeSlide];
-  const featuredHeroProduct = featuredProducts[activeSlide % Math.max(featuredProducts.length, 1)];
+  const featuredHeroProduct =
+    featuredProducts[activeSlide % Math.max(featuredProducts.length, 1)];
 
   const openProduct = (product) => {
     setSelectedProduct(buildCatalogModalProduct(product));
@@ -140,23 +155,31 @@ function Home() {
 
   return (
     <div className="home-page">
-      <section className="home-showcase">
-        <div className="home-showcase-copy">
+      <section className="home-hero">
+        <img className="home-hero-image" src={heroBotanicalImage} alt="" aria-hidden="true" />
+        <div className="home-hero-overlay" />
+
+        <div className="home-hero-content">
           <span className="home-eyebrow">{currentSlide.label}</span>
           <h1>{currentSlide.title}</h1>
           <p>{currentSlide.text}</p>
 
           <div className="home-showcase-actions">
-            <a href="#productos-destacados" className="btn">
-              Ver seleccion
-            </a>
+            <Link to={PUBLIC_ROUTES.CATALOG} className="btn">
+              Explorar catalogo
+            </Link>
             <Link to={PUBLIC_ROUTES.CATALOG} className="home-ghost-btn">
-              Ver catalogo
+              Armar regalo
             </Link>
           </div>
+
         </div>
 
-        <div className="home-feature-panel" aria-label="Destacado de temporada">
+        <div className="home-hero-carousel" aria-label="Destacado de temporada">
+          <div className="home-carousel-progress" key={`slide-progress-${activeSlide}`}>
+            <span />
+          </div>
+
           <button
             type="button"
             className="home-carousel-control previous"
@@ -166,25 +189,34 @@ function Home() {
             {"<"}
           </button>
 
-          <div className="home-feature-card" key={currentSlide.title}>
-            <div className="home-feature-image">
-              <span>{currentSlide.highlight}</span>
+          <div
+            className="home-feature-card"
+            key={`${currentSlide.title}-${featuredHeroProduct?.idProducto || activeSlide}`}
+          >
+            <figure className="home-feature-media">
               <img
                 src={
                   featuredHeroProduct
                     ? getCatalogProductImage(featuredHeroProduct)
-                    : getCatalogProductImage({})
+                    : macetaNoirImage
                 }
-                alt={featuredHeroProduct?.nombre || currentSlide.highlight}
-                onError={(event) =>
-                  handleCatalogImageFallback(event, featuredHeroProduct?.imagen)
-                }
+                alt={featuredHeroProduct?.nombre || "Seleccion botanica"}
+                onError={(event) => {
+                  if (featuredHeroProduct) {
+                    handleCatalogImageFallback(event, featuredHeroProduct.imagen);
+                  }
+                }}
               />
-            </div>
+            </figure>
 
-            <div className="home-feature-content">
-              <span>Concre Innova</span>
-              <strong>{featuredHeroProduct?.nombre || currentSlide.label}</strong>
+            <div className="home-feature-copy">
+              <span>{currentSlide.highlight}</span>
+              <strong>{featuredHeroProduct?.nombre || "Seleccion botanica"}</strong>
+              <small>
+                {featuredHeroProduct
+                  ? formatCatalogPrice(featuredHeroProduct.precio)
+                  : "Macetas, plantas y flores"}
+              </small>
             </div>
           </div>
 
@@ -201,7 +233,7 @@ function Home() {
             {homeSlides.map((slide, index) => (
               <button
                 type="button"
-                key={slide.title}
+                key={slide.label}
                 className={activeSlide === index ? "active" : ""}
                 onClick={() => setActiveSlide(index)}
                 aria-label={`Ver ${slide.label}`}
@@ -211,45 +243,99 @@ function Home() {
         </div>
       </section>
 
-      <section className="container home-story">
-        <div>
-          <span className="home-section-kicker">Sobre nosotros</span>
-          <h2>Diseno natural sin exceso visual</h2>
-        </div>
-        <p>
-          En Concre Innova creamos piezas que combinan naturaleza, forma y uso diario.
-          La seleccion se enfoca en productos faciles de integrar a hogares, oficinas y
-          regalos.
-        </p>
-      </section>
-
-      {showAdminAccess && (
-        <section className="container admin-home-access">
-          <div className="admin-home-card">
-            <div className="admin-home-card-content">
-              <span className="admin-home-badge">Acceso interno</span>
-              <h2>Panel de administracion</h2>
-              <p>
-                Gestiona las funciones internas disponibles para tu rol desde un solo lugar.
-              </p>
-            </div>
-
-            <div className="admin-home-card-action">
-              <Link to={ADMIN_ROUTES.DASHBOARD} className="admin-home-button">
-                Ir al panel
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      <section className="container featured-section" id="productos-destacados">
-        <div className="section-title-row">
+      <section className="home-section home-collections">
+        <div className="home-section-heading">
           <div>
             <span className="home-section-kicker">Colecciones</span>
-            <h2>Productos destacados</h2>
-            <p>Seleccion visual para plantas, flores y macetas decorativas.</p>
+            <h2>Comprar por intencion</h2>
           </div>
+          <p>
+            La experiencia prioriza decisiones claras: decorar, regalar, renovar o cuidar.
+            Cada coleccion puede mapearse a categorias existentes del catalogo.
+          </p>
+        </div>
+
+        <div className="home-collection-grid">
+          {collectionCards.map((collection) => (
+            <Link
+              className="home-collection-card"
+              key={collection.title}
+              to={PUBLIC_ROUTES.CATALOG}
+            >
+              <img src={collection.image} alt="" aria-hidden="true" />
+              <div>
+                <h3>{collection.title}</h3>
+                <p>{collection.text}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="home-section home-story">
+        <div className="home-section-heading">
+          <div>
+            <span className="home-section-kicker">Nosotros</span>
+            <h2>Un lugar que define nuestra forma de cuidar</h2>
+          </div>
+          <p>
+            La propuesta habla del espacio fisico, del origen y de la experiencia de
+            visitar. Aqui el relato se vuelve local, sereno y cercano a San Miguel
+            Oeste de Naranjo.
+          </p>
+        </div>
+
+        <div className="home-story-layout">
+          <div className="home-story-photo">
+            <img src={heroBotanicalImage} alt="Macetas y plantas en un espacio exterior" />
+            <span>Foto real del lugar</span>
+            <p>Entorno verde, luz natural y macetas como parte de la experiencia de visita.</p>
+          </div>
+
+          <article className="home-story-panel">
+            <span>Raices</span>
+            <h3>Del oficio al detalle vivo</h3>
+            <p>
+              Las raices de la marca se cuentan desde el cuidado diario: seleccionar
+              plantas sanas, preparar macetas duraderas y convertir flores en gestos
+              memorables.
+            </p>
+          </article>
+
+          <article className="home-story-panel dark">
+            <span>San Miguel Oeste</span>
+            <h3>Una tienda pensada desde el paisaje</h3>
+            <p>
+              Naranjo permite construir una experiencia mas calmada: verde cercano,
+              ritmo local y productos elegidos para hogares que buscan naturaleza sin
+              exceso visual.
+            </p>
+          </article>
+        </div>
+
+        <div className="home-story-gallery">
+          {storyPhotos.map(([caption, image]) => (
+            <figure key={caption}>
+              <img src={image} alt="" aria-hidden="true" />
+              <figcaption>
+                <strong>{caption}</strong>
+                <span>Reemplazar por fotografia real</span>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
+      <section className="home-section featured-section" id="productos-destacados">
+        <div className="home-section-heading">
+          <div>
+            <span className="home-section-kicker">Seleccion destacada</span>
+            <h2>Piezas con presencia natural</h2>
+          </div>
+          <p>
+            Cards reducen decoracion y tratan cada item como un objeto de cuidado.
+            Precio, material y disponibilidad se mantienen claros.
+          </p>
         </div>
 
         {isLoadingProducts && (
@@ -261,18 +347,21 @@ function Home() {
         )}
 
         {!isLoadingProducts && !productsError && (
-          <div className="grid home-product-grid">
+          <div className="home-product-grid">
             {featuredProducts.map((product, index) => (
-              <div
-                className="card product-card-modern home-product-card"
+              <article
+                className="home-product-card"
                 key={product.idProducto}
                 style={{ "--card-index": index }}
                 onClick={() => openProduct(product)}
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    openProduct(product);
+                  }
+                }}
               >
                 <div className="product-visual">
-                  <span className="product-rating">
-                    {getCatalogProductAvailabilityText(product)}
-                  </span>
                   <img
                     src={getCatalogProductImage(product)}
                     alt={product.nombre}
@@ -281,23 +370,10 @@ function Home() {
                 </div>
 
                 <div className="product-card-body">
-                  <span className="product-category">
-                    {getCatalogProductCategoryName(product, normalizedCategories)}
-                  </span>
                   <h3>{product.nombre}</h3>
-                  <p>{formatCatalogPrice(product.precio)}</p>
-                  <button
-                    className="btn"
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      openProduct(product);
-                    }}
-                  >
-                    Ver
-                  </button>
+                  <p className="home-product-price">{formatCatalogPrice(product.precio)}</p>
                 </div>
-              </div>
+              </article>
             ))}
 
             {featuredProducts.length === 0 && (
@@ -309,7 +385,19 @@ function Home() {
         )}
       </section>
 
-      <footer className="footer">
+      <footer className="footer home-footer">
+        <div className="home-footer-top">
+          <div>
+            <span>Identidad local</span>
+            <h2>Desde San Miguel Oeste de Naranjo</h2>
+          </div>
+          <p>
+            La marca se presenta como una experiencia cercana y confiable: seleccion
+            botanica, asesoria de cuidado, preparacion de regalos y entrega local con
+            una estetica de calidad.
+          </p>
+        </div>
+
         <div className="footer-container">
           <div>
             <h3>Concre Innova</h3>
