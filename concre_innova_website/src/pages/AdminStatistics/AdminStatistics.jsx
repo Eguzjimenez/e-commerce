@@ -1,121 +1,141 @@
 import "./AdminStatistics.css";
+import { useEffect, useState } from "react";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
+import {
+  getCategoryStatistics,
+  getFrequentClients,
+  getStatisticsSummary,
+  getTopProducts,
+} from "../../services/statisticsService";
 
 function AdminStatistics() {
-  const monthlySales = [
-    { mes: "Enero", valor: 60 },
-    { mes: "Febrero", valor: 75 },
-    { mes: "Marzo", valor: 90 },
-    { mes: "Abril", valor: 68 },
-    { mes: "Mayo", valor: 95 }
-  ];
+  const [summary, setSummary] = useState(null);
+  const [topProducts, setTopProducts] = useState([]);
+  const [topCategories, setTopCategories] = useState([]);
+  const [frequentClients, setFrequentClients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const topProducts = [
-    { nombre: "Macetero negro", porcentaje: 82 },
-    { nombre: "Palma interior", porcentaje: 74 },
-    { nombre: "Fuente decorativa", porcentaje: 61 }
-  ];
+  useEffect(() => {
+    loadStatistics();
+  }, []);
 
-  const topCategories = [
-    { nombre: "Maceteros", porcentaje: 88 },
-    { nombre: "Plantas", porcentaje: 79 },
-    { nombre: "Accesorios", porcentaje: 54 }
-  ];
+  const loadStatistics = async () => {
+    setLoading(true);
+    setError("");
 
-  const frequentClients = [
-    "María López",
-    "Carlos Herrera",
-    "Ana Rodríguez",
-    "Luis Méndez"
-  ];
+    try {
+      const [summaryResponse, productsResponse, categoriesResponse, clientsResponse] =
+        await Promise.all([
+          getStatisticsSummary(),
+          getTopProducts(),
+          getCategoryStatistics(),
+          getFrequentClients(),
+        ]);
+
+      setSummary(summaryResponse);
+      setTopProducts(Array.isArray(productsResponse) ? productsResponse : []);
+      setTopCategories(Array.isArray(categoriesResponse) ? categoriesResponse : []);
+      setFrequentClients(Array.isArray(clientsResponse) ? clientsResponse : []);
+    } catch (loadError) {
+      setError(loadError.message || "No se pudieron cargar las estadisticas.");
+      setSummary(null);
+      setTopProducts([]);
+      setTopCategories([]);
+      setFrequentClients([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <AdminLayout title="Estadísticas del Negocio">
       <div className="admin-statistics-page">
-        <div className="admin-statistics-summary">
-          <div className="statistics-summary-card">
-            <h3>Ventas mensuales</h3>
-            <p>+18%</p>
-            <span>Comparado con el mes anterior</span>
-          </div>
+        {error && <div className="admin-products-error">{error}</div>}
 
-          <div className="statistics-summary-card">
-            <h3>Producto destacado</h3>
-            <p>Macetero negro</p>
-            <span>Mayor volumen de ventas</span>
-          </div>
+        {loading && <div className="admin-products-empty">Cargando estadisticas...</div>}
 
-          <div className="statistics-summary-card">
-            <h3>Clientes frecuentes</h3>
-            <p>24</p>
-            <span>Clientes con compras repetidas</span>
-          </div>
-        </div>
+        {!loading && !error && (
+          <>
+            <div className="admin-statistics-summary">
+              <div className="statistics-summary-card">
+                <h3>Ventas del mes</h3>
+                <p>${Number(summary?.ventasMesActual || 0).toFixed(2)}</p>
+                <span>
+                  {Number(summary?.variacionMesAnteriorPorcentaje || 0) >= 0 ? "+" : ""}
+                  {Number(summary?.variacionMesAnteriorPorcentaje || 0).toFixed(1)}% comparado con el mes anterior
+                </span>
+              </div>
 
-        <div className="statistics-grid">
-          <div className="statistics-card">
-            <h2>Ventas por mes</h2>
-            <div className="statistics-bars">
-              {monthlySales.map((item) => (
-                <div className="statistics-bar-row" key={item.mes}>
-                  <span>{item.mes}</span>
-                  <div className="statistics-bar-track">
-                    <div
-                      className="statistics-bar-fill"
-                      style={{ width: `${item.valor}%` }}
-                    ></div>
-                  </div>
-                  <strong>{item.valor}%</strong>
-                </div>
-              ))}
+              <div className="statistics-summary-card">
+                <h3>Producto destacado</h3>
+                <p>{summary?.productoDestacado || "Sin datos"}</p>
+                <span>Mayor volumen de ventas</span>
+              </div>
+
+              <div className="statistics-summary-card">
+                <h3>Clientes frecuentes</h3>
+                <p>{summary?.clientesFrecuentes || 0}</p>
+                <span>Clientes con compras repetidas</span>
+              </div>
             </div>
-          </div>
 
-          <div className="statistics-card">
-            <h2>Productos más vendidos</h2>
-            <div className="statistics-bars">
-              {topProducts.map((item) => (
-                <div className="statistics-bar-row" key={item.nombre}>
-                  <span>{item.nombre}</span>
-                  <div className="statistics-bar-track">
-                    <div
-                      className="statistics-bar-fill"
-                      style={{ width: `${item.porcentaje}%` }}
-                    ></div>
-                  </div>
-                  <strong>{item.porcentaje}%</strong>
+            <div className="statistics-grid">
+              <div className="statistics-card">
+                <h2>Productos más vendidos</h2>
+                <div className="statistics-bars">
+                  {topProducts.map((item) => (
+                    <div className="statistics-bar-row" key={item.nombreProducto}>
+                      <span>{item.nombreProducto}</span>
+                      <div className="statistics-bar-track">
+                        <div
+                          className="statistics-bar-fill"
+                          style={{ width: `${Number(item.porcentajeRelativo)}%` }}
+                        ></div>
+                      </div>
+                      <strong>{item.cantidadVendida}</strong>
+                    </div>
+                  ))}
+
+                  {topProducts.length === 0 && <p>No hay ventas registradas.</p>}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          <div className="statistics-card">
-            <h2>Categorías destacadas</h2>
-            <div className="statistics-bars">
-              {topCategories.map((item) => (
-                <div className="statistics-bar-row" key={item.nombre}>
-                  <span>{item.nombre}</span>
-                  <div className="statistics-bar-track">
-                    <div
-                      className="statistics-bar-fill"
-                      style={{ width: `${item.porcentaje}%` }}
-                    ></div>
-                  </div>
-                  <strong>{item.porcentaje}%</strong>
+              <div className="statistics-card">
+                <h2>Categorías destacadas</h2>
+                <div className="statistics-bars">
+                  {topCategories.map((item) => (
+                    <div className="statistics-bar-row" key={item.nombreCategoria}>
+                      <span>{item.nombreCategoria}</span>
+                      <div className="statistics-bar-track">
+                        <div
+                          className="statistics-bar-fill"
+                          style={{ width: `${Number(item.porcentajeDelTotal)}%` }}
+                        ></div>
+                      </div>
+                      <strong>{Number(item.porcentajeDelTotal).toFixed(0)}%</strong>
+                    </div>
+                  ))}
+
+                  {topCategories.length === 0 && <p>No hay ventas registradas.</p>}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          <div className="statistics-card">
-            <h2>Clientes frecuentes</h2>
-            <ul className="statistics-client-list">
-              {frequentClients.map((client) => (
-                <li key={client}>{client}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
+              <div className="statistics-card">
+                <h2>Clientes frecuentes</h2>
+                <ul className="statistics-client-list">
+                  {frequentClients.map((client) => (
+                    <li key={client.idCliente}>
+                      {client.nombreCliente} — {client.cantidadPedidos} pedidos (${Number(client.totalComprado).toFixed(2)})
+                    </li>
+                  ))}
+
+                  {frequentClients.length === 0 && <li>No hay clientes frecuentes todavia.</li>}
+                </ul>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </AdminLayout>
   );
