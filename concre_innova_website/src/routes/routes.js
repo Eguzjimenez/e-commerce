@@ -17,7 +17,9 @@ export function buildProductDetailRoute(idProducto) {
 export const PRIVATE_ROUTES = {
   CART: "/cart",
   CHECKOUT: "/checkout",
-  MY_ORDERS: "/mis-pedidos"
+  MY_ORDERS: "/mis-pedidos",
+  NEW_QUOTATION: "/cotizaciones/nueva",
+  MY_QUOTATIONS: "/mis-cotizaciones"
 };
 
 export const ADMIN_ROUTES = {

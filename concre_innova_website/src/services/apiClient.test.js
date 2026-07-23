@@ -56,10 +56,22 @@ test("throws the backend message and status for a server error", async () => {
   });
 });
 
-test("propagates a network connection failure", async () => {
+test("returns a clear message for a network connection failure", async () => {
   fetch.mockRejectedValue(new TypeError("Failed to fetch"));
 
-  await expect(request("/api/test")).rejects.toThrow("Failed to fetch");
+  await expect(request("/api/test")).rejects.toThrow(
+    "No fue posible conectar con el servidor. Verifica tu conexion e intenta nuevamente."
+  );
+});
+
+test("preserves request cancellation errors", async () => {
+  const cancellationError = new DOMException(
+    "The operation was aborted.",
+    "AbortError"
+  );
+  fetch.mockRejectedValue(cancellationError);
+
+  await expect(request("/api/test")).rejects.toBe(cancellationError);
 });
 
 test("clears the stored session after an authenticated 401 response", async () => {

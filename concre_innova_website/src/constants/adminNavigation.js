@@ -30,7 +30,7 @@ export const ADMIN_NAV_ITEMS = [
   {
     to: ADMIN_ROUTES.QUOTATIONS,
     label: "Cotizaciones",
-    roles: ROLE_GROUPS.ADMIN_ONLY,
+    roles: ROLE_GROUPS.QUOTATION_STAFF,
   },
   {
     to: ADMIN_ROUTES.ORDERS,
@@ -70,5 +70,5 @@ export const ADMIN_NAV_ITEMS = [
 ];
 
 export function getAdminPanelName(role) {
-  return role ? "Panel de Administracion" : "Panel";
+  return role === "Vendedor" ? "Panel de Ventas" : "Panel de Administracion";
 }

@@ -58,7 +58,19 @@ async function request(path, options = {}) {
     init.body = JSON.stringify(requestOptions.body);
   }
 
-  const response = await fetch(url, init);
+  let response;
+  try {
+    response = await fetch(url, init);
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw error;
+    }
+
+    throw new Error(
+      "No fue posible conectar con el servidor. Verifica tu conexion e intenta nuevamente."
+    );
+  }
+
   const responseText = await response.text();
   let data;
 

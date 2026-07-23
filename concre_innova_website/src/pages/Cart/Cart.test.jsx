@@ -51,16 +51,51 @@ beforeEach(() => {
   jest.clearAllMocks();
   localStorage.setItem("concre_innova_cart", JSON.stringify([CART_ITEM]));
   Swal.fire.mockResolvedValue({ isConfirmed: false });
-});
-
-test("validates stock before increasing quantity and recalculates totals", async () => {
   validateCartStock.mockResolvedValue({
     todoDisponible: true,
+    subtotal: 12500,
     items: [
       {
         idProducto: 1,
+        idVariante: 10,
+        cantidadSolicitada: 1,
+        stockDisponible: 5,
+        precioUnitario: 12500,
+        subtotal: 12500,
+        estado: "DISPONIBLE",
+      },
+    ],
+  });
+});
+
+test("validates stock before increasing quantity and recalculates totals", async () => {
+  validateCartStock
+    .mockResolvedValueOnce({
+      todoDisponible: true,
+      subtotal: 12500,
+      items: [
+        {
+          idProducto: 1,
+          idVariante: 10,
+          cantidadSolicitada: 1,
+          stockDisponible: 5,
+          precioUnitario: 12500,
+          subtotal: 12500,
+          estado: "DISPONIBLE",
+        },
+      ],
+    })
+    .mockResolvedValue({
+    todoDisponible: true,
+    subtotal: 25000,
+    items: [
+      {
+        idProducto: 1,
+        idVariante: 10,
         cantidadSolicitada: 2,
         stockDisponible: 5,
+        precioUnitario: 12500,
+        subtotal: 25000,
         estado: "DISPONIBLE",
       },
     ],
@@ -75,13 +110,15 @@ test("validates stock before increasing quantity and recalculates totals", async
   );
 
   await waitFor(() => {
-    expect(validateCartStock).toHaveBeenCalledWith([
-      expect.objectContaining({
-        idProducto: 1,
-        idVariante: 10,
-        cantidad: 2,
-      }),
-    ]);
+    expect(validateCartStock).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          idProducto: 1,
+          idVariante: 10,
+          cantidad: 2,
+        }),
+      ]
+    );
     expect(screen.getByLabelText("Cantidad de Maceta")).toHaveValue(2);
     expect(screen.getByText("Unidades: 2")).toBeInTheDocument();
   });
@@ -128,9 +165,41 @@ test("rejects decimal quantities without changing the cart", async () => {
     );
   });
 
-  expect(validateCartStock).not.toHaveBeenCalled();
+  expect(validateCartStock).not.toHaveBeenCalledWith(
+    [
+      expect.objectContaining({
+        cantidad: 1.5,
+      }),
+    ]
+  );
   expect(screen.getByLabelText("Cantidad de Maceta")).toHaveValue(1);
   expect(JSON.parse(localStorage.getItem("concre_innova_cart"))[0].cantidad).toBe(
     1
   );
+});
+
+test("shows the authoritative subtotal after automatic stock validation", async () => {
+  validateCartStock.mockResolvedValue({
+    todoDisponible: true,
+    subtotal: 13000,
+    items: [
+      {
+        idProducto: 1,
+        idVariante: 10,
+        cantidadSolicitada: 1,
+        stockDisponible: 5,
+        precioUnitario: 13000,
+        subtotal: 13000,
+        estado: "DISPONIBLE",
+      },
+    ],
+  });
+
+  render(<Cart />);
+
+  expect(
+    await screen.findByText("Todos los productos tienen stock disponible.")
+  ).toBeInTheDocument();
+  expect(screen.getByText("Subtotal").parentElement).toHaveTextContent(/₡13\s000/);
+  expect(screen.getByRole("button", { name: "Ir a pagar" })).toBeEnabled();
 });

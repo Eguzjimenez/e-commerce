@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import {
   ClipboardList,
   Heart,
+  ImagePlus,
+  ListChecks,
   LogOut,
   Menu,
   MessageCircle,
@@ -15,7 +17,11 @@ import {
 } from "lucide-react";
 import { ADMIN_ROUTES, PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 import { getAuth, getUserRole, isLoggedIn, logout } from "../../services/authService";
-import { canPurchase, isAdminRole } from "../../constants/roleAccess";
+import {
+  canManageQuotations,
+  canPurchase,
+  isAdminRole,
+} from "../../constants/roleAccess";
 import { getCartCount } from "../../services/cartService";
 import { getFavoriteCountAsync } from "../../services/favoriteService";
 
@@ -65,6 +71,7 @@ function Navbar() {
   const authenticated = isLoggedIn() && auth;
   const userRole = getUserRole();
   const admin = isAdminRole(userRole);
+  const quotationStaff = canManageQuotations(userRole);
   const purchaseAccess = canPurchase(userRole);
   const isActivePath = (path) =>
     path === PUBLIC_ROUTES.HOME ? location.pathname === path : location.pathname.startsWith(path);
@@ -175,6 +182,30 @@ function Navbar() {
         {authenticated && purchaseAccess && (
           <li>
             <Link
+              to={PRIVATE_ROUTES.NEW_QUOTATION}
+              className={getNavLinkClass(PRIVATE_ROUTES.NEW_QUOTATION)}
+              aria-current={isActivePath(PRIVATE_ROUTES.NEW_QUOTATION) ? "page" : undefined}
+            >
+              <ImagePlus size={15} strokeWidth={1.8} />
+              Cotizar
+            </Link>
+          </li>
+        )}
+        {authenticated && purchaseAccess && (
+          <li>
+            <Link
+              to={PRIVATE_ROUTES.MY_QUOTATIONS}
+              className={getNavLinkClass(PRIVATE_ROUTES.MY_QUOTATIONS)}
+              aria-current={isActivePath(PRIVATE_ROUTES.MY_QUOTATIONS) ? "page" : undefined}
+            >
+              <ListChecks size={15} strokeWidth={1.8} />
+              Mis cotizaciones
+            </Link>
+          </li>
+        )}
+        {authenticated && purchaseAccess && (
+          <li>
+            <Link
               to={PRIVATE_ROUTES.MY_ORDERS}
               className={getNavLinkClass(PRIVATE_ROUTES.MY_ORDERS)}
               aria-current={isActivePath(PRIVATE_ROUTES.MY_ORDERS) ? "page" : undefined}
@@ -194,15 +225,23 @@ function Navbar() {
             Favoritos{favoriteCount > 0 ? ` (${favoriteCount})` : ""}
           </Link>
         </li>
-        {admin && (
+        {quotationStaff && (
           <li>
             <Link
-              to={ADMIN_ROUTES.DASHBOARD}
-              className={getNavLinkClass(ADMIN_ROUTES.DASHBOARD)}
-              aria-current={isActivePath(ADMIN_ROUTES.DASHBOARD) ? "page" : undefined}
+              to={admin ? ADMIN_ROUTES.DASHBOARD : ADMIN_ROUTES.QUOTATIONS}
+              className={getNavLinkClass(
+                admin ? ADMIN_ROUTES.DASHBOARD : ADMIN_ROUTES.QUOTATIONS
+              )}
+              aria-current={
+                isActivePath(
+                  admin ? ADMIN_ROUTES.DASHBOARD : ADMIN_ROUTES.QUOTATIONS
+                )
+                  ? "page"
+                  : undefined
+              }
             >
               <ShieldCheck size={15} strokeWidth={1.8} />
-              Panel
+              {admin ? "Panel" : "Atencion de cotizaciones"}
             </Link>
           </li>
         )}

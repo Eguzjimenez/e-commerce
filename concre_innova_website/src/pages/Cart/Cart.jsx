@@ -36,6 +36,11 @@ function Cart() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [products, setProducts] = useState([]);
   const [updatingItemKey, setUpdatingItemKey] = useState("");
+  const [stockSummary, setStockSummary] = useState({
+    status: "idle",
+    response: null,
+    message: "",
+  });
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -78,7 +83,7 @@ function Cart() {
     return () => window.removeEventListener("cartchange", syncCart);
   }, []);
 
-  const total = useMemo(
+  const calculatedSubtotal = useMemo(
     () =>
       products.reduce(
         (sum, product) => sum + product.price * product.quantity,
@@ -86,6 +91,83 @@ function Cart() {
       ),
     [products]
   );
+
+  useEffect(() => {
+    if (products.length === 0) {
+      setStockSummary({
+        status: "idle",
+        response: null,
+        message: "",
+      });
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const validationTimer = window.setTimeout(async () => {
+      setStockSummary({
+        status: "loading",
+        response: null,
+        message: "Validando disponibilidad y precios...",
+      });
+
+      try {
+        const response = await validateCartStock(products, {
+          signal: controller.signal,
+        });
+        const stockItems = Array.isArray(response?.items)
+          ? response.items
+          : [];
+        const unavailableItems = stockItems.filter(isStockItemUnavailable);
+        const allAvailable =
+          Boolean(response?.todoDisponible) &&
+          unavailableItems.length === 0;
+
+        setStockSummary({
+          status: allAvailable ? "available" : "unavailable",
+          response,
+          message: allAvailable
+            ? "Todos los productos tienen stock disponible."
+            : "Hay productos sin stock suficiente.",
+        });
+      } catch (error) {
+        if (error?.name === "AbortError") {
+          return;
+        }
+
+        setStockSummary({
+          status: "error",
+          response: null,
+          message:
+            error?.message ||
+            "No fue posible validar la disponibilidad del carrito.",
+        });
+      }
+    }, 150);
+
+    return () => {
+      window.clearTimeout(validationTimer);
+      controller.abort();
+    };
+  }, [products]);
+
+  const validatedItemsByKey = useMemo(() => {
+    const items = Array.isArray(stockSummary.response?.items)
+      ? stockSummary.response.items
+      : [];
+
+    return new Map(
+      items.map((item) => [
+        `${Number(item.idProducto)}:${Number(item.idVariante) || 0}`,
+        item,
+      ])
+    );
+  }, [stockSummary.response]);
+
+  const validatedSubtotal = Number(stockSummary.response?.subtotal);
+  const purchaseSubtotal =
+    stockSummary.status === "available" && Number.isFinite(validatedSubtotal)
+      ? validatedSubtotal
+      : calculatedSubtotal;
 
   const totalUnits = useMemo(
     () =>
@@ -207,6 +289,17 @@ function Cart() {
       return;
     }
 
+    if (stockSummary.status !== "available") {
+      await Swal.fire({
+        icon: "warning",
+        title: "Stock pendiente de validacion",
+        text:
+          stockSummary.message ||
+          "Espera a que se valide la disponibilidad de todos los productos.",
+      });
+      return;
+    }
+
     if (!isLoggedIn()) {
       navigate(PUBLIC_ROUTES.LOGIN, {
         state: {
@@ -236,7 +329,15 @@ function Cart() {
             const itemKey = getCartItemKey(product);
             const isUpdating = updatingItemKey === itemKey;
             const attributes = getProductAttributes(product);
-            const subtotal = product.price * product.quantity;
+            const validatedItem = validatedItemsByKey.get(itemKey);
+            const validatedItemSubtotal = Number(validatedItem?.subtotal);
+            const subtotal = Number.isFinite(validatedItemSubtotal)
+              ? validatedItemSubtotal
+              : product.price * product.quantity;
+            const validatedUnitPrice = Number(validatedItem?.precioUnitario);
+            const unitPrice = Number.isFinite(validatedUnitPrice)
+              ? validatedUnitPrice
+              : product.price;
 
             return (
               <article className="cart-item" key={itemKey}>
@@ -257,7 +358,7 @@ function Cart() {
                         {attributes.join(" | ")}
                       </p>
                     )}
-                    <p>Precio unitario: {formatCatalogPrice(product.price)}</p>
+                    <p>Precio unitario: {formatCatalogPrice(unitPrice)}</p>
                   </div>
                 </button>
 
@@ -328,11 +429,28 @@ function Cart() {
           <p className="summary-copy">Unidades: {totalUnits}</p>
 
           <div className="summary-total">
-            <span>Total</span>
-            <span>{formatCatalogPrice(total)}</span>
+            <span>Subtotal</span>
+            <span>{formatCatalogPrice(purchaseSubtotal)}</span>
           </div>
 
-          <button className="btn checkout-btn" onClick={handleProceedToCheckout}>
+          <p
+            className={`cart-stock-status ${stockSummary.status}`}
+            role="status"
+            aria-live="polite"
+          >
+            {products.length > 0
+              ? stockSummary.message || "Preparando validacion de stock..."
+              : "Agrega productos para calcular el subtotal."}
+          </p>
+
+          <button
+            className="btn checkout-btn"
+            onClick={handleProceedToCheckout}
+            disabled={
+              products.length === 0 ||
+              stockSummary.status !== "available"
+            }
+          >
             Ir a pagar
           </button>
         </aside>

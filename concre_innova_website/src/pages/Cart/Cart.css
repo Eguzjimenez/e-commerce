@@ -232,6 +232,41 @@
   font-weight: 800;
 }
 
+.cart-stock-status {
+  min-height: 42px;
+  margin: 16px 0;
+  padding: 10px 12px;
+  border-left: 3px solid #89939a;
+  background: #f2f4f5;
+  color: #465158;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.cart-stock-status.available {
+  border-left-color: #2d7a4b;
+  background: #edf7f0;
+  color: #245f3c;
+}
+
+.cart-stock-status.unavailable,
+.cart-stock-status.error {
+  border-left-color: #aa3333;
+  background: #fbefef;
+  color: #812727;
+}
+
+.cart-stock-status.loading {
+  border-left-color: #b27a20;
+  background: #fff7e8;
+  color: #735017;
+}
+
+.checkout-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .checkout-btn {
   width: 100%;
   background: var(--clay);

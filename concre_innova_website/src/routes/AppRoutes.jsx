@@ -11,6 +11,8 @@ import Favorites from "../pages/Favorites/Favorites";
 import Cart from "../pages/Cart/Cart";
 import Checkout from "../pages/Checkout/Checkout";
 import History from "../pages/History/History";
+import QuotationRequest from "../pages/QuotationRequest/QuotationRequest";
+import QuotationHistory from "../pages/QuotationHistory/QuotationHistory";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import ForgotPassword from "../pages/forgot-password/ForgotPassword";
@@ -59,6 +61,22 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
             <History />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={PRIVATE_ROUTES.NEW_QUOTATION}
+        element={
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
+            <QuotationRequest />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={PRIVATE_ROUTES.MY_QUOTATIONS}
+        element={
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
+            <QuotationHistory />
           </ProtectedRoute>
         }
       />
@@ -147,7 +165,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.QUOTATIONS}
         element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.QUOTATION_STAFF}>
             <AdminQuotations />
           </ProtectedRoute>
         }

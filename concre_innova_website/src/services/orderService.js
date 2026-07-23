@@ -56,12 +56,13 @@ export function isStockItemUnavailable(stockItem) {
   ].some((term) => status.includes(term));
 }
 
-export async function validateCartStock(items) {
+export async function validateCartStock(items, { signal } = {}) {
   const normalizedItems = normalizeOrderItems(items);
 
   return request("/api/Carrito/validar-stock", {
     method: "POST",
     body: { items: normalizedItems },
+    signal,
   });
 }
 
