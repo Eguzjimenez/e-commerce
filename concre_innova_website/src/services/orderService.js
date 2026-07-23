@@ -104,3 +104,59 @@ export async function prepareOrderReorder(idPedido) {
     method: "POST",
   });
 }
+
+export async function getAdminOrders({
+  busqueda = "",
+  estado = "",
+  fechaDesde = "",
+  fechaHasta = "",
+  pagina = 1,
+  tamanoPagina = 10,
+} = {}) {
+  const query = new URLSearchParams();
+
+  if (busqueda) {
+    query.set("busqueda", busqueda);
+  }
+
+  if (estado) {
+    query.set("estado", estado);
+  }
+
+  if (fechaDesde) {
+    query.set("fechaDesde", fechaDesde);
+  }
+
+  if (fechaHasta) {
+    query.set("fechaHasta", fechaHasta);
+  }
+
+  query.set("pagina", pagina);
+  query.set("tamanoPagina", tamanoPagina);
+
+  return request(`/api/Pedidos?${query.toString()}`, {
+    method: "GET",
+  });
+}
+
+export async function getAdminOrderDetail(idPedido) {
+  return request(`/api/Pedidos/${Number(idPedido)}`, {
+    method: "GET",
+  });
+}
+
+export async function updateOrderStatus(idPedido, nuevoEstado) {
+  return request(`/api/Pedidos/${Number(idPedido)}/estado`, {
+    method: "PUT",
+    body: {
+      idPedido: Number(idPedido),
+      nuevoEstado,
+    },
+  });
+}
+
+export async function cancelOrder(idPedido) {
+  return request(`/api/Pedidos/${Number(idPedido)}/cancelar`, {
+    method: "PUT",
+  });
+}

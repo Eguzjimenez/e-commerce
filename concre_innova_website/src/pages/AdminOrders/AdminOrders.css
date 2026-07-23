@@ -111,6 +111,99 @@
   color: var(--blue-muted);
 }
 
+.order-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  padding: 20px;
+}
+
+.admin-modal {
+  width: min(760px, 100%);
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.admin-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.admin-modal-header h3 {
+  margin: 0;
+  color: #1f3b2d;
+}
+
+.admin-modal-close {
+  border: none;
+  background: #f2f4f7;
+  color: #1f3b2d;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.admin-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-modal-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #22382b;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.admin-modal-form select {
+  border: 1px solid #d8ddd8;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.93rem;
+  font-family: inherit;
+}
+
+.admin-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.admin-view-order {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #22382b;
+  margin-bottom: 14px;
+}
+
+.admin-view-order table {
+  color: #22382b;
+  margin-top: 8px;
+}
+
 @media (max-width: 900px) {
   .admin-orders-topbar {
     flex-direction: column;
