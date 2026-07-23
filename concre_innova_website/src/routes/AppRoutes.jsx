@@ -10,6 +10,7 @@ import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import Favorites from "../pages/Favorites/Favorites";
 import Cart from "../pages/Cart/Cart";
 import Checkout from "../pages/Checkout/Checkout";
+import History from "../pages/History/History";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import ForgotPassword from "../pages/forgot-password/ForgotPassword";
@@ -50,6 +51,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
             <Checkout />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={PRIVATE_ROUTES.MY_ORDERS}
+        element={
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
+            <History />
           </ProtectedRoute>
         }
       />

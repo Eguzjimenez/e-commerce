@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
+  ClipboardList,
   Heart,
   LogOut,
   Menu,
@@ -170,6 +171,18 @@ function Navbar() {
             Catalogo
           </Link>
         </li>
+        {authenticated && (
+          <li>
+            <Link
+              to={PRIVATE_ROUTES.MY_ORDERS}
+              className={getNavLinkClass(PRIVATE_ROUTES.MY_ORDERS)}
+              aria-current={isActivePath(PRIVATE_ROUTES.MY_ORDERS) ? "page" : undefined}
+            >
+              <ClipboardList size={15} strokeWidth={1.8} />
+              Mis pedidos
+            </Link>
+          </li>
+        )}
         <li>
           <Link
             to={PUBLIC_ROUTES.FAVORITES}
