@@ -16,7 +16,7 @@ function ProtectedRoute({ children, allowedRoles }) {
   if (allowedRoles && !allowedRoles.includes(roleName)) {
     console.warn(
       `[Acceso denegado] Usuario ID=${auth.idUsuario} (Rol=${auth.idRol}) ` +
-      `intentó acceder a ruta protegida: ${location.pathname}`
+      `intento acceder a ruta protegida: ${location.pathname}`
     );
 
     return (

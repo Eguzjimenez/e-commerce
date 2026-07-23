@@ -42,6 +42,7 @@ export function addToCart(product, quantity = 1) {
       nombreVariante: product.nombreVariante ?? "",
       tamano: product.tamano ?? "",
       material: product.material ?? "",
+      color: product.color ?? "",
       cantidad: quantity,
     });
   }
@@ -50,16 +51,29 @@ export function addToCart(product, quantity = 1) {
   return cart;
 }
 
-export function removeFromCart(idProducto) {
-  const nextCart = getCart().filter((item) => Number(item.idProducto) !== Number(idProducto));
+function matchesCartItem(item, idProducto, idVariante) {
+  return (
+    Number(item.idProducto) === Number(idProducto) &&
+    Number(item.idVariante || 0) === Number(idVariante || 0)
+  );
+}
+
+export function removeFromCart(idProducto, idVariante = null) {
+  const nextCart = getCart().filter(
+    (item) => !matchesCartItem(item, idProducto, idVariante)
+  );
   saveCart(nextCart);
   return nextCart;
 }
 
-export function updateCartItemQuantity(idProducto, quantity) {
+export function updateCartItemQuantity(
+  idProducto,
+  idVariante,
+  quantity
+) {
   const normalizedQuantity = Math.max(1, Number(quantity) || 1);
   const nextCart = getCart().map((item) =>
-    Number(item.idProducto) === Number(idProducto)
+    matchesCartItem(item, idProducto, idVariante)
       ? { ...item, cantidad: normalizedQuantity }
       : item
   );

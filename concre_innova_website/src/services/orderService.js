@@ -5,19 +5,55 @@ function normalizeOrderItems(items) {
 
   (Array.isArray(items) ? items : []).forEach((item) => {
     const idProducto = Number(item?.idProducto);
+    const parsedVariantId = Number(item?.idVariante);
+    const idVariante =
+      Number.isInteger(parsedVariantId) && parsedVariantId > 0
+        ? parsedVariantId
+        : null;
     const cantidad = Math.max(1, Number(item?.cantidad) || 1);
 
     if (!Number.isInteger(idProducto) || idProducto <= 0) {
       return;
     }
 
-    groupedItems.set(idProducto, (groupedItems.get(idProducto) || 0) + cantidad);
+    const itemKey = `${idProducto}:${idVariante || 0}`;
+    const existingItem = groupedItems.get(itemKey);
+
+    if (existingItem) {
+      existingItem.cantidad += cantidad;
+      return;
+    }
+
+    groupedItems.set(itemKey, {
+      idProducto,
+      idVariante,
+      nombreVariante: String(item?.nombreVariante || "").trim(),
+      tamano: String(item?.tamano || "").trim(),
+      material: String(item?.material || "").trim(),
+      color: String(item?.color || "").trim(),
+      cantidad,
+    });
   });
 
-  return Array.from(groupedItems.entries()).map(([idProducto, cantidad]) => ({
-    idProducto,
-    cantidad,
-  }));
+  return Array.from(groupedItems.values());
+}
+
+export function isStockItemUnavailable(stockItem) {
+  const requestedQuantity = Number(stockItem?.cantidadSolicitada) || 0;
+  const availableStock = Number(stockItem?.stockDisponible) || 0;
+  const status = String(stockItem?.estado || "").toLowerCase();
+
+  if (requestedQuantity > availableStock) {
+    return true;
+  }
+
+  return [
+    "sin",
+    "agotado",
+    "insuficiente",
+    "no disponible",
+    "no_disponible",
+  ].some((term) => status.includes(term));
 }
 
 export async function validateCartStock(items) {
@@ -38,16 +74,33 @@ export async function registerOrder({ idUsuario, direccionEntrega, metodoPago, i
     items: normalizedItems,
   };
 
-  console.log("registerOrder payload:", payload);
-
   return request("/api/Carrito/registrar-pedido", {
     method: "POST",
     body: payload,
   });
 }
 
-export async function getMyOrders() {
-  return request("/api/Carrito/mis-pedidos", {
+export async function getMyOrders({ fechaDesde = "", fechaHasta = "" } = {}) {
+  const query = new URLSearchParams();
+
+  if (fechaDesde) {
+    query.set("fechaDesde", fechaDesde);
+  }
+
+  if (fechaHasta) {
+    query.set("fechaHasta", fechaHasta);
+  }
+
+  const queryString = query.toString();
+  const endpoint = `/api/Carrito/mis-pedidos${queryString ? `?${queryString}` : ""}`;
+
+  return request(endpoint, {
     method: "GET",
+  });
+}
+
+export async function prepareOrderReorder(idPedido) {
+  return request(`/api/Carrito/mis-pedidos/${Number(idPedido)}/recompra`, {
+    method: "POST",
   });
 }

@@ -1,34 +1,34 @@
 import "./Checkout.css";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { clearCart, getCart } from "../../services/cartService";
 import { formatCatalogPrice } from "../../services/catalogPresentationService";
 import { getUserId, isLoggedIn } from "../../services/authService";
-import { registerOrder, validateCartStock } from "../../services/orderService";
+import {
+  isStockItemUnavailable,
+  registerOrder,
+  validateCartStock,
+} from "../../services/orderService";
 import { PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 
 const CARD_PAYMENT_METHOD = "Tarjeta";
+const PAYMENT_METHODS = [
+  CARD_PAYMENT_METHOD,
+  "SINPE Movil",
+  "Efectivo contra entrega",
+];
 
 function buildOrderItems(cartItems) {
   return (Array.isArray(cartItems) ? cartItems : []).map((item) => ({
     idProducto: Number(item.idProducto),
+    idVariante: item.idVariante ? Number(item.idVariante) : null,
+    nombreVariante: String(item.nombreVariante || "").trim(),
+    tamano: String(item.tamano || "").trim(),
+    material: String(item.material || "").trim(),
+    color: String(item.color || "").trim(),
     cantidad: Math.max(1, Number(item.cantidad) || 1),
   }));
-}
-
-function hasUnavailableStock(stockItem) {
-  const requested = Number(stockItem?.cantidadSolicitada) || 0;
-  const available = Number(stockItem?.stockDisponible) || 0;
-  const status = String(stockItem?.estado || "").toLowerCase();
-
-  if (requested > available) {
-    return true;
-  }
-
-  return ["sin", "agotado", "insuficiente", "no disponible"].some((term) =>
-    status.includes(term)
-  );
 }
 
 function formatCardNumber(value) {
@@ -134,7 +134,7 @@ function buildReceiptHtml(receipt) {
     <p class="meta"><strong>Cliente (usuario):</strong> ${escapeHtml(receipt.idUsuario)}</p>
     <p class="meta"><strong>Direccion:</strong> ${escapeHtml(receipt.direccionEntrega)}</p>
     <p class="meta"><strong>Metodo de pago:</strong> ${escapeHtml(receipt.metodoPago)}</p>
-    <p class="meta"><strong>Tarjeta:</strong> Terminada en ${escapeHtml(receipt.last4)}</p>
+    ${receipt.last4 ? `<p class="meta"><strong>Tarjeta:</strong> Terminada en ${escapeHtml(receipt.last4)}</p>` : ""}
 
     <table>
       <thead>
@@ -179,7 +179,7 @@ function Checkout() {
   const [mensajeExito, setMensajeExito] = useState("");
   const [productos, setProductos] = useState([]);
   const [direccionEntrega, setDireccionEntrega] = useState("");
-  const [metodoPago] = useState(CARD_PAYMENT_METHOD);
+  const [metodoPago, setMetodoPago] = useState(CARD_PAYMENT_METHOD);
   const [cardHolder, setCardHolder] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
@@ -188,6 +188,7 @@ function Checkout() {
   const [stockValidationResult, setStockValidationResult] = useState(null);
   const [isStockValidated, setIsStockValidated] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const orderSubmissionInProgress = useRef(false);
 
   useEffect(() => {
     const syncCart = () => {
@@ -209,6 +210,7 @@ function Checkout() {
       0
     );
   }, [productos]);
+  const requiresCardData = metodoPago === CARD_PAYMENT_METHOD;
 
   const ensureUserSession = async () => {
     if (isLoggedIn()) {
@@ -252,7 +254,7 @@ function Checkout() {
     try {
       const response = await validateCartStock(buildOrderItems(productos));
       const stockItems = Array.isArray(response?.items) ? response.items : [];
-      const unavailableItems = stockItems.filter(hasUnavailableStock);
+      const unavailableItems = stockItems.filter(isStockItemUnavailable);
       const todoDisponible = Boolean(response?.todoDisponible) && unavailableItems.length === 0;
 
       setStockValidationResult(response);
@@ -330,7 +332,19 @@ function Checkout() {
       return;
     }
 
-    const cardError = validateCardData({ cardHolder, cardNumber, expiry, cvv });
+    if (direccionEntrega.trim().length > 255) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Direccion demasiado larga",
+        text: "La direccion de entrega no puede superar 255 caracteres.",
+      });
+      return;
+    }
+
+    const cardError = requiresCardData
+      ? validateCardData({ cardHolder, cardNumber, expiry, cvv })
+      : null;
+
     if (cardError) {
       await Swal.fire({
         icon: "warning",
@@ -363,6 +377,11 @@ function Checkout() {
       return;
     }
 
+    if (orderSubmissionInProgress.current) {
+      return;
+    }
+
+    orderSubmissionInProgress.current = true;
     setIsSubmitting(true);
 
     try {
@@ -374,7 +393,7 @@ function Checkout() {
       }));
 
       const cardDigits = String(cardNumber || "").replace(/\D/g, "");
-      const last4 = cardDigits.slice(-4) || "0000";
+      const last4 = requiresCardData ? cardDigits.slice(-4) : "";
       const response = await registerOrder({
         idUsuario,
         direccionEntrega: direccionEntrega.trim(),
@@ -433,6 +452,7 @@ function Checkout() {
         text: error?.message || "Ocurrio un error al registrar el pedido.",
       });
     } finally {
+      orderSubmissionInProgress.current = false;
       setIsSubmitting(false);
     }
   };
@@ -481,45 +501,69 @@ function Checkout() {
             className="input"
             placeholder="Direccion de entrega"
             value={direccionEntrega}
+            maxLength={255}
             onChange={(event) => setDireccionEntrega(event.target.value)}
           />
 
-          <div className="checkout-payment-method">Metodo de pago: Tarjeta</div>
+          <fieldset className="checkout-payment-method">
+            <legend>Metodo de pago</legend>
+            <div className="checkout-payment-options">
+              {PAYMENT_METHODS.map((paymentMethod) => (
+                <label
+                  className="checkout-payment-option"
+                  key={paymentMethod}
+                >
+                  <input
+                    type="radio"
+                    name="metodoPago"
+                    value={paymentMethod}
+                    checked={metodoPago === paymentMethod}
+                    onChange={(event) => setMetodoPago(event.target.value)}
+                  />
+                  <span>{paymentMethod}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
 
-          <input
-            className="input"
-            placeholder="Nombre del titular"
-            value={cardHolder}
-            onChange={(event) => setCardHolder(event.target.value)}
-          />
+          {requiresCardData && (
+            <>
+              <input
+                className="input"
+                placeholder="Nombre del titular"
+                value={cardHolder}
+                onChange={(event) => setCardHolder(event.target.value)}
+              />
 
-          <input
-            className="input"
-            inputMode="numeric"
-            placeholder="Numero de tarjeta"
-            value={cardNumber}
-            onChange={(event) => setCardNumber(formatCardNumber(event.target.value))}
-          />
+              <input
+                className="input"
+                inputMode="numeric"
+                placeholder="Numero de tarjeta"
+                value={cardNumber}
+                onChange={(event) => setCardNumber(formatCardNumber(event.target.value))}
+              />
 
-          <div className="checkout-card-row">
-            <input
-              className="input"
-              inputMode="numeric"
-              placeholder="MM/AA"
-              value={expiry}
-              onChange={(event) => setExpiry(formatExpiry(event.target.value))}
-            />
+              <div className="checkout-card-row">
+                <input
+                  className="input"
+                  inputMode="numeric"
+                  placeholder="MM/AA"
+                  value={expiry}
+                  onChange={(event) => setExpiry(formatExpiry(event.target.value))}
+                />
 
-            <input
-              className="input"
-              inputMode="numeric"
-              placeholder="CVV"
-              value={cvv}
-              onChange={(event) =>
-                setCvv(String(event.target.value || "").replace(/\D/g, "").slice(0, 4))
-              }
-            />
-          </div>
+                <input
+                  className="input"
+                  inputMode="numeric"
+                  placeholder="CVV"
+                  value={cvv}
+                  onChange={(event) =>
+                    setCvv(String(event.target.value || "").replace(/\D/g, "").slice(0, 4))
+                  }
+                />
+              </div>
+            </>
+          )}
         </div>
 
         <button className="btn" onClick={handleValidateStock} disabled={isSubmitting}>

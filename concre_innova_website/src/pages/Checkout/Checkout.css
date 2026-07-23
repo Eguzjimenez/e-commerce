@@ -107,8 +107,32 @@
   padding: 12px 14px;
   border-radius: 12px;
   background: var(--sage-100);
+  border: 1px solid rgba(15, 27, 45, 0.08);
   color: var(--forest-700);
   font-weight: 700;
+}
+
+.checkout-payment-method legend {
+  padding: 0 4px;
+}
+
+.checkout-payment-options {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.checkout-payment-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.checkout-payment-option input {
+  accent-color: var(--forest-700);
 }
 
 .checkout-card-row {

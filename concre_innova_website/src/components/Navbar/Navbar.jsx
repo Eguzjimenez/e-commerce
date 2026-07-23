@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { ADMIN_ROUTES, PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 import { getAuth, getUserRole, isLoggedIn, logout } from "../../services/authService";
-import { isAdminRole } from "../../constants/roleAccess";
+import { canPurchase, isAdminRole } from "../../constants/roleAccess";
 import { getCartCount } from "../../services/cartService";
 import { getFavoriteCountAsync } from "../../services/favoriteService";
 
@@ -65,6 +65,7 @@ function Navbar() {
   const authenticated = isLoggedIn() && auth;
   const userRole = getUserRole();
   const admin = isAdminRole(userRole);
+  const purchaseAccess = canPurchase(userRole);
   const isActivePath = (path) =>
     path === PUBLIC_ROUTES.HOME ? location.pathname === path : location.pathname.startsWith(path);
   const getNavLinkClass = (path, className = "") =>
@@ -171,7 +172,7 @@ function Navbar() {
             Catalogo
           </Link>
         </li>
-        {authenticated && (
+        {authenticated && purchaseAccess && (
           <li>
             <Link
               to={PRIVATE_ROUTES.MY_ORDERS}

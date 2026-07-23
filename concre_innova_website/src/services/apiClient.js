@@ -1,6 +1,11 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5222";
 const AUTH_STORAGE_KEY = "concre_innova_auth";
 
+function clearExpiredSession() {
+  localStorage.removeItem(AUTH_STORAGE_KEY);
+  window.dispatchEvent(new Event("authchange"));
+}
+
 function getAuthHeaders() {
   try {
     const rawAuth = localStorage.getItem(AUTH_STORAGE_KEY);
@@ -64,6 +69,10 @@ async function request(path, options = {}) {
   }
 
   if (!response.ok) {
+    if (response.status === 401 && !skipAuthHeaders) {
+      clearExpiredSession();
+    }
+
     const message =
       data?.mensaje ||
       data?.message ||

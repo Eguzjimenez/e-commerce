@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 
 import { PUBLIC_ROUTES, PRIVATE_ROUTES, ADMIN_ROUTES } from "./routes";
 import { ROLE_GROUPS } from "../constants/roleAccess";
@@ -49,7 +49,7 @@ function AppRoutes() {
       <Route
         path={PRIVATE_ROUTES.CHECKOUT}
         element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
             <Checkout />
           </ProtectedRoute>
         }
@@ -57,7 +57,7 @@ function AppRoutes() {
       <Route
         path={PRIVATE_ROUTES.MY_ORDERS}
         element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
             <History />
           </ProtectedRoute>
         }
@@ -168,6 +168,8 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      <Route path="*" element={<Navigate to={PUBLIC_ROUTES.HOME} replace />} />
     </Routes>
   );
 }
