@@ -102,6 +102,16 @@
   min-width: 220px;
 }
 
+.product-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.product-visualizer-button {
+  box-shadow: none;
+}
+
 .product-related-section {
   margin-top: 48px;
   margin-bottom: 72px;
@@ -232,6 +242,10 @@
 
   .product-detail-specs {
     grid-template-columns: 1fr;
+  }
+
+  .product-detail-actions {
+    flex-direction: column;
   }
 
   .product-related-header {

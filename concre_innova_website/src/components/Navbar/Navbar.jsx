@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ADMIN_ROUTES, PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 import { getAuth, getUserRole, isLoggedIn, logout } from "../../services/authService";
 import { isAdminRole } from "../../constants/roleAccess";
+import { ROLES } from "../../constants/roles";
 import { getCartCount } from "../../services/cartService";
 import { getFavoriteCountAsync } from "../../services/favoriteService";
 
@@ -51,11 +52,14 @@ function Navbar() {
   const authenticated = isLoggedIn() && auth;
   const userRole = getUserRole();
   const admin = isAdminRole(userRole);
+  const isClient = userRole === ROLES.CLIENTE;
+  const showAdminOnlyMenu = authenticated && admin;
+  const logoRoute = showAdminOnlyMenu ? ADMIN_ROUTES.DASHBOARD : PUBLIC_ROUTES.HOME;
 
   return (
     <nav className="navbar">
       <div className="nav-container">
-        <Link to={PUBLIC_ROUTES.HOME} className="nav-logo">
+        <Link to={logoRoute} className="nav-logo">
           Concre Innova
         </Link>
 
@@ -71,51 +75,63 @@ function Navbar() {
         </button>
 
         <ul className={`nav-menu ${menuOpen ? "active" : ""}`}>
-          <li>
-            <Link to={PUBLIC_ROUTES.HOME}>Inicio</Link>
-          </li>
-          <li>
-            <Link to={PUBLIC_ROUTES.CATALOG}>Catalogo</Link>
-          </li>
-          <li>
-            <Link to={PRIVATE_ROUTES.CART}>
-              Carrito{cartCount > 0 ? ` (${cartCount})` : ""}
-            </Link>
-          </li>
-          {authenticated && (
-            <li>
-              <Link to={PRIVATE_ROUTES.MY_ORDERS}>Mis pedidos</Link>
-            </li>
-          )}
-          <li>
-            <Link to={PUBLIC_ROUTES.FAVORITES}>
-              Mis Favoritos{favoriteCount > 0 ? ` (${favoriteCount})` : ""}
-            </Link>
-          </li>
-          {admin && (
-            <li>
-              <Link to={ADMIN_ROUTES.DASHBOARD}>Panel</Link>
-            </li>
-          )}
-          <li>
-            <Link to={PUBLIC_ROUTES.CHAT}>Chat</Link>
-          </li>
-          {!authenticated && (
+          {showAdminOnlyMenu ? (
             <>
               <li>
-                <Link to={PUBLIC_ROUTES.LOGIN}>Login</Link>
+                <Link to={ADMIN_ROUTES.DASHBOARD}>Panel</Link>
               </li>
               <li>
-                <Link to={PUBLIC_ROUTES.REGISTER}>Registro</Link>
+                <button className="logout-btn" type="button" onClick={handleLogout}>
+                  Cerrar sesion
+                </button>
               </li>
             </>
-          )}
-          {authenticated && (
-            <li>
-              <button className="logout-btn" type="button" onClick={handleLogout}>
-                Cerrar sesion
-              </button>
-            </li>
+          ) : (
+            <>
+              <li>
+                <Link to={PUBLIC_ROUTES.HOME}>Inicio</Link>
+              </li>
+              <li>
+                <Link to={PUBLIC_ROUTES.CATALOG}>Catalogo</Link>
+              </li>
+              <li>
+                <Link to={PRIVATE_ROUTES.CART}>
+                  Carrito{cartCount > 0 ? ` (${cartCount})` : ""}
+                </Link>
+              </li>
+              {authenticated && (
+                <li>
+                  <Link to={PRIVATE_ROUTES.MY_ORDERS}>Mis pedidos</Link>
+                </li>
+              )}
+              <li>
+                <Link to={PUBLIC_ROUTES.FAVORITES}>
+                  Mis Favoritos{favoriteCount > 0 ? ` (${favoriteCount})` : ""}
+                </Link>
+              </li>
+              {authenticated && isClient && (
+                <li>
+                  <Link to={PRIVATE_ROUTES.MY_ACCOUNT}>Mi cuenta</Link>
+                </li>
+              )}
+              {!authenticated && (
+                <>
+                  <li>
+                    <Link to={PUBLIC_ROUTES.LOGIN}>Login</Link>
+                  </li>
+                  <li>
+                    <Link to={PUBLIC_ROUTES.REGISTER}>Registro</Link>
+                  </li>
+                </>
+              )}
+              {authenticated && (
+                <li>
+                  <button className="logout-btn" type="button" onClick={handleLogout}>
+                    Cerrar sesion
+                  </button>
+                </li>
+              )}
+            </>
           )}
         </ul>
       </div>

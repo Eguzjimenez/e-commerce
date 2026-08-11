@@ -6,6 +6,7 @@ import { clearCart, getCart } from "../../services/cartService";
 import { getUserId, isLoggedIn } from "../../services/authService";
 import { registerOrder, validateCartStock } from "../../services/orderService";
 import { PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
+import ComprobantePedido from "../../components/ComprobantePedido/ComprobantePedido";
 
 const CARD_PAYMENT_METHOD = "Tarjeta";
 
@@ -84,95 +85,6 @@ function validateCardData({ cardHolder, cardNumber, expiry, cvv }) {
   }
 
   return null;
-}
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function formatMoney(value) {
-  return Number(value || 0).toFixed(2);
-}
-
-function buildReceiptHtml(receipt) {
-  const rows = receipt.items
-    .map(
-      (item) => `
-        <tr>
-          <td>${escapeHtml(item.nombre)}</td>
-          <td style="text-align:center;">${item.cantidad}</td>
-          <td style="text-align:right;">$${formatMoney(item.precio)}</td>
-          <td style="text-align:right;">$${formatMoney(item.subtotal)}</td>
-        </tr>
-      `
-    )
-    .join("");
-
-  return `
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <title>Comprobante de compra</title>
-    <style>
-      body { font-family: Arial, sans-serif; margin: 24px; color: #1d2a33; }
-      h1 { margin: 0 0 8px; }
-      .meta { margin: 4px 0; }
-      table { width: 100%; border-collapse: collapse; margin-top: 18px; }
-      th, td { border-bottom: 1px solid #d8dde1; padding: 10px 8px; }
-      th { background: #f4f6f8; text-align: left; }
-      .total { margin-top: 16px; text-align: right; font-size: 1.1rem; font-weight: 700; }
-      .foot { margin-top: 26px; color: #5b6770; font-size: 0.9rem; }
-    </style>
-  </head>
-  <body>
-    <h1>Comprobante de compra</h1>
-    <p class="meta"><strong>Pedido:</strong> #${escapeHtml(receipt.idPedido)}</p>
-    <p class="meta"><strong>Fecha:</strong> ${escapeHtml(receipt.fecha)}</p>
-    <p class="meta"><strong>Cliente (usuario):</strong> ${escapeHtml(receipt.idUsuario)}</p>
-    <p class="meta"><strong>Direccion:</strong> ${escapeHtml(receipt.direccionEntrega)}</p>
-    <p class="meta"><strong>Metodo de pago:</strong> ${escapeHtml(receipt.metodoPago)}</p>
-    <p class="meta"><strong>Tarjeta:</strong> Terminada en ${escapeHtml(receipt.last4)}</p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th style="text-align:center;">Cantidad</th>
-          <th style="text-align:right;">Precio unitario</th>
-          <th style="text-align:right;">Subtotal</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
-
-    <p class="total">Total pagado: $${formatMoney(receipt.total)}</p>
-    <p class="foot">Este documento es un comprobante digital de tu compra.</p>
-  </body>
-</html>
-  `;
-}
-
-function downloadReceipt(receipt) {
-  const html = buildReceiptHtml(receipt);
-  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  const orderId = receipt?.idPedido ?? `temp-${Date.now()}`;
-
-  anchor.href = url;
-  anchor.download = `comprobante-pedido-${orderId}.html`;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-  URL.revokeObjectURL(url);
 }
 
 function Checkout() {
@@ -443,130 +355,124 @@ function Checkout() {
   return (
     <div className="checkout-page container">
       <div className="checkout-card">
-        <div className="checkout-heading">
+        <div className="checkout-heading checkout-heading-wide">
           <span className="checkout-eyebrow">Pago seguro</span>
           <h1>Pago</h1>
           <p>Completa la informacion para finalizar tu compra.</p>
         </div>
 
-        <h3>Resumen de compra</h3>
+        <div className="checkout-layout">
+          <aside className="checkout-panel checkout-summary-panel">
+            <div className="checkout-panel-head">
+              <h3>Resumen de compra</h3>
+              <p>{productos.length} productos en carrito</p>
+            </div>
 
-        {productos.length === 0 ? (
-          <p>No hay productos en el carrito.</p>
-        ) : (
-          <>
-            {productos.map((producto) => (
-              <div
-                key={producto.idProducto}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "8px",
-                }}
+            <div className="checkout-summary-list">
+              {productos.length === 0 ? (
+                <p className="checkout-empty">No hay productos en el carrito.</p>
+              ) : (
+                productos.map((producto) => (
+                  <div className="checkout-summary-item" key={producto.idProducto}>
+                    <div>
+                      <strong>{producto.nombre}</strong>
+                      <span>x{producto.cantidad}</span>
+                    </div>
+
+                    <strong>
+                      ${(Number(producto.precio) * Number(producto.cantidad)).toFixed(2)}
+                    </strong>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="checkout-total-box">
+              <span>Total</span>
+              <strong>${total.toFixed(2)}</strong>
+            </div>
+          </aside>
+
+          <section className="checkout-panel checkout-form-panel">
+            <div className="checkout-panel-head">
+              <h3>Datos de pago</h3>
+              <p>Usa la tarjeta para validar y confirmar.</p>
+            </div>
+
+            <input
+              className="input"
+              placeholder="Direccion de entrega"
+              value={direccionEntrega}
+              onChange={(event) => setDireccionEntrega(event.target.value)}
+            />
+
+            <div className="checkout-payment-method">Metodo de pago: Tarjeta</div>
+
+            <input
+              className="input"
+              placeholder="Nombre del titular"
+              value={cardHolder}
+              onChange={(event) => setCardHolder(event.target.value)}
+            />
+
+            <input
+              className="input"
+              inputMode="numeric"
+              placeholder="Numero de tarjeta"
+              value={cardNumber}
+              onChange={(event) => setCardNumber(formatCardNumber(event.target.value))}
+            />
+
+            <div className="checkout-card-row">
+              <input
+                className="input"
+                inputMode="numeric"
+                placeholder="MM/AA"
+                value={expiry}
+                onChange={(event) => setExpiry(formatExpiry(event.target.value))}
+              />
+
+              <input
+                className="input"
+                inputMode="numeric"
+                placeholder="CVV"
+                value={cvv}
+                onChange={(event) => setCvv(String(event.target.value || "").replace(/\D/g, "").slice(0, 4))}
+              />
+            </div>
+
+            <div className="checkout-actions">
+              <button className="btn" onClick={handleValidateStock} disabled={isSubmitting}>
+                Validar stock
+              </button>
+
+              <button
+                className="btn"
+                onClick={handleConfirmOrder}
+                disabled={isSubmitting || !isStockValidated}
+                style={{ opacity: isSubmitting || !isStockValidated ? 0.6 : 1, cursor: "pointer" }}
               >
-                <span>
-                  {producto.nombre} x{producto.cantidad}
-                </span>
+                Confirmar compra
+              </button>
+            </div>
 
-                <span>
-                  $
-                  {(Number(producto.precio) * Number(producto.cantidad)).toFixed(
-                    2
-                  )}
-                </span>
-              </div>
-            ))}
+            {stockValidationResult && (
+              <p className="checkout-feedback checkout-feedback-stock">
+                {isStockValidated
+                  ? "Stock verificado correctamente."
+                  : "Hay productos sin stock suficiente. Revisa el detalle en la notificacion."}
+              </p>
+            )}
 
-            <hr />
+            {mensajeExito && (
+              <p className="checkout-feedback checkout-feedback-success">
+                {mensajeExito}
+              </p>
+            )}
 
-            <h3>Total: ${total.toFixed(2)}</h3>
-          </>
-        )}
-
-        <input
-          className="input"
-          placeholder="Direccion de entrega"
-          value={direccionEntrega}
-          onChange={(event) => setDireccionEntrega(event.target.value)}
-        />
-
-        <div className="checkout-payment-method">Metodo de pago: Tarjeta</div>
-
-        <input
-          className="input"
-          placeholder="Nombre del titular"
-          value={cardHolder}
-          onChange={(event) => setCardHolder(event.target.value)}
-        />
-
-        <input
-          className="input"
-          inputMode="numeric"
-          placeholder="Numero de tarjeta"
-          value={cardNumber}
-          onChange={(event) => setCardNumber(formatCardNumber(event.target.value))}
-        />
-
-        <div className="checkout-card-row">
-          <input
-            className="input"
-            inputMode="numeric"
-            placeholder="MM/AA"
-            value={expiry}
-            onChange={(event) => setExpiry(formatExpiry(event.target.value))}
-          />
-
-          <input
-            className="input"
-            inputMode="numeric"
-            placeholder="CVV"
-            value={cvv}
-            onChange={(event) => setCvv(String(event.target.value || "").replace(/\D/g, "").slice(0, 4))}
-          />
+            {receipt && <ComprobantePedido pedido={receipt} />}
+          </section>
         </div>
-
-        <button className="btn" onClick={handleValidateStock} disabled={isSubmitting}>
-          Validar stock
-        </button>
-
-        <button
-          className="btn"
-          onClick={handleConfirmOrder}
-          disabled={isSubmitting || !isStockValidated}
-          style={{ opacity: isSubmitting || !isStockValidated ? 0.6 : 1, cursor: "pointer" }}
-        >
-          Confirmar compra
-        </button>
-
-        {stockValidationResult && (
-          <p style={{ marginTop: "10px", color: isStockValidated ? "#2e7d32" : "#b35a00" }}>
-            {isStockValidated
-              ? "Stock verificado correctamente."
-              : "Hay productos sin stock suficiente. Revisa el detalle en la notificacion."}
-          </p>
-        )}
-
-        {mensajeExito && (
-          <p
-            style={{
-              color: "green",
-              marginTop: "15px",
-              fontWeight: "bold",
-            }}
-          >
-            {mensajeExito}
-          </p>
-        )}
-
-        {receipt && (
-          <button
-            className="btn checkout-receipt-btn"
-            type="button"
-            onClick={() => downloadReceipt(receipt)}
-          >
-            Descargar comprobante
-          </button>
-        )}
       </div>
     </div>
   );

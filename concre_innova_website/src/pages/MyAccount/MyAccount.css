@@ -1,0 +1,144 @@
+.my-account-page {
+  padding-block: 32px 56px;
+}
+
+.my-account-header h1 {
+  margin: 8px 0;
+  color: var(--ink);
+}
+
+.my-account-title {
+  align-items: center;
+  display: inline-flex;
+  gap: 10px;
+}
+
+.my-account-title-icon {
+  align-items: center;
+  background: var(--forest-600);
+  border-radius: 999px;
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  width: 32px;
+}
+
+.my-account-title-icon svg {
+  fill: #ffffff;
+  height: 18px;
+  width: 18px;
+}
+
+.my-account-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.my-account-kicker {
+  display: inline-flex;
+  color: var(--forest-600);
+  background: var(--sage-100);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.my-account-layout {
+  margin-top: 18px;
+}
+
+.my-account-form {
+  background: var(--paper);
+  border: 1px solid rgba(15, 27, 45, 0.08);
+  border-radius: 16px;
+  box-shadow: none;
+  padding: 26px;
+}
+
+.my-account-form h2 {
+  margin: 0 0 18px;
+  color: var(--ink);
+}
+
+.my-account-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.my-account-grid-3x2 {
+  display: grid;
+  gap: 16px 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.my-account-form label {
+  display: grid;
+  gap: 7px;
+  color: #41564c;
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin-block: 6px;
+  margin-inline: 6px;
+}
+
+.my-account-form label span {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.my-account-form input,
+.my-account-form textarea {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  font: inherit;
+  margin-block: 4px;
+  min-height: 44px;
+  margin-inline: 4px;
+  padding: 10px 12px;
+}
+
+.my-account-form input:focus,
+.my-account-form textarea:focus {
+  border-color: var(--forest-600);
+  box-shadow: 0 0 0 4px rgba(47, 111, 78, 0.12);
+  outline: none;
+}
+
+.my-account-status,
+.my-account-error {
+  margin-top: 18px;
+}
+
+.my-account-error {
+  color: #a62121;
+}
+
+.my-account-form .btn {
+  min-height: 46px;
+  align-self: center;
+  min-width: 180px;
+  margin-top: 6px;
+  padding-inline: 20px;
+}
+
+@media (max-width: 980px) {
+  .my-account-grid-3x2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .my-account-grid-3x2 {
+    grid-template-columns: 1fr;
+  }
+}

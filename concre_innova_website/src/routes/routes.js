@@ -6,8 +6,7 @@ export const PUBLIC_ROUTES = {
   FAVORITES: "/favorites",
   LOGIN: "/login",
   REGISTER: "/register",
-  FORGOT_PASSWORD: "/forgot-password",
-  CHAT: "/chat"
+  FORGOT_PASSWORD: "/forgot-password"
 };
 
 export function buildProductDetailRoute(idProducto) {
@@ -17,7 +16,8 @@ export function buildProductDetailRoute(idProducto) {
 export const PRIVATE_ROUTES = {
   CART: "/cart",
   CHECKOUT: "/checkout",
-  MY_ORDERS: "/mis-pedidos"
+  MY_ORDERS: "/mis-pedidos",
+  MY_ACCOUNT: "/mi-cuenta"
 };
 
 export const ADMIN_ROUTES = {

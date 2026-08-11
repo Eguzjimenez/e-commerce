@@ -11,11 +11,12 @@ import Favorites from "../pages/Favorites/Favorites";
 import Cart from "../pages/Cart/Cart";
 import Checkout from "../pages/Checkout/Checkout";
 import History from "../pages/History/History";
+import MyAccount from "../pages/MyAccount/MyAccount";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import ForgotPassword from "../pages/forgot-password/ForgotPassword";
-import Chat from "../pages/Chat/Chat";
 import AccessDenied from "../pages/AccessDenied/AccessDenied";
+import { ROLES } from "../constants/roles";
 
 import AdminDashboard from "../pages/AdminDashboard/AdminDashboard";
 import AdminInventory from "../pages/AdminInventory/AdminInventory";
@@ -42,7 +43,6 @@ function AppRoutes() {
       <Route path={PUBLIC_ROUTES.LOGIN} element={<Login />} />
       <Route path={PUBLIC_ROUTES.REGISTER} element={<Register />} />
       <Route path={PUBLIC_ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
-      <Route path={PUBLIC_ROUTES.CHAT} element={<Chat />} />
       <Route path="/acceso-denegado" element={<AccessDenied />} />
 
       <Route path={PRIVATE_ROUTES.CART} element={<Cart />} />
@@ -59,6 +59,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
             <History />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={PRIVATE_ROUTES.MY_ACCOUNT}
+        element={
+          <ProtectedRoute allowedRoles={[ROLES.CLIENTE]}>
+            <MyAccount />
           </ProtectedRoute>
         }
       />
