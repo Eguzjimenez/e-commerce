@@ -57,3 +57,16 @@ export async function getRoles() {
     method: "GET",
   });
 }
+
+export async function getUserInfo(idUsuario) {
+  return await request(`/api/Users/info/${Number(idUsuario)}`, {
+    method: "GET",
+  });
+}
+
+export async function updateUserInfo(payload) {
+  return await request("/api/Users/UpdateUserInfo", {
+    method: "PUT",
+    body: payload,
+  });
+}

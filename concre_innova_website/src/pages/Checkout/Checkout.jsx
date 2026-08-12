@@ -11,6 +11,7 @@ import {
   validateCartStock,
 } from "../../services/orderService";
 import { PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
+import ComprobantePedido from "../../components/ComprobantePedido/ComprobantePedido";
 
 const CARD_PAYMENT_METHOD = "Tarjeta";
 const PAYMENT_METHODS = [
@@ -171,7 +172,6 @@ function downloadReceipt(receipt) {
   document.body.removeChild(anchor);
   URL.revokeObjectURL(url);
 }
-
 function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -460,144 +460,169 @@ function Checkout() {
   return (
     <div className="checkout-page container">
       <div className="checkout-card">
-        <div className="checkout-heading">
+        <div className="checkout-heading checkout-heading-wide">
           <span className="checkout-eyebrow">Pago seguro</span>
           <h1>Pago</h1>
           <p>Completa la informacion para finalizar tu compra.</p>
         </div>
 
-        <section className="checkout-summary" aria-label="Resumen de compra">
-          <h3>Resumen de compra</h3>
+        <div className="checkout-layout">
+          <aside className="checkout-panel checkout-summary-panel">
+            <div className="checkout-panel-head">
+              <h3>Resumen de compra</h3>
+              <p>{productos.length} productos en carrito</p>
+            </div>
 
-          {productos.length === 0 ? (
-            <p>No hay productos en el carrito.</p>
-          ) : (
-            <>
-              <div className="checkout-summary-list">
-                {productos.map((producto) => (
+            <div className="checkout-summary-list">
+              {productos.length === 0 ? (
+                <p className="checkout-empty">No hay productos en el carrito.</p>
+              ) : (
+                productos.map((producto) => (
                   <div className="checkout-summary-item" key={producto.idProducto}>
-                    <span>
-                      {producto.nombre} x{producto.cantidad}
-                    </span>
-                    <span>
+                    <div>
+                      <strong>{producto.nombre}</strong>
+                      <span>x{producto.cantidad}</span>
+                    </div>
+
+                    <strong>
                       {formatCatalogPrice(
                         Number(producto.precio) * Number(producto.cantidad)
                       )}
-                    </span>
+                    </strong>
                   </div>
+                ))
+              )}
+            </div>
+
+            <div className="checkout-total-box">
+              <span>Total</span>
+              <strong>{formatCatalogPrice(total)}</strong>
+            </div>
+          </aside>
+
+          <section className="checkout-panel checkout-form-panel">
+            <div className="checkout-panel-head">
+              <h3>Datos de pago</h3>
+              <p>Selecciona el metodo de pago y confirma la compra.</p>
+            </div>
+
+            <input
+              className="input"
+              placeholder="Direccion de entrega"
+              value={direccionEntrega}
+              maxLength={255}
+              onChange={(event) => setDireccionEntrega(event.target.value)}
+            />
+
+            <fieldset className="checkout-payment-method">
+              <legend>Metodo de pago</legend>
+              <div className="checkout-payment-options">
+                {PAYMENT_METHODS.map((paymentMethod) => (
+                  <label className="checkout-payment-option" key={paymentMethod}>
+                    <input
+                      type="radio"
+                      name="metodoPago"
+                      value={paymentMethod}
+                      checked={metodoPago === paymentMethod}
+                      onChange={(event) => setMetodoPago(event.target.value)}
+                    />
+                    <span>{paymentMethod}</span>
+                  </label>
                 ))}
               </div>
+            </fieldset>
 
-              <div className="checkout-summary-total">
-                <span>Total</span>
-                <strong>{formatCatalogPrice(total)}</strong>
-              </div>
-            </>
-          )}
-        </section>
+            {requiresCardData && (
+              <>
+                <input
+                  className="input"
+                  placeholder="Nombre del titular"
+                  value={cardHolder}
+                  onChange={(event) => setCardHolder(event.target.value)}
+                />
 
-        <div className="checkout-form-fields">
-          <input
-            className="input"
-            placeholder="Direccion de entrega"
-            value={direccionEntrega}
-            maxLength={255}
-            onChange={(event) => setDireccionEntrega(event.target.value)}
-          />
+                <input
+                  className="input"
+                  inputMode="numeric"
+                  placeholder="Numero de tarjeta"
+                  value={cardNumber}
+                  onChange={(event) => setCardNumber(formatCardNumber(event.target.value))}
+                />
 
-          <fieldset className="checkout-payment-method">
-            <legend>Metodo de pago</legend>
-            <div className="checkout-payment-options">
-              {PAYMENT_METHODS.map((paymentMethod) => (
-                <label
-                  className="checkout-payment-option"
-                  key={paymentMethod}
-                >
+                <div className="checkout-card-row">
                   <input
-                    type="radio"
-                    name="metodoPago"
-                    value={paymentMethod}
-                    checked={metodoPago === paymentMethod}
-                    onChange={(event) => setMetodoPago(event.target.value)}
+                    className="input"
+                    inputMode="numeric"
+                    placeholder="MM/AA"
+                    value={expiry}
+                    onChange={(event) => setExpiry(formatExpiry(event.target.value))}
                   />
-                  <span>{paymentMethod}</span>
-                </label>
-              ))}
+
+                  <input
+                    className="input"
+                    inputMode="numeric"
+                    placeholder="CVV"
+                    value={cvv}
+                    onChange={(event) =>
+                      setCvv(
+                        String(event.target.value || "")
+                          .replace(/\D/g, "")
+                          .slice(0, 4)
+                      )
+                    }
+                  />
+                </div>
+              </>
+            )}
+
+            <div className="checkout-actions">
+              <input
+                type="hidden"
+                value={metodoPago}
+                readOnly
+              />
+              <button className="btn" onClick={handleValidateStock} disabled={isSubmitting}>
+                Validar stock
+              </button>
+
+              <button
+                className="btn"
+                onClick={handleConfirmOrder}
+                disabled={isSubmitting || !isStockValidated}
+                aria-disabled={isSubmitting || !isStockValidated}
+              >
+                Confirmar compra
+              </button>
             </div>
-          </fieldset>
 
-          {requiresCardData && (
-            <>
-              <input
-                className="input"
-                placeholder="Nombre del titular"
-                value={cardHolder}
-                onChange={(event) => setCardHolder(event.target.value)}
-              />
+            {stockValidationResult && (
+              <p className="checkout-feedback checkout-feedback-stock">
+                {isStockValidated
+                  ? "Stock verificado correctamente."
+                  : "Hay productos sin stock suficiente. Revisa el detalle en la notificacion."}
+              </p>
+            )}
 
-              <input
-                className="input"
-                inputMode="numeric"
-                placeholder="Numero de tarjeta"
-                value={cardNumber}
-                onChange={(event) => setCardNumber(formatCardNumber(event.target.value))}
-              />
+            {mensajeExito && (
+              <p className="checkout-feedback checkout-feedback-success">
+                {mensajeExito}
+              </p>
+            )}
 
-              <div className="checkout-card-row">
-                <input
-                  className="input"
-                  inputMode="numeric"
-                  placeholder="MM/AA"
-                  value={expiry}
-                  onChange={(event) => setExpiry(formatExpiry(event.target.value))}
-                />
-
-                <input
-                  className="input"
-                  inputMode="numeric"
-                  placeholder="CVV"
-                  value={cvv}
-                  onChange={(event) =>
-                    setCvv(String(event.target.value || "").replace(/\D/g, "").slice(0, 4))
-                  }
-                />
+            {receipt && (
+              <div className="checkout-receipt-actions">
+                <ComprobantePedido pedido={receipt} />
+                <button
+                  className="btn checkout-receipt-btn"
+                  type="button"
+                  onClick={() => downloadReceipt(receipt)}
+                >
+                  Descargar comprobante HTML
+                </button>
               </div>
-            </>
-          )}
+            )}
+          </section>
         </div>
-
-        <button className="btn" onClick={handleValidateStock} disabled={isSubmitting}>
-          Validar stock
-        </button>
-
-        <button
-          className="btn"
-          onClick={handleConfirmOrder}
-          disabled={isSubmitting || !isStockValidated}
-          aria-disabled={isSubmitting || !isStockValidated}
-        >
-          Confirmar compra
-        </button>
-
-        {stockValidationResult && (
-          <p className={isStockValidated ? "checkout-success" : "checkout-warning"}>
-            {isStockValidated
-              ? "Stock verificado correctamente."
-              : "Hay productos sin stock suficiente. Revisa el detalle en la notificacion."}
-          </p>
-        )}
-
-        {mensajeExito && <p className="checkout-success">{mensajeExito}</p>}
-
-        {receipt && (
-          <button
-            className="btn checkout-receipt-btn"
-            type="button"
-            onClick={() => downloadReceipt(receipt)}
-          >
-            Descargar comprobante
-          </button>
-        )}
       </div>
     </div>
   );

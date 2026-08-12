@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
+import VisualizadorProducto from "../../components/VisualizadorProducto/VisualizadorProducto";
 import {
   getCatalogCategories,
   getCatalogProductById,
@@ -31,6 +32,7 @@ function ProductDetail() {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(Boolean(idProducto));
   const [error, setError] = useState("");
+  const [showVisualizer, setShowVisualizer] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -155,6 +157,26 @@ function ProductDetail() {
     });
   };
 
+  const visualizerProduct = useMemo(() => {
+    if (!product) {
+      return null;
+    }
+
+    const variantName = selectedVariant?.nombreVariante
+      ? `${product.nombre} - ${selectedVariant.nombreVariante}`
+      : product.nombre;
+    const variantImage = selectedVariant?.imagen || product.imagen;
+    const variantPrice = Number(selectedVariant?.precio) || Number(product.precio) || 0;
+
+    return {
+      ...product,
+      imagen: variantImage,
+      Imagen: getCatalogProductImage({ ...product, imagen: variantImage }),
+      Nombre: variantName,
+      Precio: variantPrice,
+    };
+  }, [product, selectedVariant]);
+
   if (isLoading) {
     return (
       <div className="product-detail-page container">
@@ -246,9 +268,19 @@ function ProductDetail() {
 
           <h2>{formatCatalogPrice(selectedVariant?.precio ?? product.precio)}</h2>
 
-          <button className="btn" type="button" onClick={handleAddToCart}>
-            Agregar al carrito
-          </button>
+          <div className="product-detail-actions">
+            <button className="btn" type="button" onClick={handleAddToCart}>
+              Agregar al carrito
+            </button>
+
+            <button
+              className="btn secondary product-visualizer-button"
+              type="button"
+              onClick={() => setShowVisualizer(true)}
+            >
+              Visualizar en mi espacio
+            </button>
+          </div>
         </div>
       </div>
 
@@ -284,6 +316,13 @@ function ProductDetail() {
             ))}
           </div>
         </section>
+      )}
+
+      {showVisualizer && visualizerProduct && (
+        <VisualizadorProducto
+          producto={visualizerProduct}
+          onClose={() => setShowVisualizer(false)}
+        />
       )}
     </>
   );

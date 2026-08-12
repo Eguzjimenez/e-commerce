@@ -22,6 +22,7 @@ import {
   canPurchase,
   isAdminRole,
 } from "../../constants/roleAccess";
+import { ROLES } from "../../constants/roles";
 import { getCartCount } from "../../services/cartService";
 import { getFavoriteCountAsync } from "../../services/favoriteService";
 
@@ -73,6 +74,10 @@ function Navbar() {
   const admin = isAdminRole(userRole);
   const quotationStaff = canManageQuotations(userRole);
   const purchaseAccess = canPurchase(userRole);
+  const isClient = userRole === ROLES.CLIENTE;
+  const logoRoute = authenticated && admin
+    ? ADMIN_ROUTES.DASHBOARD
+    : PUBLIC_ROUTES.HOME;
   const isActivePath = (path) =>
     path === PUBLIC_ROUTES.HOME ? location.pathname === path : location.pathname.startsWith(path);
   const getNavLinkClass = (path, className = "") =>
@@ -104,7 +109,7 @@ function Navbar() {
           />
         </form>
 
-        <Link to={PUBLIC_ROUTES.HOME} className="nav-brand-block">
+        <Link to={logoRoute} className="nav-brand-block">
           <span className="nav-logo">Concre Innova</span>
           <span className="nav-location">Naranjo, Alajuela</span>
         </Link>
@@ -188,6 +193,18 @@ function Navbar() {
             >
               <ImagePlus size={15} strokeWidth={1.8} />
               Cotizar
+            </Link>
+          </li>
+        )}
+        {authenticated && isClient && (
+          <li>
+            <Link
+              to={PRIVATE_ROUTES.MY_ACCOUNT}
+              className={getNavLinkClass(PRIVATE_ROUTES.MY_ACCOUNT)}
+              aria-current={isActivePath(PRIVATE_ROUTES.MY_ACCOUNT) ? "page" : undefined}
+            >
+              <UserRound size={15} strokeWidth={1.8} />
+              Mi cuenta
             </Link>
           </li>
         )}

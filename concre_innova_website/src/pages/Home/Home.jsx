@@ -15,6 +15,7 @@ import {
   getFeaturedCatalogProducts,
   handleCatalogImageFallback,
 } from "../../services/catalogPresentationService";
+import ChatBot from "../Chat/Chat";
 
 const homeSlides = [
   {
@@ -429,6 +430,8 @@ function Home() {
         onClose={() => setSelectedProduct(null)}
         onAddToCart={handleAddToCart}
       />
+
+      <ChatBot />
     </div>
   );
 }
