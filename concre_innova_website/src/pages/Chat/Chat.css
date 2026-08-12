@@ -157,12 +157,116 @@
   text-align: left;
 }
 
+.chatbot-recommendations {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.chatbot-recommendations-title {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.chatbot-recommendation {
+  align-items: center;
+  background: var(--cream-50);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 8px 10px;
+  text-decoration: none;
+}
+
+.chatbot-recommendation:hover {
+  border-color: var(--forest-600);
+}
+
+.chatbot-recommendation strong {
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.chatbot-recommendation span {
+  color: var(--forest-700);
+  font-size: 0.86rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.chatbot-recommendations-link {
+  color: var(--forest-700);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.chatbot-notice {
+  background: #fff4cc;
+  border-radius: 10px;
+  color: #785b00;
+  font-size: 0.85rem;
+  margin: 0;
+  padding: 9px 11px;
+}
+
+.chatbot-actions {
+  background: #ffffff;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px 0;
+}
+
+.chatbot-actions button {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 8px 13px;
+}
+
+.chatbot-actions button:hover {
+  border-color: var(--forest-600);
+  color: var(--forest-700);
+}
+
+.chatbot-actions button.chatbot-action-highlight {
+  background: var(--forest-600);
+  border-color: var(--forest-600);
+  color: #ffffff;
+}
+
+.chatbot-actions:empty {
+  display: none;
+}
+
 .chatbot-input-container {
   background: #ffffff;
   border-top: 1px solid var(--line);
   display: flex;
   gap: 10px;
   padding: 12px;
+}
+
+.chatbot-actions + .chatbot-input-container {
+  border-top: 0;
+}
+
+.chatbot-input-container input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .chatbot-input-container input {

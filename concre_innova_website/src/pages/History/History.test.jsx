@@ -48,6 +48,9 @@ const ORDER = {
       tamano: "30cm",
       material: "Ceramica",
       color: "Blanco",
+      nombreTipo: "Macetas Interior",
+      macetero: "Maceta Ovalada Blanca",
+      imagen: "maceta.jpg",
       cantidad: 2,
       precioUnitario: 12500,
       subtotal: 25000,
@@ -87,6 +90,21 @@ test("filters the order history by the selected date range", async () => {
       fechaHasta: "2026-07-31",
     });
   });
+});
+
+test("shows the purchased products when the order is opened", async () => {
+  renderHistory();
+
+  const orderCard = await screen.findByRole("button", { name: /Pedido #27/ });
+  expect(screen.queryByText("Maceta")).not.toBeInTheDocument();
+
+  fireEvent.click(orderCard);
+
+  expect(screen.getByRole("heading", { name: "Maceta" })).toBeInTheDocument();
+  expect(screen.getByAltText("Maceta")).toBeInTheDocument();
+  expect(screen.getByText("Macetas Interior")).toBeInTheDocument();
+  expect(screen.getByText("Blanco")).toBeInTheDocument();
+  expect(screen.getByText("Maceta Ovalada Blanca")).toBeInTheDocument();
 });
 
 test("adds available order items to the cart when reordering", async () => {

@@ -8,6 +8,7 @@ import Home from "../pages/Home/Home";
 import Catalog from "../pages/Catalog/Catalog";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import Favorites from "../pages/Favorites/Favorites";
+import SmartAdvisor from "../pages/SmartAdvisor/SmartAdvisor";
 import Cart from "../pages/Cart/Cart";
 import Checkout from "../pages/Checkout/Checkout";
 import History from "../pages/History/History";
@@ -42,6 +43,7 @@ function AppRoutes() {
       <Route path={PUBLIC_ROUTES.PRODUCT_DETAIL} element={<ProductDetail />} />
       <Route path={PUBLIC_ROUTES.PRODUCT} element={<ProductDetail />} />
       <Route path={PUBLIC_ROUTES.FAVORITES} element={<Favorites />} />
+      <Route path={PUBLIC_ROUTES.SMART_ADVISOR} element={<SmartAdvisor />} />
       <Route path={PUBLIC_ROUTES.LOGIN} element={<Login />} />
       <Route path={PUBLIC_ROUTES.REGISTER} element={<Register />} />
       <Route path={PUBLIC_ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />

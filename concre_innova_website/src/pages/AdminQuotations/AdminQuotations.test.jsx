@@ -118,6 +118,63 @@ test("allows sales staff to approve and convert an accepted quotation", async ()
   ).toBeInTheDocument();
 });
 
+test("shows requested products and attached images for each received request", async () => {
+  getAdminQuotations.mockResolvedValueOnce({
+    items: [
+      {
+        idCotizacion: 15,
+        numeroSeguimiento: "COT-0000000015",
+        cliente: "Cliente Pendiente",
+        fechaSolicitud: "2026-07-23T08:00:00",
+        fechaRespuesta: null,
+        estado: "Pendiente",
+        total: 0,
+        descripcion: "Dos maceteros para exterior",
+        preferencias: "",
+        respuesta: "",
+        productosSolicitados: [
+          { idProducto: 1, nombre: "Maceta blanca", cantidad: 2 },
+        ],
+        imagenes: [{ rutaArchivo: "images/cotizaciones/a.jpg" }],
+        productos: [],
+        historialEstados: [],
+      },
+    ],
+    totalPages: 1,
+    hasPreviousPage: false,
+    hasNextPage: false,
+  });
+
+  render(<AdminQuotations />);
+
+  expect(
+    await screen.findByText("Productos solicitados: Maceta blanca x2")
+  ).toBeInTheDocument();
+  expect(screen.getByText("1 imagen(es) adjunta(s)")).toBeInTheDocument();
+  expect(screen.getByText("COT-0000000015 | Solicitud: 23/7/2026")).toBeInTheDocument();
+});
+
+test("lists handled quotations in the attended history view", async () => {
+  render(<AdminQuotations />);
+
+  fireEvent.click(await screen.findByRole("tab", { name: "Historial" }));
+
+  expect(
+    await screen.findByText("Historial de cotizaciones atendidas")
+  ).toBeInTheDocument();
+
+  await waitFor(() =>
+    expect(getAdminQuotations).toHaveBeenCalledWith(
+      expect.objectContaining({ onlyHandled: true })
+    )
+  );
+
+  const historyTable = screen.getByRole("table");
+  expect(historyTable).toHaveTextContent("COT-0000000012");
+  expect(historyTable).toHaveTextContent("Cliente QA");
+  expect(historyTable).toHaveTextContent("Aceptada");
+});
+
 test("lists pending requests and sends the seller response with prices and conditions", async () => {
   getAdminQuotations.mockResolvedValueOnce({
     items: [

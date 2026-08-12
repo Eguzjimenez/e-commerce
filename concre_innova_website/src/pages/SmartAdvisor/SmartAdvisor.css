@@ -1,0 +1,322 @@
+.advisor-page {
+	padding-block: 32px 56px;
+}
+
+.advisor-eyebrow {
+	display: inline-flex;
+	color: var(--forest-600);
+	background: var(--sage-100);
+	border-radius: 999px;
+	padding: 7px 12px;
+	font-size: 0.8rem;
+	font-weight: 800;
+}
+
+.advisor-header h1 {
+	margin: 10px 0 8px;
+	color: var(--ink);
+	max-width: 34ch;
+}
+
+.advisor-header p {
+	margin: 0;
+	color: var(--muted);
+	max-width: 68ch;
+}
+
+.advisor-status,
+.advisor-error {
+	margin-top: 20px;
+}
+
+.advisor-error {
+	color: #a62121;
+}
+
+.advisor-empty {
+	margin-top: 20px;
+	background: var(--paper);
+	border: 1px dashed rgba(15, 27, 45, 0.2);
+	border-radius: 14px;
+	padding: 20px;
+}
+
+.advisor-empty h2 {
+	margin: 0 0 8px;
+}
+
+.advisor-empty p {
+	margin: 0;
+	color: var(--muted);
+}
+
+.advisor-welcome,
+.advisor-questionnaire {
+	margin-top: 22px;
+	background: var(--paper);
+	border: 1px solid rgba(15, 27, 45, 0.08);
+	border-radius: 18px;
+	padding: 24px;
+}
+
+.advisor-welcome {
+	display: grid;
+	justify-items: start;
+	gap: 10px;
+	color: var(--forest-600);
+}
+
+.advisor-welcome h2,
+.advisor-questionnaire h2 {
+	margin: 0;
+	color: var(--ink);
+}
+
+.advisor-welcome p {
+	margin: 0;
+	color: var(--muted);
+	max-width: 62ch;
+}
+
+.advisor-welcome .btn {
+	margin-top: 6px;
+	min-width: 200px;
+}
+
+.advisor-progress {
+	display: grid;
+	gap: 8px;
+	margin-bottom: 16px;
+	color: var(--muted);
+	font-size: 0.9rem;
+	font-weight: 700;
+}
+
+.advisor-progress-bar {
+	height: 6px;
+	border-radius: 999px;
+	background: rgba(15, 27, 45, 0.1);
+	overflow: hidden;
+}
+
+.advisor-progress-bar span {
+	display: block;
+	height: 100%;
+	border-radius: 999px;
+	background: var(--forest-600);
+	transition: width 0.2s ease;
+}
+
+.advisor-question-help {
+	margin: 8px 0 0;
+	color: var(--muted);
+}
+
+.advisor-options {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+	gap: 12px;
+	margin: 18px 0 0;
+	padding: 0;
+	border: 0;
+}
+
+.advisor-option {
+	display: grid;
+	gap: 4px;
+	padding: 14px 16px;
+	border: 1px solid rgba(15, 27, 45, 0.16);
+	border-radius: 14px;
+	background: transparent;
+	cursor: pointer;
+}
+
+.advisor-option:hover {
+	border-color: var(--forest-600);
+}
+
+.advisor-option.selected {
+	border-color: var(--forest-600);
+	background: var(--sage-100);
+}
+
+.advisor-option input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.advisor-option-label {
+	color: var(--ink);
+	font-weight: 800;
+}
+
+.advisor-option-description {
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+
+.advisor-questionnaire-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	margin-top: 22px;
+	padding-top: 18px;
+	border-top: 1px solid rgba(15, 27, 45, 0.08);
+}
+
+.advisor-questionnaire-actions .btn,
+.advisor-secondary-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 44px;
+}
+
+.advisor-secondary-button {
+	border: 1px solid rgba(15, 27, 45, 0.18);
+	border-radius: 6px;
+	background: transparent;
+	color: var(--ink);
+	padding: 8px 14px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.advisor-questionnaire-actions .btn:disabled,
+.advisor-secondary-button:disabled {
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+.advisor-results {
+	margin-top: 22px;
+}
+
+.advisor-results-header {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+	gap: 14px;
+	padding-bottom: 16px;
+	border-bottom: 1px solid rgba(15, 27, 45, 0.1);
+}
+
+.advisor-results-header h2 {
+	margin: 0 0 4px;
+	color: var(--ink);
+}
+
+.advisor-results-header p {
+	margin: 0;
+	color: var(--muted);
+}
+
+.advisor-cart-summary {
+	display: grid;
+	gap: 2px;
+	padding: 10px 14px;
+	border: 1px solid rgba(15, 27, 45, 0.1);
+	border-radius: 12px;
+	background: var(--paper);
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+
+.advisor-cart-summary strong {
+	color: var(--ink);
+	font-size: 1.05rem;
+}
+
+.advisor-group {
+	margin-top: 26px;
+}
+
+.advisor-group h3 {
+	margin: 0 0 14px;
+	color: var(--ink);
+}
+
+.advisor-recommendation-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+	gap: 16px;
+}
+
+.advisor-recommendation-card {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	background: var(--paper);
+	border: 1px solid rgba(15, 27, 45, 0.08);
+	border-radius: 16px;
+	padding: 14px;
+}
+
+.advisor-recommendation-card img {
+	width: 100%;
+	aspect-ratio: 1 / 1;
+	object-fit: cover;
+	border-radius: 12px;
+	background: var(--sage-100);
+}
+
+.advisor-recommendation-body {
+	display: grid;
+	gap: 6px;
+	flex: 1;
+}
+
+.advisor-recommendation-category {
+	color: var(--forest-600);
+	font-size: 0.78rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.advisor-recommendation-body h4 {
+	margin: 0;
+	font-size: 1.02rem;
+	color: var(--ink);
+}
+
+.advisor-recommendation-body p {
+	margin: 0;
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+
+.advisor-recommendation-body strong {
+	color: var(--ink);
+	font-size: 1.05rem;
+}
+
+.advisor-recommendation-card .btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 42px;
+	width: 100%;
+}
+
+@media (max-width: 760px) {
+	.advisor-options {
+		grid-template-columns: 1fr;
+	}
+
+	.advisor-questionnaire-actions .btn,
+	.advisor-secondary-button,
+	.advisor-cart-summary {
+		width: 100%;
+	}
+
+	.advisor-results-header {
+		flex-direction: column;
+		align-items: stretch;
+	}
+}

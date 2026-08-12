@@ -1,4 +1,4 @@
-import { API_BASE_URL, request } from "./apiClient";
+import { buildApiFileUrl, request } from "./apiClient";
 
 export function createQuotation({
   descripcion,
@@ -64,6 +64,7 @@ export function getAdminQuotations({
   pageSize = 20,
   search = "",
   status = "",
+  onlyHandled = false,
   signal,
 } = {}) {
   const query = new URLSearchParams({
@@ -79,6 +80,10 @@ export function getAdminQuotations({
 
   if (normalizedStatus) {
     query.set("estado", normalizedStatus);
+  }
+
+  if (onlyHandled) {
+    query.set("soloGestionadas", "true");
   }
 
   return request(`/api/Cotizaciones/admin?${query}`, {
@@ -114,16 +119,5 @@ export function convertQuotationToOrder(idCotizacion) {
 }
 
 export function getQuotationImageUrl(relativePath) {
-  if (!relativePath) {
-    return "";
-  }
-
-  if (/^https?:\/\//i.test(relativePath)) {
-    return relativePath;
-  }
-
-  return `${API_BASE_URL.replace(/\/+$/, "")}/${String(relativePath).replace(
-    /^\/+/,
-    ""
-  )}`;
+  return buildApiFileUrl(relativePath);
 }

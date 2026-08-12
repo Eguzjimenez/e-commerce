@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Images,
   Plus,
   RotateCcw,
   Search,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import Swal from "sweetalert2";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
+import AttendedQuotationsHistory from "../../components/AttendedQuotationsHistory/AttendedQuotationsHistory";
 import { getCatalogProducts } from "../../services/catalogService";
 import { formatCatalogPrice } from "../../services/catalogPresentationService";
 import {
@@ -25,6 +27,17 @@ import {
 } from "../../services/quotationService";
 
 const PAGE_SIZE = 20;
+
+const QUOTATION_VIEWS = {
+  REQUESTS: "solicitudes",
+  HISTORY: "historial",
+};
+
+function describeRequestedProducts(requestedProducts) {
+  return (Array.isArray(requestedProducts) ? requestedProducts : [])
+    .map((product) => `${product.nombre} x${product.cantidad}`)
+    .join(", ");
+}
 
 function getItems(response) {
   if (Array.isArray(response)) {
@@ -61,6 +74,7 @@ function statusClass(status) {
 }
 
 function AdminQuotations() {
+  const [activeView, setActiveView] = useState(QUOTATION_VIEWS.REQUESTS);
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [statusInput, setStatusInput] = useState("");
@@ -438,7 +452,33 @@ function AdminQuotations() {
 
   return (
     <AdminLayout title="Atencion de Cotizaciones">
-      <div className="admin-quotations-page">
+      <div className="admin-quotations-views" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeView === QUOTATION_VIEWS.REQUESTS}
+          className={activeView === QUOTATION_VIEWS.REQUESTS ? "active" : ""}
+          onClick={() => setActiveView(QUOTATION_VIEWS.REQUESTS)}
+        >
+          Solicitudes
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeView === QUOTATION_VIEWS.HISTORY}
+          className={activeView === QUOTATION_VIEWS.HISTORY ? "active" : ""}
+          onClick={() => setActiveView(QUOTATION_VIEWS.HISTORY)}
+        >
+          Historial
+        </button>
+      </div>
+
+      {activeView === QUOTATION_VIEWS.HISTORY && <AttendedQuotationsHistory />}
+
+      <div
+        className="admin-quotations-page"
+        hidden={activeView !== QUOTATION_VIEWS.REQUESTS}
+      >
         <section className="admin-quotations-list">
           <div className="admin-quotations-list-header">
             <h2>Solicitudes recibidas</h2>
@@ -528,6 +568,18 @@ function AdminQuotations() {
                 <p className="admin-quotation-summary">
                   {quotation.descripcion}
                 </p>
+                {quotation.productosSolicitados?.length > 0 && (
+                  <p className="admin-quotation-requested">
+                    Productos solicitados:{" "}
+                    {describeRequestedProducts(quotation.productosSolicitados)}
+                  </p>
+                )}
+                {quotation.imagenes?.length > 0 && (
+                  <p className="admin-quotation-attachments">
+                    <Images size={15} aria-hidden="true" />
+                    {quotation.imagenes.length} imagen(es) adjunta(s)
+                  </p>
+                )}
                 <strong className="admin-quotation-amount">
                   {formatCatalogPrice(quotation.total)}
                 </strong>

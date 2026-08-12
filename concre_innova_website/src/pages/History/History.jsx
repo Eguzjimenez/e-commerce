@@ -6,7 +6,11 @@ import {
   getMyOrders,
   prepareOrderReorder,
 } from "../../services/orderService";
-import { formatCatalogPrice } from "../../services/catalogPresentationService";
+import {
+  formatCatalogPrice,
+  getCatalogProductImage,
+  handleCatalogImageFallback,
+} from "../../services/catalogPresentationService";
 import { PRIVATE_ROUTES } from "../../routes/routes";
 import "./History.css";
 
@@ -60,12 +64,17 @@ function getStatusPresentation(value) {
 }
 
 function getOrderItemAttributes(item) {
+  return [item?.nombreVariante, item?.tamano, item?.material].filter((value) =>
+    String(value || "").trim()
+  );
+}
+
+function getOrderItemDetails(item) {
   return [
-    item?.nombreVariante,
-    item?.tamano,
-    item?.material,
-    item?.color,
-  ].filter((value) => String(value || "").trim());
+    { label: "Tipo", value: item?.nombreTipo },
+    { label: "Color", value: item?.color },
+    { label: "Macetero", value: item?.macetero },
+  ].filter((detail) => String(detail.value || "").trim());
 }
 
 function History() {
@@ -75,6 +84,7 @@ function History() {
   const [appliedFilters, setAppliedFilters] = useState(EMPTY_FILTERS);
   const [isLoading, setIsLoading] = useState(true);
   const [reorderingOrderId, setReorderingOrderId] = useState(null);
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [error, setError] = useState("");
 
   const loadOrders = useCallback(async () => {
@@ -85,6 +95,7 @@ function History() {
       const response = await getMyOrders(appliedFilters);
       const nextOrders = Array.isArray(response?.pedidos) ? response.pedidos : [];
       setOrders(nextOrders);
+      setExpandedOrderId(null);
     } catch (requestError) {
       setError(requestError?.message || "No fue posible cargar tus pedidos.");
     } finally {
@@ -124,6 +135,10 @@ function History() {
   const handleClearFilters = () => {
     setFilters(EMPTY_FILTERS);
     setAppliedFilters(EMPTY_FILTERS);
+  };
+
+  const handleToggleOrderDetail = (idPedido) => {
+    setExpandedOrderId((currentId) => (currentId === idPedido ? null : idPedido));
   };
 
   const handleReorder = async (idPedido) => {
@@ -269,18 +284,30 @@ function History() {
           {orders.map((order) => {
             const details = Array.isArray(order?.detalle) ? order.detalle : [];
             const status = getStatusPresentation(order.estado);
+            const isExpanded = expandedOrderId === order.idPedido;
+            const detailPanelId = `history-detail-${order.idPedido}`;
 
             return (
               <article className="history-card" key={order.idPedido}>
-                <div className="history-card-head">
+                <button
+                  className="history-card-head"
+                  type="button"
+                  aria-expanded={isExpanded}
+                  aria-controls={detailPanelId}
+                  onClick={() => handleToggleOrderDetail(order.idPedido)}
+                >
                   <div>
                     <h2>Pedido #{order.idPedido}</h2>
                     <p>{formatOrderDate(order.fechaPedido)}</p>
+                    <p className="history-card-hint">
+                      {details.length} producto(s) |{" "}
+                      {isExpanded ? "Ocultar detalle" : "Ver detalle"}
+                    </p>
                   </div>
                   <span className={`history-state ${status.className}`}>
                     {status.label}
                   </span>
-                </div>
+                </button>
 
                 <div className="history-card-meta">
                   <p>
@@ -301,34 +328,52 @@ function History() {
                   </p>
                 </div>
 
-                <div className="history-items">
-                  {details.map((item) => {
-                    const attributes = getOrderItemAttributes(item);
+                {isExpanded && (
+                  <div className="history-items" id={detailPanelId}>
+                    {details.map((item) => {
+                      const attributes = getOrderItemAttributes(item);
+                      const itemDetails = getOrderItemDetails(item);
 
-                    return (
-                      <div
-                        className="history-item"
-                        key={item.idDetallePedido}
-                      >
-                        <div>
-                          <h3>
-                            {item.nombre || `Producto ${item.idProducto}`}
-                          </h3>
-                          {attributes.length > 0 && (
-                            <p className="history-item-attributes">
-                              {attributes.join(" | ")}
+                      return (
+                        <div
+                          className="history-item"
+                          key={item.idDetallePedido}
+                        >
+                          <img
+                            className="history-item-image"
+                            src={getCatalogProductImage(item)}
+                            alt={item.nombre || `Producto ${item.idProducto}`}
+                            onError={(event) =>
+                              handleCatalogImageFallback(event, item.imagen)
+                            }
+                          />
+
+                          <div className="history-item-info">
+                            <h3>
+                              {item.nombre || `Producto ${item.idProducto}`}
+                            </h3>
+                            {attributes.length > 0 && (
+                              <p className="history-item-attributes">
+                                {attributes.join(" | ")}
+                              </p>
+                            )}
+                            {itemDetails.map((detail) => (
+                              <p key={detail.label}>
+                                <strong>{detail.label}:</strong> {detail.value}
+                              </p>
+                            ))}
+                            <p>
+                              Cantidad: {item.cantidad} | Unitario:{" "}
+                              {formatCatalogPrice(item.precioUnitario)}
                             </p>
-                          )}
-                          <p>
-                            Cantidad: {item.cantidad} | Unitario:{" "}
-                            {formatCatalogPrice(item.precioUnitario)}
-                          </p>
+                          </div>
+
+                          <strong>{formatCatalogPrice(item.subtotal)}</strong>
                         </div>
-                        <strong>{formatCatalogPrice(item.subtotal)}</strong>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
 
                 <div className="history-card-actions">
                   <button

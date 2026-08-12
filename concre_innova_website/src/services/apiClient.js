@@ -98,4 +98,20 @@ async function request(path, options = {}) {
   return data;
 }
 
-export { API_BASE_URL, request };
+/**
+ * Convierte una ruta relativa devuelta por el API (por ejemplo
+ * "images/visualizaciones/3/foto.jpg") en una URL absoluta servible.
+ */
+function buildApiFileUrl(relativePath) {
+  if (!relativePath) {
+    return "";
+  }
+
+  if (/^https?:\/\//i.test(relativePath)) {
+    return relativePath;
+  }
+
+  return `${API_BASE_URL.replace(/\/+$/, "")}/${String(relativePath).replace(/^\/+/, "")}`;
+}
+
+export { API_BASE_URL, buildApiFileUrl, request };

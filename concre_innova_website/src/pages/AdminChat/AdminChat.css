@@ -151,6 +151,58 @@
   color: #fffaf3;
 }
 
+.admin-chat-message.bot {
+  align-self: flex-start;
+  background: rgba(103, 148, 119, 0.16);
+  border: 1px solid rgba(167, 215, 180, 0.3);
+  color: #dbe7d7;
+}
+
+.admin-chat-message-sender {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+  opacity: 0.75;
+  text-transform: uppercase;
+}
+
+.admin-chat-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 22px 14px;
+}
+
+.admin-chat-filters button {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(191, 219, 199, 0.16);
+  border-radius: 999px;
+  color: #cbd5e1;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 7px 14px;
+}
+
+.admin-chat-filters button.active {
+  background: rgba(103, 148, 119, 0.26);
+  border-color: rgba(167, 215, 180, 0.45);
+  color: #f8fbf5;
+}
+
+.admin-chat-state {
+  color: #cbd5e1;
+  margin: 0;
+  padding: 18px 22px;
+}
+
+.admin-chat-state.error {
+  color: #f2a079;
+}
+
 .admin-chat-input-area {
   align-items: flex-end;
   border-top: 1px solid rgba(191, 219, 199, 0.1);

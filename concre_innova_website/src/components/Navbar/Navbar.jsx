@@ -11,6 +11,7 @@ import {
   Search,
   ShieldCheck,
   ShoppingBag,
+  Sparkles,
   UserPlus,
   UserRound,
   X,
@@ -24,6 +25,7 @@ import {
 } from "../../constants/roleAccess";
 import { ROLES } from "../../constants/roles";
 import { getCartCount } from "../../services/cartService";
+import { openChatAssistant } from "../../services/chatService";
 import { getFavoriteCountAsync } from "../../services/favoriteService";
 
 function Navbar() {
@@ -184,6 +186,16 @@ function Navbar() {
             Catalogo
           </Link>
         </li>
+        <li>
+          <Link
+            to={PUBLIC_ROUTES.SMART_ADVISOR}
+            className={getNavLinkClass(PUBLIC_ROUTES.SMART_ADVISOR)}
+            aria-current={isActivePath(PUBLIC_ROUTES.SMART_ADVISOR) ? "page" : undefined}
+          >
+            <Sparkles size={15} strokeWidth={1.8} />
+            Asesor Inteligente
+          </Link>
+        </li>
         {authenticated && purchaseAccess && (
           <li>
             <Link
@@ -263,14 +275,14 @@ function Navbar() {
           </li>
         )}
         <li>
-          <Link
-            to={PUBLIC_ROUTES.CHAT}
-            className={getNavLinkClass(PUBLIC_ROUTES.CHAT)}
-            aria-current={isActivePath(PUBLIC_ROUTES.CHAT) ? "page" : undefined}
+          <button
+            className="nav-chat-button"
+            type="button"
+            onClick={openChatAssistant}
           >
             <MessageCircle size={15} strokeWidth={1.8} />
             Chat
-          </Link>
+          </button>
         </li>
         {authenticated && (
           <li className="nav-menu-auth-action">

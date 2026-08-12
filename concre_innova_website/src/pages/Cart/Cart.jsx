@@ -7,6 +7,7 @@ import ProductModal from "../../components/ProductModal/ProductModal";
 import { getProductImageCandidates } from "../../services/catalogService";
 import { isLoggedIn } from "../../services/authService";
 import {
+  calculateCartSubtotal,
   getCart,
   removeFromCart,
   updateCartItemQuantity,
@@ -26,9 +27,11 @@ function getCartItemKey(product) {
 function getProductAttributes(product) {
   return [
     product.nombreVariante,
+    product.nombreTipo,
     product.tamano,
     product.material,
     product.color,
+    product.macetero ? `Macetero: ${product.macetero}` : "",
   ].filter((value) => String(value || "").trim());
 }
 
@@ -71,6 +74,8 @@ function Cart() {
           tamano: item.tamano || "",
           material: item.material || "",
           color: item.color || "",
+          nombreTipo: item.nombreTipo || "",
+          macetero: item.macetero || "",
         };
       });
 
@@ -84,11 +89,7 @@ function Cart() {
   }, []);
 
   const calculatedSubtotal = useMemo(
-    () =>
-      products.reduce(
-        (sum, product) => sum + product.price * product.quantity,
-        0
-      ),
+    () => calculateCartSubtotal(products),
     [products]
   );
 

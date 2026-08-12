@@ -321,6 +321,7 @@ function ProductDetail() {
       {showVisualizer && visualizerProduct && (
         <VisualizadorProducto
           producto={visualizerProduct}
+          productosRecomendados={relatedProducts}
           onClose={() => setShowVisualizer(false)}
         />
       )}

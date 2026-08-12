@@ -4,6 +4,7 @@ export const PUBLIC_ROUTES = {
   PRODUCT: "/product",
   PRODUCT_DETAIL: "/product/:idProducto",
   FAVORITES: "/favorites",
+  SMART_ADVISOR: "/asesor-inteligente",
   LOGIN: "/login",
   REGISTER: "/register",
   FORGOT_PASSWORD: "/forgot-password"

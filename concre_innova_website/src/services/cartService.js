@@ -43,6 +43,8 @@ export function addToCart(product, quantity = 1) {
       tamano: product.tamano ?? "",
       material: product.material ?? "",
       color: product.color ?? "",
+      nombreTipo: product.nombreTipo ?? "",
+      macetero: product.macetero ?? "",
       cantidad: quantity,
     });
   }
@@ -88,6 +90,18 @@ export function clearCart() {
 
 export function getCartCount() {
   return getCart().reduce((total, item) => total + (Number(item.cantidad) || 0), 0);
+}
+
+export function calculateCartSubtotal(items) {
+  return (Array.isArray(items) ? items : []).reduce(
+    (total, item) =>
+      total + (Number(item.precio) || 0) * (Number(item.cantidad) || 0),
+    0
+  );
+}
+
+export function getCartSubtotal() {
+  return calculateCartSubtotal(getCart());
 }
 
 export function getCartPayloadForAuth() {

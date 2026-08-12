@@ -174,7 +174,8 @@
 }
 
 .nav-menu li a,
-.logout-btn {
+.logout-btn,
+.nav-chat-button {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -188,7 +189,8 @@
 }
 
 .nav-menu li a::after,
-.logout-btn::after {
+.logout-btn::after,
+.nav-chat-button::after {
   content: "";
   position: absolute;
   left: 0;
@@ -203,17 +205,20 @@
 
 .nav-menu li a:hover,
 .logout-btn:hover,
+.nav-chat-button:hover,
 .nav-menu li a.active {
   color: var(--clay);
 }
 
 .nav-menu li a:hover::after,
 .logout-btn:hover::after,
+.nav-chat-button:hover::after,
 .nav-menu li a.active::after {
   transform: scaleX(1);
 }
 
-.logout-btn {
+.logout-btn,
+.nav-chat-button {
   background: none;
   border: none;
   cursor: pointer;
@@ -364,7 +369,8 @@
   }
 
   .nav-menu li a,
-  .logout-btn {
+  .logout-btn,
+  .nav-chat-button {
     display: flex;
     width: 100%;
     min-height: 44px;
@@ -375,7 +381,8 @@
   }
 
   .nav-menu li a::after,
-  .logout-btn::after {
+  .logout-btn::after,
+  .nav-chat-button::after {
     display: none;
   }
 
