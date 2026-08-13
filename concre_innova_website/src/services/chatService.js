@@ -65,6 +65,19 @@ export function getSupportConversations({ estado = "", signal } = {}) {
   });
 }
 
+export function getSupportConversationsSummary({ signal } = {}) {
+  return request("/api/Chat/admin/resumen", {
+    method: "GET",
+    signal,
+  });
+}
+
+export function closeSupportConversation(idChat) {
+  return request(`/api/Chat/admin/${Number(idChat)}/cierre`, {
+    method: "POST",
+  });
+}
+
 export function getSupportConversationMessages(idChat, { signal } = {}) {
   return request(`/api/Chat/admin/${Number(idChat)}/mensajes`, {
     method: "GET",

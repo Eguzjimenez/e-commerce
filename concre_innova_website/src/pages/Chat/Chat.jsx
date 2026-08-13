@@ -15,6 +15,10 @@ import { buildProductDetailRoute, PUBLIC_ROUTES } from "../../routes/routes";
 import chatbotIcon from "./charla-de-robots.png";
 import "./Chat.css";
 
+// Con la conversacion escalada las respuestas llegan del personal de soporte,
+// asi que el hilo se refresca periodicamente mientras el chat esta abierto.
+const SUPPORT_REFRESH_INTERVAL_MS = 8000;
+
 const WELCOME_MESSAGE = {
   id: "bienvenida",
   sender: CHAT_SENDERS.BOT,
@@ -98,6 +102,24 @@ function ChatBot() {
 
     return () => controller.abort();
   }, [isOpen, loadStoredConversation]);
+
+  useEffect(() => {
+    if (!isOpen || conversationState !== CHAT_STATES.ESCALATED) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        loadStoredConversation(controller.signal);
+      }
+    }, SUPPORT_REFRESH_INTERVAL_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+      controller.abort();
+    };
+  }, [isOpen, conversationState, loadStoredConversation]);
 
   const appendMessages = (newMessages) => {
     setMessages((previousMessages) => [...previousMessages, ...newMessages]);

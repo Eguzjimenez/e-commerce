@@ -398,7 +398,9 @@ export function buildProductRequestPayload(productForm, modalMode) {
     caracteristicas: String(productForm.caracteristicas || "").trim(),
     cantidadDisponible: Number(productForm.cantidadDisponible),
     cantidadMinima: Number(productForm.cantidadMinima),
-    estado: "Activo",
+    // Al editar se conserva el estado actual para que un borrador no se publique
+    // solo por guardar cambios; publicarlo es una accion aparte.
+    estado: modalMode === "edit" ? productForm.estado || "Activo" : "Activo",
   };
 
   if (modalMode === "edit") {

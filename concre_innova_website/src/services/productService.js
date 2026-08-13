@@ -38,6 +38,12 @@ export async function updateProduct(idProducto, product) {
   });
 }
 
+export async function duplicateProduct(idProducto) {
+  return await request(`/api/Productos/${idProducto}/duplicado`, {
+    method: "POST",
+  });
+}
+
 export async function deleteProduct(idProducto) {
   return await request(`/api/Productos/${idProducto}`, {
     method: "DELETE",

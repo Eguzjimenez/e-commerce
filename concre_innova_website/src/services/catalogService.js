@@ -55,6 +55,9 @@ export async function getCatalogProducts(options = {}) {
     tipo: options.type,
     pagina: options.page,
     tamanoPagina: options.pageSize,
+    // Solo la administracion del catalogo pide los borradores; la API valida
+    // el permiso antes de incluirlos.
+    incluirBorradores: options.includeDrafts ? "true" : undefined,
   }, {
     signal: options.signal,
   });

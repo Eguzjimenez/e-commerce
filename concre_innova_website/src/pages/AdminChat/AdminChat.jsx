@@ -1,13 +1,23 @@
 import "./AdminChat.css";
 import { useCallback, useEffect, useState } from "react";
+import Swal from "sweetalert2";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
 import {
   CHAT_SENDERS,
   CHAT_STATES,
+  closeSupportConversation,
   getSupportConversationMessages,
   getSupportConversations,
+  getSupportConversationsSummary,
   replySupportConversation,
 } from "../../services/chatService";
+
+const EMPTY_SUMMARY = {
+  activas: 0,
+  escaladas: 0,
+  finalizadas: 0,
+  pendientes: 0,
+};
 
 const STATE_FILTERS = [
   { value: "", label: "Todas" },
@@ -44,24 +54,41 @@ function AdminChat() {
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [summary, setSummary] = useState(EMPTY_SUMMARY);
 
-  useEffect(() => {
-    const controller = new AbortController();
+  const loadSummary = useCallback(async (signal) => {
+    try {
+      const response = await getSupportConversationsSummary({ signal });
+      setSummary({ ...EMPTY_SUMMARY, ...(response || {}) });
+    } catch (error) {
+      if (error?.name !== "AbortError") {
+        setSummary(EMPTY_SUMMARY);
+      }
+    }
+  }, []);
 
-    const loadConversations = async () => {
+  const loadConversations = useCallback(
+    async (signal) => {
       setIsLoadingConversations(true);
       setErrorMessage("");
 
       try {
         const response = await getSupportConversations({
           estado: stateFilter,
-          signal: controller.signal,
+          signal,
         });
         const nextConversations = Array.isArray(response) ? response : [];
 
         setConversations(nextConversations);
-        setSelectedChatId(nextConversations[0]?.idChat ?? null);
+        setSelectedChatId((currentChatId) =>
+          nextConversations.some(
+            (conversation) => conversation.idChat === currentChatId
+          )
+            ? currentChatId
+            : nextConversations[0]?.idChat ?? null
+        );
       } catch (error) {
         if (error?.name !== "AbortError") {
           setErrorMessage(
@@ -69,15 +96,22 @@ function AdminChat() {
           );
         }
       } finally {
-        if (!controller.signal.aborted) {
+        if (!signal?.aborted) {
           setIsLoadingConversations(false);
         }
       }
-    };
+    },
+    [stateFilter]
+  );
 
-    loadConversations();
+  useEffect(() => {
+    const controller = new AbortController();
+
+    loadConversations(controller.signal);
+    loadSummary(controller.signal);
+
     return () => controller.abort();
-  }, [stateFilter]);
+  }, [loadConversations, loadSummary]);
 
   const loadMessages = useCallback(async (idChat, signal) => {
     if (!idChat) {
@@ -131,10 +165,59 @@ function AdminChat() {
 
       setMessages((currentMessages) => [...currentMessages, nuevoMensaje]);
       setReplyText("");
+      await loadConversations();
+      await loadSummary();
     } catch (error) {
       setErrorMessage(error?.message || "No fue posible enviar la respuesta.");
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleReplyKeyDown = (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      handleSendReply();
+    }
+  };
+
+  const handleCloseConversation = async () => {
+    if (!selectedChatId || isClosing) {
+      return;
+    }
+
+    const confirmation = await Swal.fire({
+      icon: "question",
+      title: "Cerrar conversacion",
+      text: "La conversacion se archiva y queda disponible en el filtro Finalizadas.",
+      showCancelButton: true,
+      confirmButtonText: "Si, cerrar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!confirmation.isConfirmed) {
+      return;
+    }
+
+    setIsClosing(true);
+    setErrorMessage("");
+
+    try {
+      await closeSupportConversation(selectedChatId);
+      await loadConversations();
+      await loadSummary();
+
+      await Swal.fire({
+        icon: "success",
+        title: "Conversacion cerrada",
+        text: "El historial sigue disponible en las conversaciones finalizadas.",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      setErrorMessage(error?.message || "No fue posible cerrar la conversacion.");
+    } finally {
+      setIsClosing(false);
     }
   };
 
@@ -145,6 +228,18 @@ function AdminChat() {
           <div className="admin-chat-sidebar-header">
             <h2>Conversaciones</h2>
             <p>Atiende las consultas escaladas por el asistente virtual.</p>
+
+            <div className="admin-chat-summary" aria-label="Resumen de la bandeja">
+              <span className="admin-chat-summary-item pending">
+                Pendientes <strong>{summary.pendientes}</strong>
+              </span>
+              <span className="admin-chat-summary-item">
+                Activas <strong>{summary.activas}</strong>
+              </span>
+              <span className="admin-chat-summary-item">
+                Cerradas <strong>{summary.finalizadas}</strong>
+              </span>
+            </div>
           </div>
 
           <div className="admin-chat-filters">
@@ -199,9 +294,12 @@ function AdminChat() {
                     {conversation.estado}
                   </span>
 
-                  {conversation.totalMensajes > 0 && (
-                    <span className="admin-chat-unread">
-                      {conversation.totalMensajes}
+                  {conversation.mensajesSinLeer > 0 && (
+                    <span
+                      className="admin-chat-unread"
+                      title="Mensajes sin responder"
+                    >
+                      {conversation.mensajesSinLeer} sin leer
                     </span>
                   )}
                 </div>
@@ -229,6 +327,17 @@ function AdminChat() {
                       : ""}
                   </p>
                 </div>
+
+                {selectedConversation.estado !== CHAT_STATES.CLOSED && (
+                  <button
+                    type="button"
+                    className="admin-chat-close-button"
+                    onClick={handleCloseConversation}
+                    disabled={isClosing}
+                  >
+                    {isClosing ? "Cerrando..." : "Cerrar conversacion"}
+                  </button>
+                )}
               </div>
 
               {errorMessage && (
@@ -250,6 +359,9 @@ function AdminChat() {
                     >
                       <span className="admin-chat-message-sender">
                         {mensaje.remitente}
+                        <time className="admin-chat-message-time">
+                          {formatMessageTime(mensaje.fechaHora)}
+                        </time>
                       </span>
                       {mensaje.mensaje}
                     </div>
@@ -263,6 +375,7 @@ function AdminChat() {
                   maxLength={1000}
                   value={replyText}
                   onChange={(event) => setReplyText(event.target.value)}
+                  onKeyDown={handleReplyKeyDown}
                   disabled={selectedConversation.estado === CHAT_STATES.CLOSED}
                 />
 

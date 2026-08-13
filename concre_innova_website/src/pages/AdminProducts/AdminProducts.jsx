@@ -8,7 +8,15 @@ import {
   getCatalogProducts,
   getCatalogTypes,
 } from "../../services/catalogService";
-import { createProduct, deleteProduct, updateProduct, uploadProductImage } from "../../services/productService";
+import {
+  createProduct,
+  deleteProduct,
+  duplicateProduct,
+  updateProduct,
+  uploadProductImage,
+} from "../../services/productService";
+import { isAdminRole } from "../../constants/roleAccess";
+import { getUserRole } from "../../services/authService";
 import {
   buildAdminProductViewModel,
   buildProductRequestPayload,
@@ -21,6 +29,7 @@ import {
 import { DEFAULT_PAGINATION, normalizePaginatedResponse } from "../../services/paginationService";
 
 const ADMIN_PRODUCTS_PAGE_SIZE = 9;
+const DRAFT_STATUS = "Borrador";
 
 const EMPTY_PRODUCT_FORM = {
   idProducto: null,
@@ -35,7 +44,30 @@ const EMPTY_PRODUCT_FORM = {
   caracteristicas: "",
   cantidadDisponible: "",
   cantidadMinima: "",
+  estado: "Activo",
 };
+
+function isDraftProduct(product) {
+  return product?.estado === DRAFT_STATUS;
+}
+
+function buildProductFormValues(product) {
+  return {
+    idProducto: product.idProducto,
+    nombre: product.nombre,
+    descripcion: product.descripcion,
+    precio: String(product.precio),
+    imagen: product.imagen,
+    idCategoria: product.idCategoria,
+    idTipo: product.idTipo,
+    tamano: product.tamano,
+    material: product.material,
+    caracteristicas: product.caracteristicas,
+    cantidadDisponible: String(product.cantidadDisponible),
+    cantidadMinima: String(product.cantidadMinima),
+    estado: product.estado || "Activo",
+  };
+}
 
 function AdminProducts() {
   const [productList, setProductList] = useState([]);
@@ -93,6 +125,7 @@ function AdminProducts() {
         categoryId: selectedCategoryId === "all" ? undefined : selectedCategoryId,
         page,
         pageSize: ADMIN_PRODUCTS_PAGE_SIZE,
+        includeDrafts: true,
       });
       const pagedProducts = normalizePaginatedResponse(
         productsResponse,
@@ -102,6 +135,7 @@ function AdminProducts() {
 
       setProductList(pagedProducts.items);
       setPagination(pagedProducts);
+      return pagedProducts;
     } catch (loadError) {
       setError(loadError.message || "No se pudieron cargar los productos.");
       setProductList([]);
@@ -110,6 +144,7 @@ function AdminProducts() {
         pageNumber: page,
         pageSize: ADMIN_PRODUCTS_PAGE_SIZE,
       });
+      return null;
     } finally {
       setLoading(false);
     }
@@ -134,6 +169,9 @@ function AdminProducts() {
     return products;
   }, [products]);
 
+  // El vendedor solo duplica productos y ajusta los borradores resultantes.
+  const catalogAdmin = isAdminRole(getUserRole());
+
   const handleImageFallback = (event, imageCandidates) => {
     handleCatalogImageCandidateFallback(event, imageCandidates);
   };
@@ -149,20 +187,7 @@ function AdminProducts() {
 
   const openEditModal = (product) => {
     setModalMode("edit");
-    setNewProduct({
-      idProducto: product.idProducto,
-      nombre: product.nombre,
-      descripcion: product.descripcion,
-      precio: String(product.precio),
-      imagen: product.imagen,
-      idCategoria: product.idCategoria,
-      idTipo: product.idTipo,
-      tamano: product.tamano,
-      material: product.material,
-      caracteristicas: product.caracteristicas,
-      cantidadDisponible: String(product.cantidadDisponible),
-      cantidadMinima: String(product.cantidadMinima),
-    });
+    setNewProduct(buildProductFormValues(product));
     setShowAddModal(true);
   };
 
@@ -279,6 +304,81 @@ function AdminProducts() {
     }
   };
 
+  // Crea la copia en estado Borrador y abre el formulario con los datos
+  // pre-completados para que el vendedor haga los ajustes.
+  const handleDuplicateProduct = async (product) => {
+    try {
+      const result = await duplicateProduct(product.id);
+
+      if (result?.codigo !== 1) {
+        throw new Error(result?.mensaje || "No se pudo duplicar el producto.");
+      }
+
+      setProductPage(1);
+      const refreshedPage = await loadProducts(1);
+      const duplicated = (refreshedPage?.items || []).find(
+        (item) => Number(item.idProducto) === Number(result.idProducto)
+      );
+
+      await Swal.fire({
+        icon: "success",
+        title: "Producto duplicado",
+        text: "La copia quedo en estado Borrador. Ajusta los datos y guardala.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      if (duplicated) {
+        openEditModal(buildAdminProductViewModel(duplicated, normalizedCategories));
+      }
+    } catch (duplicateError) {
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo duplicar",
+        text: duplicateError.message || "Error al duplicar el producto.",
+      });
+    }
+  };
+
+  const handlePublishProduct = async (product) => {
+    const confirmation = await Swal.fire({
+      icon: "question",
+      title: "Publicar producto",
+      text: `Deseas publicar ${product.name} en el catalogo?`,
+      showCancelButton: true,
+      confirmButtonText: "Si, publicar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!confirmation.isConfirmed) {
+      return;
+    }
+
+    try {
+      const payload = {
+        ...buildProductRequestPayload(buildProductFormValues(product), "edit"),
+        estado: "Activo",
+      };
+
+      await updateProduct(Number(product.idProducto), payload);
+      await Swal.fire({
+        icon: "success",
+        title: "Producto publicado",
+        text: "El producto ya esta visible en el catalogo.",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+
+      await loadProducts(productPage);
+    } catch (publishError) {
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo publicar",
+        text: publishError.message || "Error al publicar el producto.",
+      });
+    }
+  };
+
   const handleDeleteProduct = async (product) => {
     const result = await Swal.fire({
       icon: "warning",
@@ -343,9 +443,11 @@ function AdminProducts() {
             </select>
           </div>
 
-          <button className="admin-primary-button" onClick={openAddModal}>
-            Agregar producto
-          </button>
+          {catalogAdmin && (
+            <button className="admin-primary-button" onClick={openAddModal}>
+              Agregar producto
+            </button>
+          )}
         </div>
 
         {error && <div className="admin-products-error">{error}</div>}
@@ -373,7 +475,11 @@ function AdminProducts() {
                   <h3>{product.name}</h3>
                   <span
                     className={`admin-product-status ${
-                      product.status === "Activo" ? "active" : "inactive"
+                      isDraftProduct(product)
+                        ? "draft"
+                        : product.status === "Activo"
+                        ? "active"
+                        : "inactive"
                     }`}
                   >
                     {product.status}
@@ -391,18 +497,36 @@ function AdminProducts() {
                 </div>
 
                 <div className="admin-product-actions">
-                  <button className="admin-product-btn" onClick={() => openEditModal(product)}>
-                    Editar
-                  </button>
+                  {(catalogAdmin || isDraftProduct(product)) && (
+                    <button className="admin-product-btn" onClick={() => openEditModal(product)}>
+                      Editar
+                    </button>
+                  )}
                   <button className="admin-product-btn secondary" onClick={() => openViewModal(product)}>
                     Ver
                   </button>
                   <button
-                    className="admin-product-btn danger"
-                    onClick={() => handleDeleteProduct(product)}
+                    className="admin-product-btn secondary"
+                    onClick={() => handleDuplicateProduct(product)}
                   >
-                    Eliminar
+                    Duplicar
                   </button>
+                  {catalogAdmin && isDraftProduct(product) && (
+                    <button
+                      className="admin-product-btn"
+                      onClick={() => handlePublishProduct(product)}
+                    >
+                      Publicar
+                    </button>
+                  )}
+                  {catalogAdmin && (
+                    <button
+                      className="admin-product-btn danger"
+                      onClick={() => handleDeleteProduct(product)}
+                    >
+                      Eliminar
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -427,7 +551,13 @@ function AdminProducts() {
           <div className="admin-modal-backdrop" onClick={closeAddModal}>
             <div className="admin-modal" onClick={(event) => event.stopPropagation()}>
               <div className="admin-modal-header">
-                <h3>{modalMode === "edit" ? "Editar producto" : "Nuevo producto"}</h3>
+                <h3>
+                  {modalMode === "edit"
+                    ? isDraftProduct(newProduct)
+                      ? "Editar borrador"
+                      : "Editar producto"
+                    : "Nuevo producto"}
+                </h3>
                 <button className="admin-modal-close" onClick={closeAddModal} disabled={saving}>
                   ×
                 </button>

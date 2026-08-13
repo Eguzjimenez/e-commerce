@@ -22,6 +22,7 @@ export const PRIVATE_ROUTES = {
   NEW_QUOTATION: "/cotizaciones/nueva",
   MY_QUOTATIONS: "/mis-cotizaciones",
   MY_ACCOUNT: "/mi-cuenta",
+  NOTIFICATIONS: "/notificaciones",
   SETTINGS: "/configuracion"
 };
 

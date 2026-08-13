@@ -16,6 +16,7 @@ import QuotationRequest from "../pages/QuotationRequest/QuotationRequest";
 import QuotationHistory from "../pages/QuotationHistory/QuotationHistory";
 import MyAccount from "../pages/MyAccount/MyAccount";
 import Contact from "../pages/Contact/Contact";
+import Notifications from "../pages/Notifications/Notifications";
 import Settings from "../pages/Settings/Settings";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
@@ -90,6 +91,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={[ROLES.CLIENTE]}>
             <MyAccount />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={PRIVATE_ROUTES.NOTIFICATIONS}
+        element={
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
+            <Notifications />
           </ProtectedRoute>
         }
       />
@@ -178,7 +187,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.PRODUCTS}
         element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.SALES_MANAGEMENT}>
             <AdminProducts />
           </ProtectedRoute>
         }
@@ -202,7 +211,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.CHAT}
         element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.SALES_MANAGEMENT}>
             <AdminChat />
           </ProtectedRoute>
         }

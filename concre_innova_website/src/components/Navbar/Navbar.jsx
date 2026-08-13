@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
+  Bell,
   ClipboardList,
   Heart,
   ImagePlus,
@@ -18,6 +19,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
+import NotificationBell from "../NotificationBell/NotificationBell";
 import { ADMIN_ROUTES, PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 import { getAuth, getUserRole, isLoggedIn, logout } from "../../services/authService";
 import {
@@ -164,6 +166,8 @@ function Navbar() {
             </>
           )}
 
+          {authenticated && <NotificationBell />}
+
           {authenticated && (
             <button className="nav-icon-link nav-logout-button" type="button" onClick={handleLogout}>
               <LogOut size={21} strokeWidth={1.75} />
@@ -262,6 +266,18 @@ function Navbar() {
             >
               <UserRound size={15} strokeWidth={1.8} />
               Mi cuenta
+            </Link>
+          </li>
+        )}
+        {authenticated && !admin && (
+          <li>
+            <Link
+              to={PRIVATE_ROUTES.NOTIFICATIONS}
+              className={getNavLinkClass(PRIVATE_ROUTES.NOTIFICATIONS)}
+              aria-current={isActivePath(PRIVATE_ROUTES.NOTIFICATIONS) ? "page" : undefined}
+            >
+              <Bell size={15} strokeWidth={1.8} />
+              Notificaciones
             </Link>
           </li>
         )}

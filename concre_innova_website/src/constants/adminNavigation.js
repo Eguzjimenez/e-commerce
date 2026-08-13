@@ -15,7 +15,7 @@ export const ADMIN_NAV_ITEMS = [
   {
     to: ADMIN_ROUTES.PRODUCTS,
     label: "Productos",
-    roles: ROLE_GROUPS.ADMIN_ONLY,
+    roles: ROLE_GROUPS.SALES_MANAGEMENT,
   },
   {
     to: ADMIN_ROUTES.CATEGORIES,
@@ -40,7 +40,7 @@ export const ADMIN_NAV_ITEMS = [
   {
     to: ADMIN_ROUTES.CHAT,
     label: "Chat administrativo",
-    roles: ROLE_GROUPS.ADMIN_ONLY,
+    roles: ROLE_GROUPS.SALES_MANAGEMENT,
   },
   {
     to: ADMIN_ROUTES.USERS,
@@ -66,6 +66,11 @@ export const ADMIN_NAV_ITEMS = [
     to: ADMIN_ROUTES.BITACORA,
     label: "Bitacora",
     roles: ROLE_GROUPS.ADMIN_ONLY,
+  },
+  {
+    to: PRIVATE_ROUTES.NOTIFICATIONS,
+    label: "Notificaciones",
+    roles: ROLE_GROUPS.SALES_MANAGEMENT,
   },
   {
     to: PRIVATE_ROUTES.SETTINGS,

@@ -1,0 +1,135 @@
+.notifications-page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 48px 24px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.notifications-panel {
+  max-width: 880px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.notifications-header span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--laurel);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.notifications-header h1 {
+  margin: 0 0 10px;
+  font-size: 2rem;
+  color: var(--ink);
+}
+
+.notifications-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.notifications-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.notifications-filters {
+  display: inline-flex;
+  gap: 8px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+}
+
+.notifications-filters button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 9px;
+  background: none;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.notifications-filters button:hover:not(:disabled) {
+  background: var(--linen);
+}
+
+.notifications-filters button.active {
+  background: var(--laurel);
+  color: var(--paper);
+}
+
+.notifications-mark-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.notifications-mark-all:hover:not(:disabled) {
+  background: var(--sand);
+  border-color: var(--laurel);
+}
+
+.notifications-mark-all:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.notifications-state {
+  padding: 22px;
+  border-radius: 14px;
+  background: var(--linen);
+  color: var(--muted);
+  text-align: center;
+}
+
+.notifications-state.error {
+  background: #fdecea;
+  color: #b4442e;
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 700px) {
+  .notifications-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .notifications-filters {
+    justify-content: center;
+  }
+
+  .notifications-mark-all {
+    justify-content: center;
+  }
+}
