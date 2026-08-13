@@ -14,7 +14,9 @@
   --muted-warm: #5f5749;
   --soft-warm: #6b604d;
   --line: #ded6c7;
-  --line-strong: #d8d0bf;
+  /* Borde de controles: 3.47:1 sobre --paper, cumple WCAG 1.4.11 (minimo 3:1).
+     --line queda para separadores decorativos, que no exigen ese contraste. */
+  --line-strong: #8e8674;
 
   --forest-950: var(--forest-ink);
   --forest-900: #1d3022;
@@ -296,7 +298,7 @@ p {
 input,
 select,
 textarea {
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius-md);
   background: var(--paper);
   color: var(--ink);
@@ -304,12 +306,18 @@ textarea {
   transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
+/* El anillo de foco necesita ser visible por si mismo: se refuerza el halo
+   ademas del cambio de borde, porque el contorno propio esta desactivado. */
+.input:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
 .input:focus,
 input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--laurel);
-  box-shadow: 0 0 0 4px rgba(49, 77, 55, 0.12);
+  box-shadow: 0 0 0 3px rgba(49, 77, 55, 0.45);
 }
 
 option,

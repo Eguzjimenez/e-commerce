@@ -380,7 +380,9 @@
   .nav-container {
     width: min(100% - 28px, var(--max-page));
     min-height: auto;
-    grid-template-columns: 1fr auto auto;
+    /* minmax(0, 1fr) permite que la columna se encoja por debajo de su
+       contenido; con 1fr la barra desbordaba horizontalmente a 320 px. */
+    grid-template-columns: minmax(0, 1fr) auto auto;
     grid-template-areas:
       "brand actions menu"
       "search search search";
@@ -390,6 +392,7 @@
   .nav-search-form {
     grid-area: search;
     width: 100%;
+    min-width: 0;
   }
 
   .nav-brand-block {
@@ -397,6 +400,15 @@
     justify-items: start;
     justify-self: start;
     text-align: left;
+    min-width: 0;
+  }
+
+  .nav-logo,
+  .nav-location {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .nav-brand-block::before {

@@ -143,8 +143,42 @@ export function getClientId() {
   );
 }
 
+/**
+ * Lee las credenciales del propio token en lugar del objeto guardado, para que
+ * editar localStorage no habilite pantallas que la API va a rechazar igualmente.
+ */
+function readTokenClaims(token) {
+  try {
+    const payload = String(token).split(".")[1];
+    if (!payload) {
+      return null;
+    }
+
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(
+      normalized.length + ((4 - (normalized.length % 4)) % 4),
+      "="
+    );
+
+    return JSON.parse(decodeURIComponent(escape(atob(padded))));
+  } catch {
+    return null;
+  }
+}
+
 export function getUserRole() {
   const auth = getAuth();
+  const claims = auth?.token ? readTokenClaims(auth.token) : null;
+
+  if (claims) {
+    return (
+      claims.nombreRol ||
+      claims.role ||
+      ROL_ID_MAP[Number(claims.idRol)] ||
+      null
+    );
+  }
+
   return auth?.nombreRol || ROL_ID_MAP[auth?.idRol] || null;
 }
 

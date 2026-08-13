@@ -373,6 +373,7 @@ function ChatBot() {
           <div className="chatbot-input-container">
             <input
               type="text"
+              aria-label="Mensaje para el asistente"
               placeholder={
                 isConversationClosed
                   ? "Conversacion finalizada"

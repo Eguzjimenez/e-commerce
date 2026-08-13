@@ -16,6 +16,18 @@ export function isVendorRole(role) {
   return role === ROLES.VENDEDOR;
 }
 
+/**
+ * Roles que operan el panel interno. El vendedor no es administrador, pero
+ * navega con la misma estructura de personal y no con la de cliente.
+ */
+export function isStaffRole(role) {
+  return ROLE_GROUPS.SALES_MANAGEMENT.includes(role);
+}
+
+export function canManageCatalog(role) {
+  return ROLE_GROUPS.SALES_MANAGEMENT.includes(role);
+}
+
 export function canPurchase(role) {
   return ROLE_GROUPS.PURCHASE.includes(role);
 }

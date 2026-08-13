@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Bell,
   ClipboardList,
@@ -26,6 +26,7 @@ import {
   canManageQuotations,
   canPurchase,
   isAdminRole,
+  isStaffRole,
 } from "../../constants/roleAccess";
 import { ROLES } from "../../constants/roles";
 import { getCartCount } from "../../services/cartService";
@@ -41,33 +42,39 @@ function Navbar() {
   const [favoriteCount, setFavoriteCount] = useState(0);
   const [navSearchTerm, setNavSearchTerm] = useState("");
 
+  // Los favoritos son por usuario: sin sesion la peticion solo produce un 401.
+  const refreshFavoriteCount = useCallback(() => {
+    if (!isLoggedIn()) {
+      setFavoriteCount(0);
+      return;
+    }
+
+    getFavoriteCountAsync().then(setFavoriteCount).catch(() => setFavoriteCount(0));
+  }, []);
+
   useEffect(() => {
     setMenuOpen(false);
     setAuth(getAuth());
     setCartCount(getCartCount());
-    getFavoriteCountAsync().then(setFavoriteCount).catch(() => setFavoriteCount(0));
-  }, [location.pathname]);
+    refreshFavoriteCount();
+  }, [location.pathname, refreshFavoriteCount]);
 
   useEffect(() => {
-    const refreshFavoriteCount = () => {
-      getFavoriteCountAsync().then(setFavoriteCount).catch(() => setFavoriteCount(0));
-    };
     const handleAuthChange = () => {
       setAuth(getAuth());
       refreshFavoriteCount();
     };
     const handleCartChange = () => setCartCount(getCartCount());
-    const handleFavoritesChange = refreshFavoriteCount;
     window.addEventListener("authchange", handleAuthChange);
     window.addEventListener("cartchange", handleCartChange);
-    window.addEventListener("favoriteschange", handleFavoritesChange);
+    window.addEventListener("favoriteschange", refreshFavoriteCount);
 
     return () => {
       window.removeEventListener("authchange", handleAuthChange);
       window.removeEventListener("cartchange", handleCartChange);
-      window.removeEventListener("favoriteschange", handleFavoritesChange);
+      window.removeEventListener("favoriteschange", refreshFavoriteCount);
     };
-  }, []);
+  }, [refreshFavoriteCount]);
 
   const handleLogout = () => {
     logout();
@@ -78,11 +85,14 @@ function Navbar() {
   const authenticated = isLoggedIn() && auth;
   const userRole = getUserRole();
   const admin = isAdminRole(userRole);
+  // El vendedor tambien opera el panel interno: no debe ver la navegacion de compra.
+  const staff = isStaffRole(userRole);
   const quotationStaff = canManageQuotations(userRole);
   const purchaseAccess = canPurchase(userRole);
   const isClient = userRole === ROLES.CLIENTE;
-  const logoRoute = authenticated && admin
-    ? ADMIN_ROUTES.DASHBOARD
+  const panelRoute = admin ? ADMIN_ROUTES.DASHBOARD : ADMIN_ROUTES.PRODUCTS;
+  const logoRoute = authenticated && staff
+    ? panelRoute
     : PUBLIC_ROUTES.HOME;
   const isActivePath = (path) =>
     path === PUBLIC_ROUTES.HOME ? location.pathname === path : location.pathname.startsWith(path);
@@ -91,8 +101,8 @@ function Navbar() {
     PUBLIC_ROUTES.REGISTER,
     PUBLIC_ROUTES.FORGOT_PASSWORD,
   ].some((path) => location.pathname.startsWith(path));
-  const showSearch = !admin && !authPage;
-  const navClassName = ["navbar", admin ? "navbar-admin" : "", showSearch ? "" : "navbar-compact"]
+  const showSearch = !staff && !authPage;
+  const navClassName = ["navbar", staff ? "navbar-admin" : "", showSearch ? "" : "navbar-compact"]
     .filter(Boolean)
     .join(" ");
   const getNavLinkClass = (path, className = "") =>
@@ -132,13 +142,13 @@ function Navbar() {
         </Link>
 
         <div className="nav-utility-actions" aria-label="Accesos rapidos">
-          {admin && <span className="nav-role">{userRole}</span>}
+          {staff && <span className="nav-role">{userRole}</span>}
 
-          {admin && (
+          {staff && (
             <Link
-              to={ADMIN_ROUTES.DASHBOARD}
-              className={getNavLinkClass(ADMIN_ROUTES.DASHBOARD, "nav-icon-link nav-panel-link")}
-              aria-current={isActivePath(ADMIN_ROUTES.DASHBOARD) ? "page" : undefined}
+              to={panelRoute}
+              className={getNavLinkClass(panelRoute, "nav-icon-link nav-panel-link")}
+              aria-current={isActivePath(panelRoute) ? "page" : undefined}
             >
               <ShieldCheck size={20} strokeWidth={1.75} />
               <span className="nav-icon-label">Panel</span>
@@ -175,7 +185,7 @@ function Navbar() {
             </button>
           )}
 
-          {!admin && (
+          {!staff && (
             <Link
               to={PRIVATE_ROUTES.CART}
               className={getNavLinkClass(PRIVATE_ROUTES.CART, "nav-icon-link nav-bag-link")}
@@ -188,7 +198,7 @@ function Navbar() {
           )}
         </div>
 
-        {!admin && (
+        {!staff && (
           <button
             className="menu-toggle"
             type="button"
@@ -201,9 +211,9 @@ function Navbar() {
         )}
       </div>
 
-      {!admin && (
+      {!staff && (
       <ul className={`nav-menu ${menuOpen ? "active" : ""}`}>
-        {!admin && (
+        {!staff && (
           <>
             <li>
               <Link
@@ -245,7 +255,7 @@ function Navbar() {
             </li>
           </>
         )}
-        {authenticated && purchaseAccess && !admin && (
+        {authenticated && purchaseAccess && !staff && (
           <li>
             <Link
               to={PRIVATE_ROUTES.NEW_QUOTATION}
@@ -269,7 +279,7 @@ function Navbar() {
             </Link>
           </li>
         )}
-        {authenticated && !admin && (
+        {authenticated && !staff && (
           <li>
             <Link
               to={PRIVATE_ROUTES.NOTIFICATIONS}
@@ -281,7 +291,7 @@ function Navbar() {
             </Link>
           </li>
         )}
-        {authenticated && !admin && (
+        {authenticated && !staff && (
           <li>
             <Link
               to={PRIVATE_ROUTES.SETTINGS}
@@ -293,7 +303,7 @@ function Navbar() {
             </Link>
           </li>
         )}
-        {authenticated && purchaseAccess && !admin && (
+        {authenticated && purchaseAccess && !staff && (
           <li>
             <Link
               to={PRIVATE_ROUTES.MY_QUOTATIONS}
@@ -305,7 +315,7 @@ function Navbar() {
             </Link>
           </li>
         )}
-        {authenticated && purchaseAccess && !admin && (
+        {authenticated && purchaseAccess && !staff && (
           <li>
             <Link
               to={PRIVATE_ROUTES.MY_ORDERS}
@@ -317,7 +327,7 @@ function Navbar() {
             </Link>
           </li>
         )}
-        {!admin && (
+        {!staff && (
           <li>
             <Link
               to={PUBLIC_ROUTES.FAVORITES}
@@ -349,7 +359,7 @@ function Navbar() {
             </Link>
           </li>
         )}
-        {!admin && (
+        {!staff && (
           <li>
             <button
               className="nav-chat-button"
