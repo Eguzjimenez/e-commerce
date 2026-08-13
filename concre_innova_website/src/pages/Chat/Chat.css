@@ -124,7 +124,7 @@
 }
 
 .bot-message .message-content {
-  background: #ffffff;
+  background: var(--paper);
   border: 1px solid var(--line);
   color: var(--ink);
 }
@@ -146,7 +146,7 @@
 }
 
 .quick-options button {
-  background: #ffffff;
+  background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 10px;
   color: var(--ink);
@@ -209,7 +209,7 @@
 }
 
 .chatbot-notice {
-  background: #fff4cc;
+  background: var(--surface-accent);
   border-radius: 10px;
   color: #785b00;
   font-size: 0.85rem;
@@ -218,7 +218,7 @@
 }
 
 .chatbot-actions {
-  background: #ffffff;
+  background: var(--paper);
   border-top: 1px solid var(--line);
   display: flex;
   flex-wrap: wrap;
@@ -253,7 +253,7 @@
 }
 
 .chatbot-input-container {
-  background: #ffffff;
+  background: var(--paper);
   border-top: 1px solid var(--line);
   display: flex;
   gap: 10px;

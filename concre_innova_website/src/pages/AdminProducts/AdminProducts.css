@@ -56,7 +56,7 @@
   height: 220px;
   margin: 14px 14px 0;
   object-fit: cover;
-  background: #e7e2d8;
+  background: var(--surface-muted);
 }
 
 .admin-product-info {
@@ -124,7 +124,7 @@
   background-color: var(--forest-ink);
   border: 1px solid var(--forest-ink);
   border-radius: var(--radius-md);
-  color: var(--paper);
+  color: var(--on-dark);
   cursor: pointer;
   font-size: 0.84rem;
   font-weight: 800;
@@ -140,12 +140,12 @@
 .admin-product-btn.secondary {
   background-color: var(--paper);
   border-color: var(--forest-ink);
-  color: var(--forest-ink);
+  color: var(--ink);
 }
 
 .admin-product-btn.secondary:hover {
   background-color: var(--forest-ink);
-  color: var(--paper);
+  color: var(--on-dark);
 }
 
 .admin-product-btn.danger {
@@ -220,7 +220,7 @@
   height: 34px;
   background: var(--forest-ink);
   border-radius: var(--radius-md);
-  color: var(--paper);
+  color: var(--on-dark);
   cursor: pointer;
   font-size: 1rem;
   font-weight: 800;
@@ -297,7 +297,7 @@
 
 .admin-image-dropzone-title {
   margin: 0;
-  color: var(--forest-ink);
+  color: var(--ink);
   font-weight: 700;
 }
 
@@ -312,7 +312,7 @@
   justify-content: center;
   background-color: var(--laurel);
   border-radius: var(--radius-md);
-  color: var(--paper);
+  color: var(--on-dark);
   cursor: pointer;
   font-size: 0.85rem;
   padding: 8px 14px;
@@ -324,7 +324,7 @@
 
 .admin-image-uploading {
   margin: 0;
-  color: var(--forest-ink);
+  color: var(--ink);
   font-size: 0.86rem;
 }
 

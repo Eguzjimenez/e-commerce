@@ -15,6 +15,8 @@ import History from "../pages/History/History";
 import QuotationRequest from "../pages/QuotationRequest/QuotationRequest";
 import QuotationHistory from "../pages/QuotationHistory/QuotationHistory";
 import MyAccount from "../pages/MyAccount/MyAccount";
+import Contact from "../pages/Contact/Contact";
+import Settings from "../pages/Settings/Settings";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import ForgotPassword from "../pages/forgot-password/ForgotPassword";
@@ -30,7 +32,7 @@ import AdminQuotations from "../pages/AdminQuotations/AdminQuotations";
 import AdminOrders from "../pages/AdminOrders/AdminOrders";
 import AdminChat from "../pages/AdminChat/AdminChat";
 import AdminReports from "../pages/AdminReports/AdminReports";
-import AdminStatistics from "../pages/AdminStatistics/AdminStatistics";
+import AdminCompanyInfo from "../pages/AdminCompanyInfo/AdminCompanyInfo";
 import AdminUsers from "../pages/AdminUsers/AdminUsers";
 import AdminBitacora from "../pages/AdminBitacora/AdminBitacora";
 import AdminPermissions from "../pages/AdminPermissions/AdminPermissions";
@@ -44,6 +46,7 @@ function AppRoutes() {
       <Route path={PUBLIC_ROUTES.PRODUCT} element={<ProductDetail />} />
       <Route path={PUBLIC_ROUTES.FAVORITES} element={<Favorites />} />
       <Route path={PUBLIC_ROUTES.SMART_ADVISOR} element={<SmartAdvisor />} />
+      <Route path={PUBLIC_ROUTES.CONTACT} element={<Contact />} />
       <Route path={PUBLIC_ROUTES.LOGIN} element={<Login />} />
       <Route path={PUBLIC_ROUTES.REGISTER} element={<Register />} />
       <Route path={PUBLIC_ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
@@ -90,6 +93,14 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path={PRIVATE_ROUTES.SETTINGS}
+        element={
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
+            <Settings />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path={ADMIN_ROUTES.DASHBOARD}
@@ -126,16 +137,16 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.REPORTS}
         element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.SALES_MANAGEMENT}>
             <AdminReports />
           </ProtectedRoute>
         }
       />
       <Route
-        path={ADMIN_ROUTES.STATISTICS}
+        path={ADMIN_ROUTES.COMPANY_INFO}
         element={
           <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
-            <AdminStatistics />
+            <AdminCompanyInfo />
           </ProtectedRoute>
         }
       />

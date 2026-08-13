@@ -39,7 +39,7 @@
   background: var(--forest-ink);
   border: 1px solid var(--forest-ink);
   border-radius: var(--radius-md);
-  color: var(--paper);
+  color: var(--on-dark);
   font-weight: 700;
   padding: 0 18px;
   text-decoration: none;
@@ -90,7 +90,7 @@
   margin: 14px;
   height: 240px;
   overflow: hidden;
-  background: #e7e2d8;
+  background: var(--surface-muted);
 }
 
 .favorite-image-link img {
@@ -126,7 +126,7 @@
 }
 
 .favorite-card-body strong {
-  color: var(--forest-ink);
+  color: var(--ink);
   font-size: 1rem;
 }
 
@@ -142,7 +142,7 @@
   background: var(--forest-ink);
   border: 1px solid var(--forest-ink);
   border-radius: var(--radius-md);
-  color: var(--paper);
+  color: var(--on-dark);
   cursor: pointer;
   font-weight: 700;
   padding: 0 14px;
@@ -162,7 +162,7 @@
 .favorite-actions .favorite-remove-button:hover {
   background: var(--danger);
   border-color: var(--danger);
-  color: var(--paper);
+  color: var(--on-dark);
 }
 
 .favorites-empty h2 {

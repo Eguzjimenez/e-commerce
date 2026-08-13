@@ -91,7 +91,7 @@
 }
 
 .checkout-summary-total strong {
-  color: var(--forest-ink);
+  color: var(--ink);
   font-size: 1.25rem;
 }
 

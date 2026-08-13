@@ -40,10 +40,6 @@ function AdminLayout({ title, children }) {
             <h1>{title}</h1>
             <p>Gestiona las operaciones del negocio desde un solo lugar</p>
           </div>
-
-          <div className="admin-header-user">
-            <span>{userRole || "Usuario"}</span>
-          </div>
         </header>
 
         <main className="admin-content">{children}</main>

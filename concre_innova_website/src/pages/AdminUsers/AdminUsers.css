@@ -162,7 +162,7 @@
 }
 
 .admin-modal {
-  background: #fffaf3;
+  background: var(--surface-accent);
   border: 1px solid rgba(103, 148, 119, 0.18);
   border-radius: 8px;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.32);
@@ -220,7 +220,7 @@
 
 .form-row input,
 .form-row select {
-  background: #ffffff;
+  background: var(--paper);
   border: 1px solid rgba(103, 148, 119, 0.24);
   border-radius: 8px;
   color: #163326;
@@ -266,7 +266,7 @@
 }
 
 .detail-item {
-  background: #ffffff;
+  background: var(--paper);
   border: 1px solid rgba(103, 148, 119, 0.2);
   border-radius: 8px;
   display: grid;

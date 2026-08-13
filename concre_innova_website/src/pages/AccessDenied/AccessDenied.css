@@ -44,7 +44,7 @@
 }
 
 .access-denied-detail {
-  background: #f7f4ed;
+  background: var(--surface-muted-soft);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   margin-bottom: 28px;
@@ -60,7 +60,7 @@
 
 .access-denied-detail code {
   background: var(--paper);
-  color: var(--forest-ink);
+  color: var(--ink);
   font-size: 0.85rem;
   padding: 2px 6px;
 }
@@ -88,12 +88,12 @@
 
 .access-denied-btn.primary {
   background: var(--forest-ink);
-  color: var(--paper);
+  color: var(--on-dark);
 }
 
 .access-denied-btn.secondary {
   background: var(--paper);
-  color: var(--forest-ink);
+  color: var(--ink);
 }
 
 @media (max-width: 480px) {

@@ -6,22 +6,22 @@
 
 .quotation-history-header span,
 .quotation-history-detail-heading span {
-  color: #a4512e;
+  color: var(--clay);
   font-size: 0.78rem;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .quotation-history-header h1 {
-  color: #183c3d;
+  color: var(--ink);
   font-size: clamp(2rem, 4vw, 3.4rem);
   margin: 8px 0 28px;
 }
 
 .quotation-history-filters {
   align-items: end;
-  background: #fff;
-  border: 1px solid #d8dfda;
+  background: var(--paper);
+  border: 1px solid var(--line);
   display: grid;
   gap: 12px;
   grid-template-columns: minmax(220px, 1fr) minmax(170px, 220px) auto 44px;
@@ -30,7 +30,7 @@
 }
 
 .quotation-history-filters label {
-  color: #314849;
+  color: var(--ink);
   display: grid;
   font-size: 0.8rem;
   font-weight: 800;
@@ -39,10 +39,10 @@
 
 .quotation-history-filters input,
 .quotation-history-filters select {
-  background: #fff;
-  border: 1px solid #bdc9c3;
+  background: var(--paper);
+  border: 1px solid var(--line-strong);
   border-radius: 6px;
-  color: #233638;
+  color: var(--ink);
   font: inherit;
   min-height: 44px;
   min-width: 0;
@@ -62,14 +62,14 @@
 }
 
 .quotation-history-filters button.search {
-  background: #183c3d;
-  color: #fff;
+  background: var(--ink);
+  color: var(--on-dark);
   padding: 9px 16px;
 }
 
 .quotation-history-filters button.clear {
-  background: #e8eeea;
-  color: #314849;
+  background: var(--surface-muted-soft);
+  color: var(--ink);
   width: 44px;
 }
 
@@ -91,10 +91,10 @@
 }
 
 .quotation-history-list button {
-  background: #fff;
-  border: 1px solid #d8dfda;
+  background: var(--paper);
+  border: 1px solid var(--line);
   border-radius: 7px;
-  color: #233638;
+  color: var(--ink);
   cursor: pointer;
   display: grid;
   gap: 5px;
@@ -105,7 +105,7 @@
 
 .quotation-history-list button.active,
 .quotation-history-list button:hover {
-  border-color: #a4512e;
+  border-color: var(--clay);
 }
 
 .quotation-history-list button strong {
@@ -113,7 +113,7 @@
 }
 
 .quotation-history-list button small {
-  color: #5b6969;
+  color: var(--muted);
 }
 
 .quotation-history-list button em {
@@ -121,8 +121,8 @@
 }
 
 .quotation-history-detail {
-  background: #fff;
-  border: 1px solid #d8dfda;
+  background: var(--paper);
+  border: 1px solid var(--line);
   border-radius: 8px;
   min-width: 0;
   padding: 25px;
@@ -136,7 +136,7 @@
 }
 
 .quotation-history-detail-heading h2 {
-  color: #183c3d;
+  color: var(--ink);
   font-size: 1.45rem;
   margin: 5px 0 0;
 }
@@ -151,32 +151,32 @@
 }
 
 .quotation-history-status.pendiente {
-  background: #fff1cc;
-  color: #815e00;
+  background: var(--surface-accent);
+  color: var(--warning);
 }
 
 .quotation-history-status.respondida {
-  background: #dceee3;
-  color: #245c3b;
+  background: var(--sage-100);
+  color: var(--success);
 }
 
 .quotation-history-status.aceptada {
-  background: #d9ebf1;
-  color: #174f62;
+  background: var(--surface-muted);
+  color: var(--muted);
 }
 
 .quotation-history-status.aprobada {
-  background: #dce8f7;
-  color: #214f82;
+  background: var(--surface-muted);
+  color: var(--muted);
 }
 
 .quotation-history-status.rechazada {
-  background: #f7dddd;
-  color: #8b2929;
+  background: var(--surface-accent);
+  color: var(--danger);
 }
 
 .quotation-history-description {
-  color: #4f6060;
+  color: var(--muted);
   line-height: 1.65;
   margin: 22px 0;
   white-space: pre-wrap;
@@ -197,9 +197,9 @@
 }
 
 .quotation-history-response {
-  background: #f2f6f3;
-  border-left: 3px solid #568267;
-  color: #304b3b;
+  background: var(--surface-muted-soft);
+  border-left: 3px solid var(--laurel);
+  color: var(--ink);
   padding: 15px;
 }
 
@@ -209,13 +209,13 @@
 }
 
 .quotation-history-products {
-  border-top: 1px solid #e2e7e3;
+  border-top: 1px solid var(--line);
   margin-top: 22px;
   padding-top: 20px;
 }
 
 .quotation-history-products h3 {
-  color: #183c3d;
+  color: var(--ink);
   font-size: 1rem;
   margin: 0 0 12px;
 }
@@ -228,13 +228,13 @@
 }
 
 .quotation-history-products p {
-  color: #687575;
+  color: var(--muted);
 }
 
 .quotation-history-total {
   align-items: center;
-  border-top: 1px solid #d8dfda;
-  color: #183c3d;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
   display: flex;
   font-size: 1.1rem;
   justify-content: space-between;
@@ -243,13 +243,13 @@
 }
 
 .quotation-history-timeline {
-  border-top: 1px solid #d8dfda;
+  border-top: 1px solid var(--line);
   margin-top: 22px;
   padding-top: 20px;
 }
 
 .quotation-history-timeline h3 {
-  color: #183c3d;
+  color: var(--ink);
   font-size: 1rem;
   margin: 0 0 15px;
 }
@@ -271,7 +271,7 @@
 }
 
 .quotation-history-timeline li:not(:last-child)::before {
-  background: #c7d2cc;
+  background: var(--line-strong);
   content: "";
   height: 100%;
   left: 6px;
@@ -281,10 +281,10 @@
 }
 
 .quotation-history-timeline-dot {
-  background: #8b9892;
-  border: 3px solid #fff;
+  background: var(--muted);
+  border: 3px solid var(--paper);
   border-radius: 50%;
-  box-shadow: 0 0 0 1px #aebbb5;
+  box-shadow: 0 0 0 1px var(--line-strong);
   height: 14px;
   margin-top: 3px;
   position: relative;
@@ -293,7 +293,7 @@
 }
 
 .quotation-history-timeline-dot.pendiente {
-  background: #c28a13;
+  background: var(--warning);
 }
 
 .quotation-history-timeline-dot.respondida {
@@ -320,12 +320,12 @@
 .quotation-history-timeline time,
 .quotation-history-timeline small,
 .quotation-history-timeline > p {
-  color: #687575;
+  color: var(--muted);
   font-size: 0.82rem;
 }
 
 .quotation-history-order {
-  color: #245c3b;
+  color: var(--success);
   font-weight: 800;
 }
 
@@ -340,7 +340,7 @@
   align-items: center;
   border: 0;
   border-radius: 7px;
-  color: #fff;
+  color: var(--on-dark);
   cursor: pointer;
   display: inline-flex;
   font-weight: 800;
@@ -364,14 +364,14 @@
 }
 
 .quotation-history-state {
-  background: #fff;
-  border: 1px solid #d8dfda;
-  color: #4f6060;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  color: var(--muted);
   padding: 22px;
 }
 
 .quotation-history-state.error {
-  color: #8b2929;
+  color: var(--danger);
 }
 
 .quotation-history-pagination {
@@ -384,10 +384,10 @@
 
 .quotation-history-pagination button {
   align-items: center;
-  background: #183c3d;
+  background: var(--ink);
   border: 0;
   border-radius: 6px;
-  color: #fff;
+  color: var(--on-dark);
   display: inline-flex;
   height: 38px;
   justify-content: center;

@@ -96,7 +96,7 @@
 
 .my-account-form input,
 .my-account-form textarea {
-  background: #ffffff;
+  background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 12px;
   color: var(--ink);

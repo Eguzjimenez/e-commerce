@@ -1,58 +1,141 @@
 import "./AdminDashboard.css";
+import { useEffect, useState } from "react";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
+import { BarChart, DonutChart, HorizontalBars } from "../../components/AdminChart/AdminChart";
+import { getDashboardMetrics, getTopProducts } from "../../services/statisticsService";
+
+function formatCurrency(value) {
+  return `$${Number(value || 0).toLocaleString("es-CR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+function formatMonthLabel(periodo) {
+  if (!periodo) {
+    return "";
+  }
+
+  const [anio, mes] = periodo.split("-");
+  const fecha = new Date(Number(anio), Number(mes) - 1, 1);
+
+  return fecha.toLocaleDateString("es-CR", { month: "short", year: "2-digit" });
+}
 
 function AdminDashboard() {
+  const [metrics, setMetrics] = useState(null);
+  const [topProducts, setTopProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  const loadDashboard = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const [metricsResponse, productsResponse] = await Promise.all([
+        getDashboardMetrics(),
+        getTopProducts(5),
+      ]);
+
+      setMetrics(metricsResponse);
+      setTopProducts(Array.isArray(productsResponse) ? productsResponse : []);
+    } catch (loadError) {
+      setError(loadError.message || "No se pudieron cargar los indicadores del panel.");
+      setMetrics(null);
+      setTopProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const ventasMensuales = (metrics?.ventasMensuales || []).map((venta) => ({
+    label: formatMonthLabel(venta.periodo),
+    value: venta.ingresos,
+  }));
+
+  const productosDestacados = topProducts.map((producto) => ({
+    label: producto.nombreProducto,
+    value: producto.cantidadVendida,
+  }));
+
   return (
     <AdminLayout title="Panel Principal">
       <div className="admin-dashboard">
-        <div className="admin-dashboard-cards">
-          <div className="dashboard-card">
-            <span>Ventas del mes</span>
-            <p>$4,250</p>
-            <small>+12%</small>
-          </div>
+        {error && <div className="admin-products-error">{error}</div>}
 
-          <div className="dashboard-card">
-            <span>Pedidos pendientes</span>
-            <p>12</p>
-            <small>+5%</small>
-          </div>
+        {loading && <div className="admin-products-empty">Cargando indicadores...</div>}
 
-          <div className="dashboard-card">
-            <span>Cotizaciones pendientes</span>
-            <p>5</p>
-            <small>+3%</small>
-          </div>
+        {!loading && !error && metrics && (
+          <>
+            <div className="admin-dashboard-cards">
+              <article className="dashboard-card">
+                <span>Ventas del mes</span>
+                <p>{formatCurrency(metrics.ventasMes)}</p>
+                <small>Pedidos facturados este mes</small>
+              </article>
 
-          <div className="dashboard-card">
-            <span>Productos con bajo stock</span>
-            <p>7</p>
-            <small>-2%</small>
-          </div>
-        </div>
+              <article className="dashboard-card">
+                <span>Pedidos pendientes</span>
+                <p>{metrics.pedidosPendientes}</p>
+                <small>Esperando preparacion</small>
+              </article>
 
-        <div className="admin-dashboard-grid">
-          <div className="admin-dashboard-section dashboard-chart">
-            <h2>Resumen general</h2>
-            <p>
-              Esta seccion mostrara mas adelante graficos, pedidos recientes y alertas del negocio.
-            </p>
+              <article className="dashboard-card">
+                <span>Cotizaciones activas</span>
+                <p>{metrics.cotizacionesPendientes}</p>
+                <small>Requieren seguimiento</small>
+              </article>
 
-            <div className="dashboard-bars" aria-hidden="true">
-              {[42, 68, 88, 54, 76, 46, 92, 70].map((height, index) => (
-                <span key={index} style={{ height: `${height}%` }}></span>
-              ))}
+              <article className="dashboard-card">
+                <span>Productos con bajo stock</span>
+                <p>{metrics.productosBajoStock}</p>
+                <small>De {metrics.productosActivos} productos activos</small>
+              </article>
             </div>
-          </div>
 
-          <div className="admin-dashboard-section dashboard-health">
-            <h2>Inventario saludable</h2>
-            <div className="dashboard-donut">
-              <strong>82%</strong>
+            <div className="admin-dashboard-grid">
+              <section className="admin-dashboard-section">
+                <header>
+                  <h2>Ingresos por mes</h2>
+                  <p>Ventas facturadas en los ultimos meses.</p>
+                </header>
+                <BarChart
+                  data={ventasMensuales}
+                  valueFormatter={formatCurrency}
+                  emptyMessage="Todavia no hay ventas registradas."
+                />
+              </section>
+
+              <section className="admin-dashboard-section">
+                <header>
+                  <h2>Inventario saludable</h2>
+                  <p>Productos activos con stock por encima del minimo.</p>
+                </header>
+                <DonutChart
+                  percentage={metrics.porcentajeInventarioSaludable}
+                  label="con stock"
+                  caption={`${metrics.productosBajoStock} producto(s) requieren reabastecimiento.`}
+                />
+              </section>
             </div>
-            <p>Productos disponibles para venta inmediata.</p>
-          </div>
-        </div>
+
+            <section className="admin-dashboard-section">
+              <header>
+                <h2>Productos mas vendidos</h2>
+                <p>Ranking historico por unidades vendidas.</p>
+              </header>
+              <HorizontalBars
+                data={productosDestacados}
+                emptyMessage="Aun no hay productos vendidos."
+              />
+            </section>
+          </>
+        )}
       </div>
     </AdminLayout>
   );

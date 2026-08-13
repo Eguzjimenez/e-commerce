@@ -1,0 +1,258 @@
+.admin-chart-empty {
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.admin-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 220px;
+  padding-top: 12px;
+}
+
+.admin-chart-bar-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-chart-bar-track {
+  width: 100%;
+  max-width: 56px;
+  height: 160px;
+  display: flex;
+  align-items: flex-end;
+  background: var(--sand);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.admin-chart-bar-fill {
+  width: 100%;
+  border-radius: 10px 10px 0 0;
+  transition: height 320ms ease;
+}
+
+.admin-chart-bar-value {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.admin-chart-bar-label {
+  font-size: 0.76rem;
+  color: var(--muted);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.admin-chart-line-wrapper {
+  width: 100%;
+}
+
+.admin-chart-line {
+  width: 100%;
+  height: auto;
+}
+
+.admin-chart-grid-line {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.admin-chart-line-path {
+  fill: none;
+  stroke: var(--laurel);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.admin-chart-line-area {
+  fill: rgba(49, 77, 55, 0.12);
+  stroke: none;
+}
+
+.admin-chart-line-dot {
+  fill: var(--paper);
+  stroke: var(--laurel);
+  stroke-width: 3;
+}
+
+.admin-chart-line-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 0 32px;
+}
+
+.admin-chart-line-labels span {
+  font-size: 0.74rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.admin-chart-area-wrapper {
+  width: 100%;
+}
+
+.admin-chart-area-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.admin-chart-axis-label {
+  text-anchor: end;
+  font-size: 11px;
+  fill: var(--muted);
+}
+
+.admin-chart-axis-line {
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+}
+
+.admin-chart-area-line {
+  stroke: var(--laurel);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.admin-chart-area-dot {
+  fill: var(--paper);
+  stroke: var(--laurel);
+  stroke-width: 3.5;
+}
+
+.admin-chart-area-value {
+  text-anchor: middle;
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--ink);
+}
+
+.admin-chart-area-month {
+  text-anchor: middle;
+  font-size: 11px;
+  fill: var(--muted);
+  text-transform: capitalize;
+}
+
+.admin-chart-donut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-chart-donut svg {
+  width: 180px;
+  height: 180px;
+}
+
+.admin-chart-donut-track {
+  fill: none;
+  stroke: var(--sand);
+}
+
+.admin-chart-donut-value {
+  fill: none;
+  stroke: var(--laurel);
+  stroke-linecap: round;
+  transition: stroke-dasharray 420ms ease;
+}
+
+.admin-chart-donut-number {
+  text-anchor: middle;
+  font-size: 2rem;
+  font-weight: 800;
+  fill: var(--ink);
+}
+
+.admin-chart-donut-label {
+  text-anchor: middle;
+  font-size: 0.78rem;
+  fill: var(--muted);
+}
+
+.admin-chart-donut-caption {
+  margin: 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.admin-chart-hbars {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-chart-hbar-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 1.4fr) 3fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-chart-hbar-label {
+  font-size: 0.88rem;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-chart-hbar-track {
+  height: 14px;
+  background: var(--sand);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.admin-chart-hbar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 320ms ease;
+}
+
+.admin-chart-hbar-value {
+  font-size: 0.86rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .admin-chart-bar-value {
+    font-size: 0.68rem;
+  }
+
+  .admin-chart-hbar-row {
+    grid-template-columns: minmax(80px, 1fr) 2fr auto;
+    gap: 8px;
+  }
+
+  .admin-chart-line-labels {
+    padding: 0 12px;
+  }
+
+  .admin-chart-line-labels span {
+    font-size: 0.65rem;
+  }
+}

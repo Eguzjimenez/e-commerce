@@ -19,7 +19,7 @@
 
 .pagination-controls button:not(:disabled) {
   background: var(--forest-ink);
-  color: var(--paper);
+  color: var(--on-dark);
 }
 
 .pagination-controls button:not(:disabled):hover {
@@ -28,7 +28,7 @@
 }
 
 .pagination-controls button:disabled {
-  background: #f0eee7;
+  background: var(--surface-header);
   border-color: var(--line);
   color: var(--soft);
   cursor: not-allowed;

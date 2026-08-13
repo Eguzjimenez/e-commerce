@@ -1,9 +1,8 @@
 .catalog-shop {
   --catalog-accent: var(--clay);
-  --catalog-border: rgba(22, 20, 15, 0.18);
+  --catalog-border: var(--line-strong);
   --catalog-control-height: 48px;
   --catalog-control-compact: 40px;
-  --catalog-media-bg: #ebe7dd;
   --catalog-motion-fast: 180ms;
   --catalog-motion-medium: 240ms;
   --catalog-motion-reveal: 360ms;
@@ -132,7 +131,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(252, 250, 246, 0.94);
+  background: rgba(var(--paper-rgb), 0.94);
   border: 1px solid rgba(22, 20, 15, 0.16);
   border-radius: 999px;
   color: var(--soil-black);
@@ -159,14 +158,14 @@
 .catalog-favorite-button:focus-visible {
   background: var(--soil-black);
   border-color: var(--soil-black);
-  color: var(--paper);
+  color: var(--on-dark);
   outline: none;
 }
 
 .catalog-favorite-button.active {
   background: var(--catalog-accent);
   border-color: var(--catalog-accent);
-  color: var(--paper);
+  color: var(--on-dark);
 }
 
 .catalog-card-body {
@@ -194,7 +193,7 @@
 .catalog-status,
 .catalog-error,
 .catalog-empty {
-  background: rgba(252, 250, 246, 0.76);
+  background: rgba(var(--paper-rgb), 0.76);
   border: 1px solid var(--catalog-border);
   color: var(--soil-black);
   padding: 24px;
@@ -382,7 +381,7 @@
 .catalog-sort-stack button.active {
   background: var(--soil-black);
   border-color: var(--soil-black);
-  color: var(--paper);
+  color: var(--on-dark);
 }
 
 .catalog-price-filter {
@@ -501,7 +500,7 @@
 .catalog-filter-apply {
   background: var(--soil-black);
   border: 1px solid var(--soil-black);
-  color: var(--paper);
+  color: var(--on-dark);
 }
 
 .catalog-clear-button:hover,
