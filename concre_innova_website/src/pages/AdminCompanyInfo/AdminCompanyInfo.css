@@ -1,0 +1,114 @@
+.admin-company-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.admin-company-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-company-card header h2 {
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+.admin-company-card header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.admin-company-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-company-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.admin-company-form input,
+.admin-company-form textarea {
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.94rem;
+  font-family: inherit;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.admin-company-full {
+  grid-column: 1 / -1;
+}
+
+.admin-company-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-company-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-company-table th,
+.admin-company-table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
+  color: var(--ink);
+  vertical-align: top;
+}
+
+.admin-company-table th {
+  background: var(--linen);
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.admin-company-table a {
+  color: var(--laurel);
+}
+
+.admin-company-message {
+  max-width: 340px;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 900px) {
+  .admin-company-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .admin-company-table {
+    min-width: 720px;
+  }
+}

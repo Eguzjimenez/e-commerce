@@ -4,6 +4,10 @@ export async function getStatisticsSummary() {
   return request("/api/Estadisticas/resumen", { method: "GET" });
 }
 
+export async function getDashboardMetrics() {
+  return request("/api/Estadisticas/dashboard", { method: "GET" });
+}
+
 export async function getFrequentClients(top = 10) {
   return request(`/api/Estadisticas/clientes-frecuentes?top=${Number(top)}`, {
     method: "GET",

@@ -32,7 +32,7 @@
   height: 34px;
   background: rgba(22, 20, 15, 0.72);
   border-radius: var(--radius-md);
-  color: var(--paper);
+  color: var(--on-dark);
   cursor: pointer;
   font-weight: 800;
 }
@@ -40,7 +40,7 @@
 .modal-image-wrap {
   position: relative;
   overflow: hidden;
-  background: #e7e2d8;
+  background: var(--surface-muted);
   border-radius: var(--radius-md);
   margin-bottom: 12px;
 }
@@ -108,7 +108,7 @@
 
 .modal-content h3 {
   margin: 22px 0;
-  color: var(--forest-ink);
+  color: var(--ink);
   font-family: "DM Sans", system-ui, sans-serif;
   font-size: 1.35rem;
   font-weight: 800;

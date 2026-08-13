@@ -63,7 +63,7 @@
   min-height: 44px;
   border-radius: 10px;
   border: 1px solid rgba(15, 27, 45, 0.15);
-  background: #f8faf9;
+  background: var(--surface-muted-soft);
   color: var(--ink);
   font-weight: 700;
   cursor: pointer;
@@ -114,7 +114,7 @@
   padding: 9px 12px;
   border: 1px solid rgba(15, 27, 45, 0.15);
   border-radius: 10px;
-  background: #fff;
+  background: var(--paper);
   color: var(--ink);
   cursor: pointer;
 }
@@ -126,7 +126,7 @@
 .visualizador-guardadas .danger {
   border: 1px solid #dc3545;
   border-radius: 10px;
-  background: #fff;
+  background: var(--paper);
   color: #dc3545;
   cursor: pointer;
   font-weight: 700;
@@ -152,7 +152,7 @@
   padding: 0 14px;
   border: 1px solid rgba(15, 27, 45, 0.15);
   border-radius: 10px;
-  background: #f8faf9;
+  background: var(--surface-muted-soft);
   font-weight: 700;
   cursor: pointer;
 }
@@ -188,7 +188,7 @@
   height: 46px;
   object-fit: cover;
   border-radius: 8px;
-  background: #f0f0f0;
+  background: var(--surface-muted-soft);
 }
 
 .simulacion-selector-datos {
@@ -278,7 +278,7 @@
   height: 42px;
   object-fit: cover;
   border-radius: 8px;
-  background: #f0f0f0;
+  background: var(--surface-muted-soft);
 }
 
 .simulacion-item-cabecera span {
@@ -316,7 +316,7 @@
   border-radius: 8px;
   padding: 0 8px;
   color: var(--ink);
-  background: #fff;
+  background: var(--paper);
 }
 
 .simulacion-item-eliminar {
@@ -363,7 +363,7 @@
   height: 60px;
   object-fit: contain;
   border-radius: 10px;
-  background: #f5f5f5;
+  background: var(--surface-muted-soft);
 }
 
 .visualizador-producto-price {
@@ -388,7 +388,7 @@
   min-height: 40px;
   border-radius: 10px;
   border: 1px solid rgba(15, 27, 45, 0.15);
-  background: #f8faf9;
+  background: var(--surface-muted-soft);
   color: var(--ink);
   padding: 0 14px;
   font-weight: 700;
@@ -406,13 +406,13 @@
 .visualizador-controls .danger {
   border-color: #dc3545;
   color: #dc3545;
-  background: #fff;
+  background: var(--paper);
 }
 
 .visualizador-canvas-container {
   width: 100%;
   min-height: 400px;
-  background: #f2f2f2;
+  background: var(--surface-muted-soft);
   border-radius: 12px;
   overflow: hidden;
   display: flex;

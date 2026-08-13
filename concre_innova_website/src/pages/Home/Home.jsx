@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import { PUBLIC_ROUTES } from "../../routes/routes";
 import ProductModal from "../../components/ProductModal/ProductModal";
 import { getCatalogProducts } from "../../services/catalogService";
+import { getCompanyInfo } from "../../services/empresaService";
 import { addToCart } from "../../services/cartService";
 import heroBotanicalImage from "../../img/Hero-background.png";
 import macetaNoirImage from "../../img/Maceta-Negra.jpg";
@@ -74,6 +75,23 @@ function Home() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [productsError, setProductsError] = useState("");
+  const [companyInfo, setCompanyInfo] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getCompanyInfo()
+      .then((info) => {
+        if (isMounted) {
+          setCompanyInfo(info);
+        }
+      })
+      .catch(() => setCompanyInfo(null));
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     const slideTimer = setInterval(() => {
@@ -406,15 +424,46 @@ function Home() {
 
           <div>
             <h4>Contacto</h4>
-            <p>correo@email.com</p>
-            <p>+506 0000-0000</p>
+            {companyInfo?.correo && (
+              <p>
+                <a href={`mailto:${companyInfo.correo}`}>{companyInfo.correo}</a>
+              </p>
+            )}
+            {companyInfo?.telefono && (
+              <p>
+                <a href={`tel:${companyInfo.telefono.replace(/\s/g, "")}`}>
+                  {companyInfo.telefono}
+                </a>
+              </p>
+            )}
+            <p>
+              <Link to={PUBLIC_ROUTES.CONTACT}>Enviar una consulta</Link>
+            </p>
           </div>
 
           <div>
             <h4>Redes</h4>
-            <p>Instagram</p>
-            <p>Facebook</p>
-            <p>TikTok</p>
+            {companyInfo?.instagram && (
+              <p>
+                <a href={companyInfo.instagram} target="_blank" rel="noreferrer">
+                  Instagram
+                </a>
+              </p>
+            )}
+            {companyInfo?.facebook && (
+              <p>
+                <a href={companyInfo.facebook} target="_blank" rel="noreferrer">
+                  Facebook
+                </a>
+              </p>
+            )}
+            {companyInfo?.tikTok && (
+              <p>
+                <a href={companyInfo.tikTok} target="_blank" rel="noreferrer">
+                  TikTok
+                </a>
+              </p>
+            )}
           </div>
         </div>
 

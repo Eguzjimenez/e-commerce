@@ -51,9 +51,64 @@
   --shadow-card: 0 24px 56px rgba(22, 20, 15, 0.11);
   --shadow-warm: 0 18px 36px rgba(166, 106, 67, 0.18);
   --shadow-nav: 0 22px 54px rgba(22, 20, 15, 0.1);
-  --surface-highlight: rgba(252, 250, 246, 0.86);
+  --surface-highlight: rgba(var(--paper-rgb), 0.86);
   --max-page: 1248px;
   --page-gutter: clamp(24px, 6.6vw, 96px);
+  --page-gradient-end: #efe7d7;
+  --paper-rgb: 252, 250, 246;
+  --surface-muted: #e7e2d8;
+  --surface-muted-soft: #eeebe4;
+  --surface-header: #f0eee7;
+  --surface-accent: #fff4cc;
+  --catalog-media-bg: #ebe7dd;
+  --on-dark: #fcfaf6;
+  --on-dark-muted: #efe7d7;
+  --linen-rgb: 245, 240, 230;
+}
+
+:root[data-theme="oscuro"] {
+  --forest-ink: #0e1511;
+  --soil-black: #eef2ea;
+  --laurel: #7ba585;
+  --sage: #9fb8a6;
+  --linen: #151d18;
+  --paper: #1b241e;
+  --clay: #c98a5f;
+  --petal: #b79b83;
+  --sand: #26312a;
+  --bark: #cdc6ba;
+  --muted-warm: #a8b6ac;
+  --soft-warm: #91a096;
+  --line: #33413a;
+  --line-strong: #405147;
+
+  --forest-900: #16211a;
+  --forest-800: #1c2a21;
+  --forest-700: #24352a;
+  --forest-500: #6f9a79;
+  --sage-200: #4a5f51;
+  --sage-100: #33443a;
+  --terracotta-dark: #b0764f;
+  --gold: #d8b875;
+  --navy-800: #1c2a21;
+  --navy-700: #24352a;
+  --blue-muted: #a8b6ac;
+  --danger: #e07a68;
+  --success: #6fbf8b;
+  --warning: #d7a54a;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.32);
+  --shadow-card: 0 24px 56px rgba(0, 0, 0, 0.4);
+  --shadow-warm: 0 18px 36px rgba(0, 0, 0, 0.34);
+  --shadow-nav: 0 22px 54px rgba(0, 0, 0, 0.42);
+  --surface-highlight: rgba(27, 36, 30, 0.86);
+  --page-gradient-end: #101711;
+  --paper-rgb: 27, 36, 30;
+  --surface-muted: #26312a;
+  --surface-muted-soft: #2c382f;
+  --surface-header: #223029;
+  --surface-accent: #3a3320;
+  --catalog-media-bg: #222d26;
+  --linen-rgb: 21, 29, 24;
 }
 
 * {
@@ -67,7 +122,7 @@ html {
 body {
   margin: 0;
   background:
-    linear-gradient(180deg, var(--paper) 0%, var(--linen) 58%, #efe7d7 100%);
+    linear-gradient(180deg, var(--paper) 0%, var(--linen) 58%, var(--page-gradient-end) 100%);
   color: var(--ink);
   font-family: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   letter-spacing: 0;
@@ -200,7 +255,7 @@ p {
   background: var(--forest-ink);
   border: 1px solid var(--forest-ink);
   box-shadow: 0 12px 22px rgba(22, 20, 15, 0.12);
-  color: var(--paper);
+  color: var(--on-dark);
 }
 
 .btn:hover,
@@ -227,14 +282,14 @@ p {
 .btn.secondary {
   background: var(--paper);
   border: 1px solid var(--forest-ink);
-  color: var(--forest-ink);
+  color: var(--ink);
   box-shadow: none;
 }
 
 .admin-secondary-button:hover,
 .btn.secondary:hover {
   background: var(--forest-ink);
-  color: var(--paper);
+  color: var(--on-dark);
 }
 
 .input,
@@ -255,6 +310,30 @@ select:focus,
 textarea:focus {
   border-color: var(--laurel);
   box-shadow: 0 0 0 4px rgba(49, 77, 55, 0.12);
+}
+
+option,
+optgroup {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+:root[data-theme="oscuro"] select,
+:root[data-theme="oscuro"] option,
+:root[data-theme="oscuro"] optgroup {
+  background: var(--paper);
+  color: var(--ink);
+  color-scheme: dark;
+}
+
+:root[data-theme="oscuro"] input,
+:root[data-theme="oscuro"] textarea {
+  color-scheme: dark;
+}
+
+:root[data-theme="oscuro"] input::placeholder,
+:root[data-theme="oscuro"] textarea::placeholder {
+  color: var(--soft);
 }
 
 .status-pill {

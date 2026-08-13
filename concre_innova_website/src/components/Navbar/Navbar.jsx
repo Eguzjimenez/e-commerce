@@ -6,11 +6,13 @@ import {
   ImagePlus,
   ListChecks,
   LogOut,
+  Mail,
   Menu,
   MessageCircle,
   Search,
   ShieldCheck,
   ShoppingBag,
+  SlidersHorizontal,
   Sparkles,
   UserPlus,
   UserRound,
@@ -82,6 +84,15 @@ function Navbar() {
     : PUBLIC_ROUTES.HOME;
   const isActivePath = (path) =>
     path === PUBLIC_ROUTES.HOME ? location.pathname === path : location.pathname.startsWith(path);
+  const authPage = [
+    PUBLIC_ROUTES.LOGIN,
+    PUBLIC_ROUTES.REGISTER,
+    PUBLIC_ROUTES.FORGOT_PASSWORD,
+  ].some((path) => location.pathname.startsWith(path));
+  const showSearch = !admin && !authPage;
+  const navClassName = ["navbar", admin ? "navbar-admin" : "", showSearch ? "" : "navbar-compact"]
+    .filter(Boolean)
+    .join(" ");
   const getNavLinkClass = (path, className = "") =>
     [className, isActivePath(path) ? "active" : ""].filter(Boolean).join(" ");
 
@@ -96,20 +107,22 @@ function Navbar() {
   };
 
   return (
-    <nav className="navbar">
+    <nav className={navClassName}>
       <div className="nav-container">
-        <form className="nav-search-form" onSubmit={handleNavSearchSubmit}>
-          <button type="submit" className="nav-search-button" aria-label="Buscar productos">
-            <Search size={21} strokeWidth={1.8} />
-          </button>
-          <input
-            type="search"
-            placeholder="Search"
-            aria-label="Buscar productos"
-            value={navSearchTerm}
-            onChange={(event) => setNavSearchTerm(event.target.value)}
-          />
-        </form>
+        {showSearch && (
+          <form className="nav-search-form" onSubmit={handleNavSearchSubmit}>
+            <button type="submit" className="nav-search-button" aria-label="Buscar productos">
+              <Search size={21} strokeWidth={1.8} />
+            </button>
+            <input
+              type="search"
+              placeholder="Search"
+              aria-label="Buscar productos"
+              value={navSearchTerm}
+              onChange={(event) => setNavSearchTerm(event.target.value)}
+            />
+          </form>
+        )}
 
         <Link to={logoRoute} className="nav-brand-block">
           <span className="nav-logo">Concre Innova</span>
@@ -117,6 +130,19 @@ function Navbar() {
         </Link>
 
         <div className="nav-utility-actions" aria-label="Accesos rapidos">
+          {admin && <span className="nav-role">{userRole}</span>}
+
+          {admin && (
+            <Link
+              to={ADMIN_ROUTES.DASHBOARD}
+              className={getNavLinkClass(ADMIN_ROUTES.DASHBOARD, "nav-icon-link nav-panel-link")}
+              aria-current={isActivePath(ADMIN_ROUTES.DASHBOARD) ? "page" : undefined}
+            >
+              <ShieldCheck size={20} strokeWidth={1.75} />
+              <span className="nav-icon-label">Panel</span>
+            </Link>
+          )}
+
           {!authenticated && (
             <>
               <Link
@@ -145,58 +171,77 @@ function Navbar() {
             </button>
           )}
 
-          <Link
-            to={PRIVATE_ROUTES.CART}
-            className={getNavLinkClass(PRIVATE_ROUTES.CART, "nav-icon-link nav-bag-link")}
-            aria-current={isActivePath(PRIVATE_ROUTES.CART) ? "page" : undefined}
-          >
-            <ShoppingBag size={22} strokeWidth={1.75} />
-            <span className="nav-icon-label">Cart</span>
-            {cartCount > 0 && <span className="nav-count-badge">{cartCount}</span>}
-          </Link>
+          {!admin && (
+            <Link
+              to={PRIVATE_ROUTES.CART}
+              className={getNavLinkClass(PRIVATE_ROUTES.CART, "nav-icon-link nav-bag-link")}
+              aria-current={isActivePath(PRIVATE_ROUTES.CART) ? "page" : undefined}
+            >
+              <ShoppingBag size={22} strokeWidth={1.75} />
+              <span className="nav-icon-label">Cart</span>
+              {cartCount > 0 && <span className="nav-count-badge">{cartCount}</span>}
+            </Link>
+          )}
         </div>
 
-        <button
-          className="menu-toggle"
-          type="button"
-          aria-label={menuOpen ? "Cerrar menu" : "Abrir menu"}
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          {menuOpen ? <X size={20} strokeWidth={1.8} /> : <Menu size={20} strokeWidth={1.8} />}
-        </button>
+        {!admin && (
+          <button
+            className="menu-toggle"
+            type="button"
+            aria-label={menuOpen ? "Cerrar menu" : "Abrir menu"}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? <X size={20} strokeWidth={1.8} /> : <Menu size={20} strokeWidth={1.8} />}
+          </button>
+        )}
       </div>
 
+      {!admin && (
       <ul className={`nav-menu ${menuOpen ? "active" : ""}`}>
-        <li>
-          <Link
-            to={PUBLIC_ROUTES.HOME}
-            className={getNavLinkClass(PUBLIC_ROUTES.HOME)}
-            aria-current={isActivePath(PUBLIC_ROUTES.HOME) ? "page" : undefined}
-          >
-            Inicio
-          </Link>
-        </li>
-        <li>
-          <Link
-            to={PUBLIC_ROUTES.CATALOG}
-            className={getNavLinkClass(PUBLIC_ROUTES.CATALOG)}
-            aria-current={isActivePath(PUBLIC_ROUTES.CATALOG) ? "page" : undefined}
-          >
-            Catalogo
-          </Link>
-        </li>
-        <li>
-          <Link
-            to={PUBLIC_ROUTES.SMART_ADVISOR}
-            className={getNavLinkClass(PUBLIC_ROUTES.SMART_ADVISOR)}
-            aria-current={isActivePath(PUBLIC_ROUTES.SMART_ADVISOR) ? "page" : undefined}
-          >
-            <Sparkles size={15} strokeWidth={1.8} />
-            Asesor Inteligente
-          </Link>
-        </li>
-        {authenticated && purchaseAccess && (
+        {!admin && (
+          <>
+            <li>
+              <Link
+                to={PUBLIC_ROUTES.HOME}
+                className={getNavLinkClass(PUBLIC_ROUTES.HOME)}
+                aria-current={isActivePath(PUBLIC_ROUTES.HOME) ? "page" : undefined}
+              >
+                Inicio
+              </Link>
+            </li>
+            <li>
+              <Link
+                to={PUBLIC_ROUTES.CATALOG}
+                className={getNavLinkClass(PUBLIC_ROUTES.CATALOG)}
+                aria-current={isActivePath(PUBLIC_ROUTES.CATALOG) ? "page" : undefined}
+              >
+                Catalogo
+              </Link>
+            </li>
+            <li>
+              <Link
+                to={PUBLIC_ROUTES.SMART_ADVISOR}
+                className={getNavLinkClass(PUBLIC_ROUTES.SMART_ADVISOR)}
+                aria-current={isActivePath(PUBLIC_ROUTES.SMART_ADVISOR) ? "page" : undefined}
+              >
+                <Sparkles size={15} strokeWidth={1.8} />
+                Asesor Inteligente
+              </Link>
+            </li>
+            <li>
+              <Link
+                to={PUBLIC_ROUTES.CONTACT}
+                className={getNavLinkClass(PUBLIC_ROUTES.CONTACT)}
+                aria-current={isActivePath(PUBLIC_ROUTES.CONTACT) ? "page" : undefined}
+              >
+                <Mail size={15} strokeWidth={1.8} />
+                Contacto
+              </Link>
+            </li>
+          </>
+        )}
+        {authenticated && purchaseAccess && !admin && (
           <li>
             <Link
               to={PRIVATE_ROUTES.NEW_QUOTATION}
@@ -220,7 +265,19 @@ function Navbar() {
             </Link>
           </li>
         )}
-        {authenticated && purchaseAccess && (
+        {authenticated && !admin && (
+          <li>
+            <Link
+              to={PRIVATE_ROUTES.SETTINGS}
+              className={getNavLinkClass(PRIVATE_ROUTES.SETTINGS)}
+              aria-current={isActivePath(PRIVATE_ROUTES.SETTINGS) ? "page" : undefined}
+            >
+              <SlidersHorizontal size={15} strokeWidth={1.8} />
+              Configuracion
+            </Link>
+          </li>
+        )}
+        {authenticated && purchaseAccess && !admin && (
           <li>
             <Link
               to={PRIVATE_ROUTES.MY_QUOTATIONS}
@@ -232,7 +289,7 @@ function Navbar() {
             </Link>
           </li>
         )}
-        {authenticated && purchaseAccess && (
+        {authenticated && purchaseAccess && !admin && (
           <li>
             <Link
               to={PRIVATE_ROUTES.MY_ORDERS}
@@ -244,16 +301,18 @@ function Navbar() {
             </Link>
           </li>
         )}
-        <li>
-          <Link
-            to={PUBLIC_ROUTES.FAVORITES}
-            className={getNavLinkClass(PUBLIC_ROUTES.FAVORITES)}
-            aria-current={isActivePath(PUBLIC_ROUTES.FAVORITES) ? "page" : undefined}
-          >
-            <Heart size={15} strokeWidth={1.8} />
-            Favoritos{favoriteCount > 0 ? ` (${favoriteCount})` : ""}
-          </Link>
-        </li>
+        {!admin && (
+          <li>
+            <Link
+              to={PUBLIC_ROUTES.FAVORITES}
+              className={getNavLinkClass(PUBLIC_ROUTES.FAVORITES)}
+              aria-current={isActivePath(PUBLIC_ROUTES.FAVORITES) ? "page" : undefined}
+            >
+              <Heart size={15} strokeWidth={1.8} />
+              Favoritos{favoriteCount > 0 ? ` (${favoriteCount})` : ""}
+            </Link>
+          </li>
+        )}
         {quotationStaff && (
           <li>
             <Link
@@ -274,16 +333,18 @@ function Navbar() {
             </Link>
           </li>
         )}
-        <li>
-          <button
-            className="nav-chat-button"
-            type="button"
-            onClick={openChatAssistant}
-          >
-            <MessageCircle size={15} strokeWidth={1.8} />
-            Chat
-          </button>
-        </li>
+        {!admin && (
+          <li>
+            <button
+              className="nav-chat-button"
+              type="button"
+              onClick={openChatAssistant}
+            >
+              <MessageCircle size={15} strokeWidth={1.8} />
+              Chat
+            </button>
+          </li>
+        )}
         {authenticated && (
           <li className="nav-menu-auth-action">
             <button className="logout-btn" type="button" onClick={handleLogout}>
@@ -305,6 +366,7 @@ function Navbar() {
           </li>
         )}
       </ul>
+      )}
     </nav>
   );
 }

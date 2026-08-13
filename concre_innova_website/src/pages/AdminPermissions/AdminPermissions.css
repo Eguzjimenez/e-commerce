@@ -22,7 +22,7 @@
   border: 1px solid rgba(15, 27, 45, 0.12);
   border-radius: 8px;
   padding: 12px;
-  background: #ffffff;
+  background: var(--paper);
   color: var(--ink);
   font: inherit;
 }
@@ -31,7 +31,7 @@
 .admin-permissions-error {
   border-radius: 8px;
   padding: 18px;
-  background: #ffffff;
+  background: var(--paper);
   box-shadow: var(--shadow-soft);
 }
 
@@ -51,7 +51,7 @@
   border: 1px solid rgba(15, 27, 45, 0.08);
   border-radius: 8px;
   padding: 18px;
-  background: #ffffff;
+  background: var(--paper);
   box-shadow: var(--shadow-soft);
 }
 

@@ -7,7 +7,7 @@
 .home-hero {
   position: relative;
   min-height: min(660px, calc(100vh - 210px));
-  color: var(--paper);
+  color: var(--on-dark);
   overflow: hidden;
 }
 
@@ -55,10 +55,10 @@
 
 .home-eyebrow {
   align-items: center;
-  background: rgba(252, 250, 246, 0.1);
-  border: 1px solid rgba(239, 231, 215, 0.24);
+  background: rgba(var(--paper-rgb), 0.1);
+  border: 1px solid rgba(var(--on-dark-muted-rgb, 239, 231, 215), 0.24);
   border-radius: 999px;
-  color: var(--sand);
+  color: var(--on-dark-muted);
   display: inline-flex;
   gap: 10px;
   font-size: 0.78rem;
@@ -78,7 +78,7 @@
 }
 
 .home-hero h1 {
-  color: var(--paper);
+  color: var(--on-dark);
   font-size: clamp(4.7rem, 9.3vw, 7.25rem);
   line-height: 0.9;
   margin: 0;
@@ -87,7 +87,7 @@
 }
 
 .home-hero p {
-  color: var(--linen);
+  color: var(--on-dark-muted);
   font-size: clamp(1.02rem, 1.8vw, 1.32rem);
   line-height: 1.58;
   margin: 28px 0 0;
@@ -109,10 +109,10 @@
 
 .home-ghost-btn {
   align-items: center;
-  background: rgba(252, 250, 246, 0.92);
-  border: 1px solid rgba(252, 250, 246, 0.72);
+  background: rgba(var(--paper-rgb), 0.92);
+  border: 1px solid rgba(var(--paper-rgb), 0.72);
   border-radius: var(--radius-md);
-  color: var(--forest-ink);
+  color: var(--ink);
   display: inline-flex;
   font-weight: 700;
   justify-content: center;
@@ -122,7 +122,7 @@
 
 .home-ghost-btn:hover {
   background: var(--forest-ink);
-  color: var(--paper);
+  color: var(--on-dark);
   transform: translateY(-1px);
 }
 
@@ -138,7 +138,7 @@
   height: 2px;
   margin: 0 16px 12px;
   overflow: hidden;
-  background: rgba(252, 250, 246, 0.34);
+  background: rgba(var(--paper-rgb), 0.34);
 }
 
 .home-carousel-progress span {
@@ -152,7 +152,7 @@
 
 .home-feature-card {
   animation: homeSlideIn 620ms cubic-bezier(0.2, 0.72, 0.2, 1) both;
-  background: rgba(252, 250, 246, 0.97);
+  background: rgba(var(--paper-rgb), 0.97);
   border: 1px solid rgba(222, 214, 199, 0.82);
   border-radius: var(--radius-md);
   backdrop-filter: blur(12px);
@@ -170,7 +170,7 @@
   height: 104px;
   margin: 0;
   overflow: hidden;
-  background: #e7e2d8;
+  background: var(--surface-muted);
   border-radius: calc(var(--radius-md) - 1px);
 }
 
@@ -226,7 +226,7 @@
   border: 1px solid var(--forest-ink);
   border-radius: 999px;
   box-shadow: 0 10px 22px rgba(22, 20, 15, 0.14);
-  color: var(--forest-ink);
+  color: var(--ink);
   cursor: pointer;
   display: inline-flex;
   font-size: 1rem;
@@ -238,7 +238,7 @@
 
 .home-carousel-control:hover {
   background: var(--forest-ink);
-  color: var(--paper);
+  color: var(--on-dark);
 }
 
 .home-carousel-control.previous {
@@ -259,7 +259,7 @@
 .home-carousel-dots button {
   width: 8px;
   height: 8px;
-  background: rgba(252, 250, 246, 0.52);
+  background: rgba(var(--paper-rgb), 0.52);
   border: 0;
   border-radius: 999px;
   cursor: pointer;
@@ -420,7 +420,7 @@
 
 .home-story-photo span {
   top: 26px;
-  color: var(--paper);
+  color: var(--on-dark);
   font-size: 0.74rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -429,7 +429,7 @@
 .home-story-photo p {
   bottom: 26px;
   max-width: 390px;
-  color: var(--paper);
+  color: var(--on-dark);
   font-weight: 600;
   margin: 0;
 }
@@ -460,7 +460,7 @@
 
 .home-story-panel.dark h3,
 .home-story-panel.dark p {
-  color: var(--paper);
+  color: var(--on-dark);
 }
 
 .home-story-gallery {
@@ -486,7 +486,7 @@
 }
 
 .home-story-gallery strong {
-  color: var(--forest-ink);
+  color: var(--ink);
   font-size: 0.82rem;
 }
 
@@ -529,7 +529,7 @@
   aspect-ratio: 1 / 1;
   margin: 0;
   min-height: 0;
-  background: #eeebe4;
+  background: var(--surface-muted-soft);
   border-radius: 0;
   box-shadow: none;
 }
@@ -587,7 +587,7 @@
 }
 
 .product-card-footer strong {
-  color: var(--forest-ink);
+  color: var(--ink);
   font-size: 0.94rem;
 }
 
@@ -620,14 +620,14 @@
 }
 
 .home-footer-top h2 {
-  color: var(--paper);
+  color: var(--on-dark);
   font-size: clamp(2.2rem, 4vw, 3rem);
   line-height: 1.08;
   margin: 16px 0 0;
 }
 
 .home-footer-top p {
-  color: var(--sand);
+  color: var(--on-dark-muted);
   line-height: 1.68;
   margin: 6px 0 0;
 }

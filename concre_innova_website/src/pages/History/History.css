@@ -190,7 +190,7 @@
 }
 
 .history-state--pending {
-	background: #fff4cc;
+	background: var(--surface-accent);
 	color: #785b00;
 }
 

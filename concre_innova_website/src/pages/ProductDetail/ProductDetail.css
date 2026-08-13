@@ -78,7 +78,7 @@
 
 .product-detail-info h2 {
   margin: 32px 0;
-  color: var(--forest-ink);
+  color: var(--ink);
   font-family: "DM Sans", system-ui, sans-serif;
   font-size: 1.6rem;
   font-weight: 800;
@@ -170,7 +170,7 @@
   height: 190px;
   margin: 14px;
   object-fit: cover;
-  background: #e7e2d8;
+  background: var(--surface-muted);
 }
 
 .product-related-card div {
@@ -203,7 +203,7 @@
 
 .product-related-card strong {
   margin-top: auto;
-  color: var(--forest-ink);
+  color: var(--ink);
   font-size: 0.95rem;
 }
 
