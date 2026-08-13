@@ -20,7 +20,7 @@ export const ADMIN_NAV_ITEMS = [
   {
     to: ADMIN_ROUTES.CATEGORIES,
     label: "Categorias",
-    roles: ROLE_GROUPS.ADMIN_ONLY,
+    roles: ROLE_GROUPS.SALES_MANAGEMENT,
   },
   {
     to: ADMIN_ROUTES.PRODUCT_TYPES,
@@ -43,6 +43,11 @@ export const ADMIN_NAV_ITEMS = [
     roles: ROLE_GROUPS.SALES_MANAGEMENT,
   },
   {
+    to: ADMIN_ROUTES.CONSULTAS,
+    label: "Consultas",
+    roles: ROLE_GROUPS.SALES_MANAGEMENT,
+  },
+  {
     to: ADMIN_ROUTES.USERS,
     label: "Usuarios",
     roles: ROLE_GROUPS.ADMIN_ONLY,
@@ -55,7 +60,7 @@ export const ADMIN_NAV_ITEMS = [
   {
     to: ADMIN_ROUTES.REPORTS,
     label: "Reportes",
-    roles: ROLE_GROUPS.SALES_MANAGEMENT,
+    roles: ROLE_GROUPS.ADMIN_ONLY,
   },
   {
     to: ADMIN_ROUTES.COMPANY_INFO,

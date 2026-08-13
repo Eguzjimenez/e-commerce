@@ -219,9 +219,17 @@ function Contact() {
                 <input
                   type="tel"
                   name="telefono"
+                  inputMode="tel"
+                  /* Admite digitos, espacios, guiones, parentesis y prefijo
+                     internacional; la API aplica la misma regla. Los parentesis
+                     van escapados porque el navegador compila el patron con la
+                     bandera "v", donde son caracteres reservados. */
+                  pattern="\+?[0-9\s.\-\(\)]{8,20}"
+                  title="Entre 8 y 15 digitos. Se permiten espacios, guiones, parentesis y el prefijo +."
+                  placeholder="8888-8888"
                   value={form.telefono}
                   onChange={handleChange}
-                  maxLength={50}
+                  maxLength={20}
                   disabled={sending}
                 />
               </label>

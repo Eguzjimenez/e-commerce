@@ -1,7 +1,8 @@
 import "./AdminProducts.css";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Swal from "sweetalert2";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
+import Modal from "../../components/Modal/Modal";
 import PaginationControls from "../../components/PaginationControls/PaginationControls";
 import {
   getCatalogCategories,
@@ -15,8 +16,6 @@ import {
   updateProduct,
   uploadProductImage,
 } from "../../services/productService";
-import { isAdminRole } from "../../constants/roleAccess";
-import { getUserRole } from "../../services/authService";
 import {
   buildAdminProductViewModel,
   buildProductRequestPayload,
@@ -84,20 +83,17 @@ function AdminProducts() {
   const [imageUploading, setImageUploading] = useState(false);
   const [modalMode, setModalMode] = useState("add");
   const [productPage, setProductPage] = useState(1);
+  // Identificador de la accion en curso, solo para la interfaz.
+  const [productoEnProceso, setProductoEnProceso] = useState(null);
+  // La referencia se actualiza de forma sincrona: es la que realmente impide
+  // que varios clics seguidos disparen la misma operacion mas de una vez.
+  const operacionEnCursoRef = useRef(false);
   const [pagination, setPagination] = useState({
     ...DEFAULT_PAGINATION,
     pageSize: ADMIN_PRODUCTS_PAGE_SIZE,
   });
 
   const [newProduct, setNewProduct] = useState(EMPTY_PRODUCT_FORM);
-
-  useEffect(() => {
-    loadLookups();
-  }, []);
-
-  useEffect(() => {
-    loadProducts(productPage);
-  }, [productPage, searchTerm, selectedCategoryId]);
 
   const loadLookups = async () => {
     try {
@@ -115,7 +111,7 @@ function AdminProducts() {
     }
   };
 
-  const loadProducts = async (page = productPage) => {
+  const loadProducts = useCallback(async (page = productPage) => {
     setLoading(true);
     setError("");
 
@@ -148,7 +144,16 @@ function AdminProducts() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [productPage, searchTerm, selectedCategoryId]);
+
+  useEffect(() => {
+    loadLookups();
+  }, []);
+
+  // Una sola carga por cambio de pagina, busqueda o categoria.
+  useEffect(() => {
+    loadProducts(productPage);
+  }, [loadProducts, productPage]);
 
   const normalizedCategories = useMemo(
     () => normalizeCatalogCategories(categoryList),
@@ -168,9 +173,6 @@ function AdminProducts() {
   const filteredProducts = useMemo(() => {
     return products;
   }, [products]);
-
-  // El vendedor solo duplica productos y ajusta los borradores resultantes.
-  const catalogAdmin = isAdminRole(getUserRole());
 
   const handleImageFallback = (event, imageCandidates) => {
     handleCatalogImageCandidateFallback(event, imageCandidates);
@@ -307,6 +309,13 @@ function AdminProducts() {
   // Crea la copia en estado Borrador y abre el formulario con los datos
   // pre-completados para que el vendedor haga los ajustes.
   const handleDuplicateProduct = async (product) => {
+    if (operacionEnCursoRef.current) {
+      return;
+    }
+
+    operacionEnCursoRef.current = true;
+    setProductoEnProceso(product.id);
+
     try {
       const result = await duplicateProduct(product.id);
 
@@ -337,10 +346,19 @@ function AdminProducts() {
         title: "No se pudo duplicar",
         text: duplicateError.message || "Error al duplicar el producto.",
       });
+    } finally {
+      operacionEnCursoRef.current = false;
+      setProductoEnProceso(null);
     }
   };
 
   const handlePublishProduct = async (product) => {
+    if (operacionEnCursoRef.current) {
+      return;
+    }
+
+    operacionEnCursoRef.current = true;
+
     const confirmation = await Swal.fire({
       icon: "question",
       title: "Publicar producto",
@@ -351,8 +369,11 @@ function AdminProducts() {
     });
 
     if (!confirmation.isConfirmed) {
+      operacionEnCursoRef.current = false;
       return;
     }
+
+    setProductoEnProceso(product.id);
 
     try {
       const payload = {
@@ -376,10 +397,19 @@ function AdminProducts() {
         title: "No se pudo publicar",
         text: publishError.message || "Error al publicar el producto.",
       });
+    } finally {
+      operacionEnCursoRef.current = false;
+      setProductoEnProceso(null);
     }
   };
 
   const handleDeleteProduct = async (product) => {
+    if (operacionEnCursoRef.current) {
+      return;
+    }
+
+    operacionEnCursoRef.current = true;
+
     const result = await Swal.fire({
       icon: "warning",
       title: "Eliminar producto",
@@ -390,8 +420,11 @@ function AdminProducts() {
     });
 
     if (!result.isConfirmed) {
+      operacionEnCursoRef.current = false;
       return;
     }
+
+    setProductoEnProceso(product.id);
 
     try {
       await deleteProduct(product.id);
@@ -407,6 +440,9 @@ function AdminProducts() {
         title: "No se pudo eliminar",
         text: deleteError.message || "Error al eliminar el producto.",
       });
+    } finally {
+      operacionEnCursoRef.current = false;
+      setProductoEnProceso(null);
     }
   };
 
@@ -415,39 +451,43 @@ function AdminProducts() {
       <div className="admin-products-page">
         <div className="admin-products-topbar">
           <div className="admin-products-filters">
-            <input
-              type="text"
-              placeholder="Buscar producto"
-              className="admin-products-search"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setProductPage(1);
-              }}
-            />
+            <label className="admin-products-field">
+              <span>Buscar producto</span>
+              <input
+                type="search"
+                placeholder="Buscar producto"
+                className="admin-products-search"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setProductPage(1);
+                }}
+              />
+            </label>
 
-            <select
-              className="admin-products-select"
-              value={selectedCategoryId}
-              onChange={(e) => {
-                setSelectedCategoryId(e.target.value);
-                setProductPage(1);
-              }}
-            >
-              <option value="all">Todas</option>
-              {normalizedCategories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
+            <label className="admin-products-field">
+              <span>Categoria</span>
+              <select
+                className="admin-products-select"
+                value={selectedCategoryId}
+                onChange={(e) => {
+                  setSelectedCategoryId(e.target.value);
+                  setProductPage(1);
+                }}
+              >
+                <option value="all">Todas</option>
+                {normalizedCategories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
 
-          {catalogAdmin && (
-            <button className="admin-primary-button" onClick={openAddModal}>
-              Agregar producto
-            </button>
-          )}
+          <button className="admin-primary-button" onClick={openAddModal}>
+            Agregar producto
+          </button>
         </div>
 
         {error && <div className="admin-products-error">{error}</div>}
@@ -497,36 +537,35 @@ function AdminProducts() {
                 </div>
 
                 <div className="admin-product-actions">
-                  {(catalogAdmin || isDraftProduct(product)) && (
-                    <button className="admin-product-btn" onClick={() => openEditModal(product)}>
-                      Editar
-                    </button>
-                  )}
+                  <button className="admin-product-btn" onClick={() => openEditModal(product)}>
+                    Editar
+                  </button>
                   <button className="admin-product-btn secondary" onClick={() => openViewModal(product)}>
                     Ver
                   </button>
                   <button
                     className="admin-product-btn secondary"
                     onClick={() => handleDuplicateProduct(product)}
+                    disabled={productoEnProceso !== null}
                   >
-                    Duplicar
+                    {productoEnProceso === product.id ? "Duplicando..." : "Duplicar"}
                   </button>
-                  {catalogAdmin && isDraftProduct(product) && (
+                  {isDraftProduct(product) && (
                     <button
                       className="admin-product-btn"
                       onClick={() => handlePublishProduct(product)}
+                      disabled={productoEnProceso !== null}
                     >
                       Publicar
                     </button>
                   )}
-                  {catalogAdmin && (
-                    <button
-                      className="admin-product-btn danger"
-                      onClick={() => handleDeleteProduct(product)}
-                    >
-                      Eliminar
-                    </button>
-                  )}
+                  <button
+                    className="admin-product-btn danger"
+                    onClick={() => handleDeleteProduct(product)}
+                    disabled={productoEnProceso !== null}
+                  >
+                    Eliminar
+                  </button>
                 </div>
               </div>
             </div>
@@ -547,23 +586,19 @@ function AdminProducts() {
           />
         )}
 
-        {showAddModal && (
-          <div className="admin-modal-backdrop" onClick={closeAddModal}>
-            <div className="admin-modal" onClick={(event) => event.stopPropagation()}>
-              <div className="admin-modal-header">
-                <h3>
-                  {modalMode === "edit"
-                    ? isDraftProduct(newProduct)
-                      ? "Editar borrador"
-                      : "Editar producto"
-                    : "Nuevo producto"}
-                </h3>
-                <button className="admin-modal-close" onClick={closeAddModal} disabled={saving}>
-                  ×
-                </button>
-              </div>
-
-              <form className="admin-modal-form" onSubmit={handleSaveProduct}>
+        <Modal
+          open={showAddModal}
+          onClose={closeAddModal}
+          closeOnBackdrop={!saving}
+          title={
+            modalMode === "edit"
+              ? isDraftProduct(newProduct)
+                ? "Editar borrador"
+                : "Editar producto"
+              : "Nuevo producto"
+          }
+        >
+          <form className="admin-modal-form" onSubmit={handleSaveProduct}>
                 <label>
                   Nombre
                   <input
@@ -740,51 +775,43 @@ function AdminProducts() {
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
-        )}
+        </Modal>
 
-        {showViewModal && viewProduct && (
-          <div className="admin-modal-backdrop" onClick={closeViewModal}>
-            <div className="admin-modal" onClick={(event) => event.stopPropagation()}>
-              <div className="admin-modal-header">
-                <h3>Detalle del producto</h3>
-                <button className="admin-modal-close" onClick={closeViewModal}>
-                  ×
-                </button>
-              </div>
+        <Modal
+          open={showViewModal && Boolean(viewProduct)}
+          onClose={closeViewModal}
+          title="Detalle del producto"
+          footer={
+            <button type="button" className="admin-product-btn secondary" onClick={closeViewModal}>
+              Cerrar
+            </button>
+          }
+        >
+          {viewProduct && (
+            <div className="admin-view-product">
+              <img
+                src={viewProduct.image}
+                alt={viewProduct.name}
+                className="admin-view-product-image"
+                onError={(event) => handleImageFallback(event, viewProduct.imageCandidates)}
+              />
 
-              <div className="admin-view-product">
-                <img
-                  src={viewProduct.image}
-                  alt={viewProduct.name}
-                  className="admin-view-product-image"
-                  onError={(event) => handleImageFallback(event, viewProduct.imageCandidates)}
-                />
-
-                <div className="admin-view-product-info">
-                  <p><strong>Nombre:</strong> {viewProduct.nombre || "-"}</p>
-                  <p><strong>Descripcion:</strong> {viewProduct.descripcion || "-"}</p>
-                  <p><strong>Categoria:</strong> {viewProduct.category || "-"}</p>
-                  <p><strong>Tipo:</strong> {viewProduct.typeName || "-"}</p>
-                  <p><strong>Tamano:</strong> {viewProduct.tamano || "-"}</p>
-                  <p><strong>Material:</strong> {viewProduct.material || "-"}</p>
-                  <p><strong>Caracteristicas:</strong> {viewProduct.caracteristicas || "-"}</p>
-                  <p><strong>Precio:</strong> ${viewProduct.price.toFixed(2)}</p>
-                  <p><strong>Cantidad disponible:</strong> {viewProduct.cantidadDisponible}</p>
-                  <p><strong>Estado:</strong> {viewProduct.estado || "Activo"}</p>
-                  <p><strong>Imagen:</strong> {viewProduct.imagen || "-"}</p>
-                </div>
-              </div>
-
-              <div className="admin-modal-actions">
-                <button type="button" className="admin-product-btn secondary" onClick={closeViewModal}>
-                  Cerrar
-                </button>
+              <div className="admin-view-product-info">
+                <p><strong>Nombre:</strong> {viewProduct.nombre || "-"}</p>
+                <p><strong>Descripcion:</strong> {viewProduct.descripcion || "-"}</p>
+                <p><strong>Categoria:</strong> {viewProduct.category || "-"}</p>
+                <p><strong>Tipo:</strong> {viewProduct.typeName || "-"}</p>
+                <p><strong>Tamano:</strong> {viewProduct.tamano || "-"}</p>
+                <p><strong>Material:</strong> {viewProduct.material || "-"}</p>
+                <p><strong>Caracteristicas:</strong> {viewProduct.caracteristicas || "-"}</p>
+                <p><strong>Precio:</strong> ${viewProduct.price.toFixed(2)}</p>
+                <p><strong>Cantidad disponible:</strong> {viewProduct.cantidadDisponible}</p>
+                <p><strong>Estado:</strong> {viewProduct.estado || "Activo"}</p>
+                <p><strong>Imagen:</strong> {viewProduct.imagen || "-"}</p>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </Modal>
       </div>
     </AdminLayout>
   );

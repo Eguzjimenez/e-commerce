@@ -98,7 +98,7 @@
 
 .admin-chat-unread {
   align-items: center;
-  background: #d27a52;
+  background: #a24a22;
   border-radius: 999px;
   color: #fffaf3;
   display: inline-flex;
@@ -299,7 +299,7 @@
 }
 
 .admin-primary-button {
-  background: #d27a52;
+  background: #a24a22;
   color: #fffaf3;
 }
 

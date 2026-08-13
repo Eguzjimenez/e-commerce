@@ -10,12 +10,12 @@
 }
 
 .notification-item:hover {
-  border-color: var(--sage);
+  border-color: var(--laurel);
 }
 
 .notification-item.unread {
   background: var(--linen);
-  border-color: var(--sage);
+  border-color: var(--laurel);
 }
 
 .notification-item.compact {

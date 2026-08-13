@@ -32,6 +32,7 @@ import AdminProductTypes from "../pages/AdminProductTypes/AdminProductTypes";
 import AdminQuotations from "../pages/AdminQuotations/AdminQuotations";
 import AdminOrders from "../pages/AdminOrders/AdminOrders";
 import AdminChat from "../pages/AdminChat/AdminChat";
+import AdminConsultas from "../pages/AdminConsultas/AdminConsultas";
 import AdminReports from "../pages/AdminReports/AdminReports";
 import AdminCompanyInfo from "../pages/AdminCompanyInfo/AdminCompanyInfo";
 import AdminUsers from "../pages/AdminUsers/AdminUsers";
@@ -130,8 +131,16 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.CATEGORIES}
         element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.SALES_MANAGEMENT}>
             <AdminCategories />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.CONSULTAS}
+        element={
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.SALES_MANAGEMENT}>
+            <AdminConsultas />
           </ProtectedRoute>
         }
       />
@@ -146,7 +155,7 @@ function AppRoutes() {
       <Route
         path={ADMIN_ROUTES.REPORTS}
         element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.SALES_MANAGEMENT}>
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
             <AdminReports />
           </ProtectedRoute>
         }
