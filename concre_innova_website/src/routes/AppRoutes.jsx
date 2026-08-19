@@ -3,6 +3,7 @@ import { Navigate, Routes, Route } from "react-router-dom";
 import { PUBLIC_ROUTES, PRIVATE_ROUTES, ADMIN_ROUTES } from "./routes";
 import { ROLE_GROUPS } from "../constants/roleAccess";
 import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
+import ClientPageLayout from "../components/ClientPageLayout/ClientPageLayout";
 
 import Home from "../pages/Home/Home";
 import Catalog from "../pages/Catalog/Catalog";
@@ -41,75 +42,78 @@ import AdminPermissions from "../pages/AdminPermissions/AdminPermissions";
 function AppRoutes() {
   return (
     <Routes>
-      <Route path={PUBLIC_ROUTES.HOME} element={<Home />} />
-      <Route path={PUBLIC_ROUTES.CATALOG} element={<Catalog />} />
-      <Route path={PUBLIC_ROUTES.PRODUCT_DETAIL} element={<ProductDetail />} />
-      <Route path={PUBLIC_ROUTES.PRODUCT} element={<ProductDetail />} />
-      <Route path={PUBLIC_ROUTES.FAVORITES} element={<Favorites />} />
-      <Route path={PUBLIC_ROUTES.SMART_ADVISOR} element={<SmartAdvisor />} />
-      <Route path={PUBLIC_ROUTES.CONTACT} element={<Contact />} />
+      <Route element={<ClientPageLayout />}>
+        <Route path={PUBLIC_ROUTES.HOME} element={<Home />} />
+        <Route path={PUBLIC_ROUTES.CATALOG} element={<Catalog />} />
+        <Route path={PUBLIC_ROUTES.PRODUCT_DETAIL} element={<ProductDetail />} />
+        <Route path={PUBLIC_ROUTES.PRODUCT} element={<ProductDetail />} />
+        <Route path={PUBLIC_ROUTES.FAVORITES} element={<Favorites />} />
+        <Route path={PUBLIC_ROUTES.SMART_ADVISOR} element={<SmartAdvisor />} />
+        <Route path={PUBLIC_ROUTES.CONTACT} element={<Contact />} />
+
+        <Route path={PRIVATE_ROUTES.CART} element={<Cart />} />
+        <Route
+          path={PRIVATE_ROUTES.CHECKOUT}
+          element={
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PRIVATE_ROUTES.MY_ORDERS}
+          element={
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
+              <History />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PRIVATE_ROUTES.NEW_QUOTATION}
+          element={
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
+              <QuotationRequest />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PRIVATE_ROUTES.MY_QUOTATIONS}
+          element={
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
+              <QuotationHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PRIVATE_ROUTES.MY_ACCOUNT}
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.CLIENTE]}>
+              <MyAccount />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PRIVATE_ROUTES.NOTIFICATIONS}
+          element={
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
+              <Notifications />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PRIVATE_ROUTES.SETTINGS}
+          element={
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+      </Route>
+
       <Route path={PUBLIC_ROUTES.LOGIN} element={<Login />} />
       <Route path={PUBLIC_ROUTES.REGISTER} element={<Register />} />
       <Route path={PUBLIC_ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
       <Route path="/acceso-denegado" element={<AccessDenied />} />
-
-      <Route path={PRIVATE_ROUTES.CART} element={<Cart />} />
-      <Route
-        path={PRIVATE_ROUTES.CHECKOUT}
-        element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
-            <Checkout />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path={PRIVATE_ROUTES.MY_ORDERS}
-        element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
-            <History />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path={PRIVATE_ROUTES.NEW_QUOTATION}
-        element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
-            <QuotationRequest />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path={PRIVATE_ROUTES.MY_QUOTATIONS}
-        element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
-            <QuotationHistory />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path={PRIVATE_ROUTES.MY_ACCOUNT}
-        element={
-          <ProtectedRoute allowedRoles={[ROLES.CLIENTE]}>
-            <MyAccount />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path={PRIVATE_ROUTES.NOTIFICATIONS}
-        element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
-            <Notifications />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path={PRIVATE_ROUTES.SETTINGS}
-        element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
-            <Settings />
-          </ProtectedRoute>
-        }
-      />
 
       <Route
         path={ADMIN_ROUTES.DASHBOARD}

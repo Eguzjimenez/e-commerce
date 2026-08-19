@@ -104,10 +104,10 @@ function AdminProductTypes() {
 
       await Swal.fire({
         icon: "success",
-        title: modalMode === "edit" ? "Actualizacion exitosa" : "Tipo creado",
+        title: modalMode === "edit" ? "Actualización exitosa" : "Tipo creado",
         text:
           modalMode === "edit"
-            ? "El tipo de producto se actualizo correctamente."
+            ? "El tipo de producto se actualizó correctamente."
             : "El tipo de producto se registro correctamente.",
         timer: 1800,
         showConfirmButton: false,
@@ -196,7 +196,7 @@ function AdminProductTypes() {
                 </span>
               </div>
 
-              <p className="admin-type-description">{type.descripcion || "Sin descripcion"}</p>
+              <p className="admin-type-description">{type.descripcion || "Sin descripción"}</p>
 
               <div className="admin-type-actions">
                 <button className="admin-type-btn" onClick={() => openEditModal(type)}>

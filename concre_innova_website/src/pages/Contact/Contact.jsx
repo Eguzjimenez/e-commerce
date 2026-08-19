@@ -42,7 +42,7 @@ function Contact() {
         setForm((previous) => ({ ...previous, correo: auth.correo }));
       }
     } catch (loadError) {
-      setError(loadError.message || "No se pudo cargar la informacion de contacto.");
+      setError(loadError.message || "No se pudo cargar la información de contacto.");
     } finally {
       setLoading(false);
     }
@@ -90,12 +90,12 @@ function Contact() {
         <span>Contacto</span>
         <h1>Hablemos de tu espacio</h1>
         <p>
-          Escribinos para cotizaciones, asesoria de cuidado o cualquier consulta sobre
+          Escríbenos para cotizaciones, asesoría de cuidado o cualquier consulta sobre
           nuestros productos.
         </p>
       </header>
 
-      {loading && <p className="contact-state">Cargando informacion...</p>}
+      {loading && <p className="contact-state">Cargando información...</p>}
       {!loading && error && <p className="contact-state error">{error}</p>}
 
       {!loading && empresa && (
@@ -119,7 +119,7 @@ function Contact() {
                 <li>
                   <Phone size={18} aria-hidden="true" />
                   <div>
-                    <span>Telefono</span>
+                    <span>Teléfono</span>
                     <a href={`tel:${empresa.telefono.replace(/\s/g, "")}`}>{empresa.telefono}</a>
                   </div>
                 </li>
@@ -141,7 +141,7 @@ function Contact() {
                 <li>
                   <MapPin size={18} aria-hidden="true" />
                   <div>
-                    <span>Direccion</span>
+                    <span>Dirección</span>
                     <p>{empresa.direccion}</p>
                   </div>
                 </li>
@@ -159,7 +159,7 @@ function Contact() {
             </ul>
 
             <div className="contact-social">
-              <span>Seguinos</span>
+              <span>Síguenos</span>
               <div>
                 {empresa.facebook && (
                   <a href={empresa.facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
@@ -202,7 +202,7 @@ function Contact() {
               </label>
 
               <label>
-                Correo electronico
+                Correo electrónico
                 <input
                   type="email"
                   name="correo"
@@ -215,7 +215,7 @@ function Contact() {
               </label>
 
               <label>
-                Telefono (opcional)
+                Teléfono (opcional)
                 <input
                   type="tel"
                   name="telefono"

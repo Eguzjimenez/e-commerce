@@ -432,41 +432,6 @@
   color: var(--ink);
 }
 
-.admin-content .admin-chat-conversation,
-.admin-content .admin-quotation-item {
-  background: var(--surface-muted-soft);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  color: var(--ink);
-}
-
-.admin-content .admin-chat-conversation:hover,
-.admin-content .admin-chat-conversation.active,
-.admin-content .admin-quotation-item:hover,
-.admin-content .admin-quotation-item.active {
-  border-color: var(--clay);
-  background: var(--paper);
-}
-
-.admin-content .admin-chat-messages {
-  background: var(--linen);
-}
-
-.admin-content .admin-chat-message {
-  border-radius: var(--radius-md);
-}
-
-.admin-content .admin-chat-message.cliente {
-  background: var(--paper);
-  border: 1px solid var(--line);
-  color: var(--ink);
-}
-
-.admin-content .admin-chat-message.admin {
-  background: var(--laurel);
-  color: var(--paper);
-}
-
 .admin-content .admin-chat-unread,
 .admin-content .statistics-bar-fill {
   background: var(--clay);

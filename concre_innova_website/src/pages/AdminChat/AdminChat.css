@@ -328,3 +328,92 @@
     max-width: 90%;
   }
 }
+
+:root[data-theme="claro"] .admin-chat-sidebar,
+:root[data-theme="claro"] .admin-chat-main {
+  background: var(--paper);
+  border-color: var(--line);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="claro"] .admin-chat-sidebar-header h2,
+:root[data-theme="claro"] .admin-chat-main-header h2,
+:root[data-theme="claro"] .admin-chat-conversation-top h3 {
+  color: var(--ink);
+}
+
+:root[data-theme="claro"] .admin-chat-sidebar-header p,
+:root[data-theme="claro"] .admin-chat-main-header p,
+:root[data-theme="claro"] .admin-chat-conversation-top span,
+:root[data-theme="claro"] .admin-chat-last-message,
+:root[data-theme="claro"] .admin-chat-state,
+:root[data-theme="claro"] .admin-chat-summary-item {
+  color: var(--muted);
+}
+
+:root[data-theme="claro"] .admin-chat-filters button,
+:root[data-theme="claro"] .admin-chat-conversation,
+:root[data-theme="claro"] .admin-secondary-button {
+  background: var(--surface-muted-soft);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+:root[data-theme="claro"] .admin-chat-conversation:hover,
+:root[data-theme="claro"] .admin-chat-conversation.active,
+:root[data-theme="claro"] .admin-chat-filters button.active {
+  background: var(--surface-muted);
+  border-color: var(--clay);
+  color: var(--ink);
+}
+
+:root[data-theme="claro"] .admin-chat-summary-item strong {
+  color: var(--ink);
+}
+
+:root[data-theme="claro"] .admin-chat-summary-item.pending {
+  background: rgba(166, 106, 67, 0.12);
+  color: var(--clay);
+}
+
+:root[data-theme="claro"] .admin-chat-summary-item.pending strong {
+  color: var(--terracotta-dark);
+}
+
+:root[data-theme="claro"] .admin-chat-main-header,
+:root[data-theme="claro"] .admin-chat-input-area {
+  border-color: var(--line);
+}
+
+:root[data-theme="claro"] .admin-chat-messages {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(166, 106, 67, 0.12), transparent 26%),
+    var(--linen);
+}
+
+:root[data-theme="claro"] .admin-chat-message.cliente {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+:root[data-theme="claro"] .admin-chat-message.admin {
+  background: var(--forest-700);
+  color: var(--on-dark);
+}
+
+:root[data-theme="claro"] .admin-chat-message.bot {
+  background: rgba(68, 101, 75, 0.12);
+  border-color: rgba(68, 101, 75, 0.24);
+  color: var(--ink);
+}
+
+:root[data-theme="claro"] .admin-chat-input-area textarea {
+  background: var(--paper);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+:root[data-theme="claro"] .admin-chat-input-area textarea::placeholder {
+  color: var(--muted);
+}

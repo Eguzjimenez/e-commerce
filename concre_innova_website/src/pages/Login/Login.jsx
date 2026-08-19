@@ -26,14 +26,14 @@ function Login() {
         await Swal.fire({
           icon: "success",
           title: "Bienvenido",
-          text: auth.mensaje || "Inicio de sesion exitoso.",
+          text: auth.mensaje || "Inicio de sesión exitoso.",
           timer: 1800,
           showConfirmButton: false,
         });
       }
 
       if (auth.codigo === 0) {
-        const msg = auth.mensaje || "No se pudo iniciar sesion.";
+        const msg = auth.mensaje || "No se pudo iniciar sesión.";
         setError(msg);
         Swal.fire({
           icon: "error",
@@ -53,11 +53,11 @@ function Login() {
         navigate("/");
       }
     } catch (err) {
-      const message = err?.message || "Error al iniciar sesion. Verifica tus datos.";
+      const message = err?.message || "Error al iniciar sesión. Verifica tus datos.";
       setError(message);
       Swal.fire({
         icon: "error",
-        title: "No se pudo iniciar sesion",
+        title: "No se pudo iniciar sesión",
         text: message,
       });
     } finally {
@@ -75,7 +75,7 @@ function Login() {
 
         <div className="auth-heading">
           <span>Acceso</span>
-          <h1>Iniciar sesion</h1>
+          <h1>Iniciar sesión</h1>
           <p>Ingresa para continuar con tus compras o gestionar el panel interno.</p>
         </div>
 
@@ -92,7 +92,7 @@ function Login() {
           <input
             className="login-input"
             type="password"
-            placeholder="Contrasena"
+            placeholder="Contraseña"
             value={contrasena}
             onChange={(event) => setContrasena(event.target.value)}
             required
@@ -106,7 +106,7 @@ function Login() {
         </form>
 
         <div className="login-links">
-          <Link to="/forgot-password">Olvidaste tu contrasena?</Link>
+          <Link to="/forgot-password">¿Olvidaste tu contraseña?</Link>
           <Link to="/register">Crear cuenta</Link>
         </div>
       </div>

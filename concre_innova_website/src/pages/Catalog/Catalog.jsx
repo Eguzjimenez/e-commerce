@@ -102,7 +102,7 @@ function Catalog() {
         setSelectedMaxPrice(nextPriceBounds.max);
       } catch (loadError) {
         if (isMounted && !isAbortError(loadError)) {
-          setError(loadError.message || "No se pudieron cargar las categorias.");
+          setError(loadError.message || "No se pudieron cargar las categorías.");
         }
       } finally {
         if (isMounted && !abortController.signal.aborted) {
@@ -186,7 +186,7 @@ function Catalog() {
         setPagination(pagedProducts);
       } catch (loadError) {
         if (isMounted && !isAbortError(loadError)) {
-          setError(loadError.message || "No se pudo cargar el catalogo.");
+          setError(loadError.message || "No se pudo cargar el catálogo.");
           setProducts([]);
           setPagination({
             ...DEFAULT_PAGINATION,

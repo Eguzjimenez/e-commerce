@@ -214,9 +214,8 @@
 
 .checkout-total-box {
   margin-top: auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: grid;
+  gap: 12px;
   padding: 14px 16px;
   border-radius: 18px;
   background: var(--forest-700);
@@ -229,7 +228,31 @@
   font-weight: 700;
 }
 
-.checkout-total-box strong {
+.checkout-total-breakdown {
+  display: grid;
+  gap: 6px;
+}
+
+.checkout-total-breakdown p,
+.checkout-total-final {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.checkout-total-breakdown strong {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.checkout-total-final {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 10px;
+}
+
+.checkout-total-final strong {
   font-size: 1.5rem;
 }
 

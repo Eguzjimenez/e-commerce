@@ -1,0 +1,14 @@
+.client-page-layout {
+  background: var(--linen);
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.client-page-content {
+  flex: 1 0 auto;
+}
+
+.client-page-layout .home-footer {
+  margin-top: auto;
+}

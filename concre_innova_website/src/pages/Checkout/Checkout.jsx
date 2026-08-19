@@ -14,11 +14,15 @@ import { PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 import ComprobantePedido from "../../components/ComprobantePedido/ComprobantePedido";
 
 const CARD_PAYMENT_METHOD = "Tarjeta";
+const IVA_RATE = 0.13;
 const PAYMENT_METHODS = [
   CARD_PAYMENT_METHOD,
-  "SINPE Movil",
   "Efectivo contra entrega",
 ];
+
+function roundCurrency(value) {
+  return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+}
 
 function buildOrderItems(cartItems) {
   return (Array.isArray(cartItems) ? cartItems : []).map((item) => ({
@@ -53,12 +57,41 @@ function validateCardData({ cardHolder, cardNumber, expiry, cvv }) {
   const expiryDigits = String(expiry || "").replace(/\D/g, "");
   const cvvDigits = String(cvv || "").replace(/\D/g, "");
 
-  if (cardHolderValue.length < 5) {
-    return "Ingresa el nombre completo del titular de la tarjeta.";
+  if (cardHolderValue.length < 5 || !/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(cardHolderValue)) {
+    return "Ingresa el nombre del titular como aparece en la tarjeta.";
+  }
+
+  if (cardHolderValue.split(/\s+/).filter(Boolean).length < 2) {
+    return "Ingresa nombre y apellido del titular de la tarjeta.";
   }
 
   if (cardDigits.length !== 16) {
     return "El numero de tarjeta debe tener 16 digitos.";
+  }
+
+  if (/^(\d)\1+$/.test(cardDigits)) {
+    return "El numero de tarjeta no es valido.";
+  }
+
+  let luhnSum = 0;
+  let shouldDouble = false;
+
+  for (let index = cardDigits.length - 1; index >= 0; index -= 1) {
+    let digit = Number(cardDigits[index]);
+
+    if (shouldDouble) {
+      digit *= 2;
+      if (digit > 9) {
+        digit -= 9;
+      }
+    }
+
+    luhnSum += digit;
+    shouldDouble = !shouldDouble;
+  }
+
+  if (luhnSum % 10 !== 0) {
+    return "El numero de tarjeta no es valido.";
   }
 
   if (expiryDigits.length !== 4) {
@@ -124,7 +157,11 @@ function buildReceiptHtml(receipt) {
       table { width: 100%; border-collapse: collapse; margin-top: 18px; }
       th, td { border-bottom: 1px solid #d8dde1; padding: 10px 8px; }
       th { background: #f4f6f8; text-align: left; }
-      .total { margin-top: 16px; text-align: right; font-size: 1.1rem; font-weight: 700; }
+      .totals { margin-top: 16px; display: grid; gap: 6px; }
+      .total-row { display: flex; justify-content: flex-end; gap: 18px; }
+      .total-row span { min-width: 90px; text-align: left; color: #5b6770; }
+      .total-row strong { min-width: 120px; text-align: right; }
+      .total-row.final { font-size: 1.1rem; }
       .foot { margin-top: 26px; color: #5b6770; font-size: 0.9rem; }
     </style>
   </head>
@@ -133,8 +170,8 @@ function buildReceiptHtml(receipt) {
     <p class="meta"><strong>Pedido:</strong> #${escapeHtml(receipt.idPedido)}</p>
     <p class="meta"><strong>Fecha:</strong> ${escapeHtml(receipt.fecha)}</p>
     <p class="meta"><strong>Cliente (usuario):</strong> ${escapeHtml(receipt.idUsuario)}</p>
-    <p class="meta"><strong>Direccion:</strong> ${escapeHtml(receipt.direccionEntrega)}</p>
-    <p class="meta"><strong>Metodo de pago:</strong> ${escapeHtml(receipt.metodoPago)}</p>
+    <p class="meta"><strong>Dirección:</strong> ${escapeHtml(receipt.direccionEntrega)}</p>
+    <p class="meta"><strong>Método de pago:</strong> ${escapeHtml(receipt.metodoPago)}</p>
     ${receipt.last4 ? `<p class="meta"><strong>Tarjeta:</strong> Terminada en ${escapeHtml(receipt.last4)}</p>` : ""}
 
     <table>
@@ -151,7 +188,20 @@ function buildReceiptHtml(receipt) {
       </tbody>
     </table>
 
-    <p class="total">Total pagado: ${escapeHtml(formatCatalogPrice(receipt.total))}</p>
+    <div class="totals">
+      <div class="total-row">
+        <span>Subtotal</span>
+        <strong>${escapeHtml(formatCatalogPrice(receipt.subtotal ?? receipt.total))}</strong>
+      </div>
+      <div class="total-row">
+        <span>IVA (${escapeHtml(String(Math.round((receipt.ivaRate ?? IVA_RATE) * 100)))}%)</span>
+        <strong>${escapeHtml(formatCatalogPrice(receipt.iva ?? 0))}</strong>
+      </div>
+      <div class="total-row final">
+        <span>Total</span>
+        <strong>${escapeHtml(formatCatalogPrice(receipt.total))}</strong>
+      </div>
+    </div>
     <p class="foot">Este documento es un comprobante digital de tu compra.</p>
   </body>
 </html>
@@ -205,11 +255,15 @@ function Checkout() {
   }, []);
 
   const total = useMemo(() => {
-    return productos.reduce(
+    return roundCurrency(
+      productos.reduce(
       (sum, item) => sum + Number(item.precio) * Number(item.cantidad),
       0
+      )
     );
   }, [productos]);
+  const ivaAmount = useMemo(() => roundCurrency(total * IVA_RATE), [total]);
+  const totalWithIva = useMemo(() => roundCurrency(total + ivaAmount), [total, ivaAmount]);
   const requiresCardData = metodoPago === CARD_PAYMENT_METHOD;
 
   const ensureUserSession = async () => {
@@ -219,8 +273,8 @@ function Checkout() {
 
     await Swal.fire({
       icon: "info",
-      title: "Inicia sesion para continuar",
-      text: "Debes iniciar sesion antes de validar stock o confirmar la compra.",
+      title: "Inicia sesión para continuar",
+      text: "Debes iniciar sesión antes de validar stock o confirmar la compra.",
     });
 
     navigate(PUBLIC_ROUTES.LOGIN, {
@@ -239,7 +293,7 @@ function Checkout() {
     if (productos.length === 0) {
       await Swal.fire({
         icon: "info",
-        title: "Carrito vacio",
+        title: "Carrito vacío",
         text: "No hay productos para validar.",
       });
       return;
@@ -326,8 +380,8 @@ function Checkout() {
     if (!direccionEntrega.trim()) {
       await Swal.fire({
         icon: "warning",
-        title: "Direccion requerida",
-        text: "Ingresa la direccion de entrega para continuar.",
+        title: "Dirección requerida",
+        text: "Ingresa la dirección de entrega para continuar.",
       });
       return;
     }
@@ -335,8 +389,8 @@ function Checkout() {
     if (direccionEntrega.trim().length > 255) {
       await Swal.fire({
         icon: "warning",
-        title: "Direccion demasiado larga",
-        text: "La direccion de entrega no puede superar 255 caracteres.",
+        title: "Dirección demasiado larga",
+        text: "La dirección de entrega no puede superar 255 caracteres.",
       });
       return;
     }
@@ -358,8 +412,8 @@ function Checkout() {
     if (!idUsuario) {
       await Swal.fire({
         icon: "error",
-        title: "Sesion invalida",
-        text: "No fue posible identificar el usuario en sesion.",
+        title: "Sesión inválida",
+        text: "No fue posible identificar el usuario en sesión.",
       });
       return;
     }
@@ -415,7 +469,8 @@ function Checkout() {
       setCvv("");
 
       const totalPedido = Number(response?.total);
-      const totalText = formatCatalogPrice(Number.isFinite(totalPedido) ? totalPedido : total);
+      const finalTotal = Number.isFinite(totalPedido) ? roundCurrency(totalPedido) : totalWithIva;
+      const totalText = formatCatalogPrice(finalTotal);
       const orderIdText = response?.idPedido != null ? ` (Pedido #${response.idPedido})` : "";
       const receiptData = {
         idPedido: response?.idPedido ?? "N/A",
@@ -424,20 +479,23 @@ function Checkout() {
         direccionEntrega: direccionEntrega.trim(),
         metodoPago,
         last4,
-        total: Number.isFinite(totalPedido) ? totalPedido : total,
+        subtotal: total,
+        iva: ivaAmount,
+        ivaRate: IVA_RATE,
+        total: finalTotal,
         items: purchasedItems,
       };
 
       setReceipt(receiptData);
 
       setMensajeExito(
-        `Compra realizada correctamente${orderIdText}. Total registrado: ${totalText}.`
+        `Compra realizada correctamente${orderIdText}. Subtotal: ${formatCatalogPrice(total)} | IVA: ${formatCatalogPrice(ivaAmount)} | Total: ${totalText}.`
       );
 
       await Swal.fire({
         icon: "success",
         title: "Pedido registrado",
-        text: response?.mensaje || "Tu pedido fue formalizado correctamente.",
+        text: "Tu pedido fue formalizado correctamente.",
       });
     } catch (error) {
       console.error("Error al registrar pedido", {
@@ -463,7 +521,7 @@ function Checkout() {
         <div className="checkout-heading checkout-heading-wide">
           <span className="checkout-eyebrow">Pago seguro</span>
           <h1>Pago</h1>
-          <p>Completa la informacion para finalizar tu compra.</p>
+          <p>Completa la información para finalizar tu compra.</p>
         </div>
 
         <div className="checkout-layout">
@@ -495,27 +553,39 @@ function Checkout() {
             </div>
 
             <div className="checkout-total-box">
-              <span>Total</span>
-              <strong>{formatCatalogPrice(total)}</strong>
+              <div className="checkout-total-breakdown">
+                <p>
+                  <span>Subtotal</span>
+                  <strong>{formatCatalogPrice(total)}</strong>
+                </p>
+                <p>
+                  <span>IVA (13%)</span>
+                  <strong>{formatCatalogPrice(ivaAmount)}</strong>
+                </p>
+              </div>
+              <p className="checkout-total-final">
+                <span>Total</span>
+                <strong>{formatCatalogPrice(totalWithIva)}</strong>
+              </p>
             </div>
           </aside>
 
           <section className="checkout-panel checkout-form-panel">
             <div className="checkout-panel-head">
               <h3>Datos de pago</h3>
-              <p>Selecciona el metodo de pago y confirma la compra.</p>
+              <p>Selecciona el método de pago y confirma la compra.</p>
             </div>
 
             <input
               className="input"
-              placeholder="Direccion de entrega"
+              placeholder="Dirección de entrega"
               value={direccionEntrega}
               maxLength={255}
               onChange={(event) => setDireccionEntrega(event.target.value)}
             />
 
             <fieldset className="checkout-payment-method">
-              <legend>Metodo de pago</legend>
+              <legend>Método de pago</legend>
               <div className="checkout-payment-options">
                 {PAYMENT_METHODS.map((paymentMethod) => (
                   <label className="checkout-payment-option" key={paymentMethod}>
