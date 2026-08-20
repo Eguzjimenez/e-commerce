@@ -27,7 +27,7 @@ const WELCOME_MESSAGE = {
 };
 
 const QUICK_QUESTIONS = [
-  { label: "Metodos de pago", question: "Cuales son los metodos de pago?" },
+  { label: "Metodos de pago", question: "Cuales son los métodos de pago?" },
   { label: "Como comprar?", question: "Como puedo comprar?" },
   { label: "Productos", question: "Que productos tienen?" },
   { label: "Contacto", question: "Como puedo contactarlos?" },
@@ -185,7 +185,7 @@ function ChatBot() {
 
   const handleEscalate = async () => {
     if (!isLoggedIn()) {
-      setNotice("Inicia sesion para que un agente continue tu conversacion.");
+      setNotice("Inicia sesión para que un agente continue tu conversacion.");
       return;
     }
 
@@ -265,7 +265,7 @@ function ChatBot() {
                 <h3>ConcreInnova</h3>
                 <span>
                   {conversationState === CHAT_STATES.ESCALATED
-                    ? "Atencion de soporte"
+                    ? "Atención de soporte"
                     : "Asistente virtual"}
                 </span>
               </div>

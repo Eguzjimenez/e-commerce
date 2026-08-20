@@ -23,6 +23,7 @@ import {
   formatearPorcentajeImpuesto,
 } from "../../services/pricingService";
 import ComprobantePedido from "../../components/ComprobantePedido/ComprobantePedido";
+import { descargarDocumento } from "../../services/documentService";
 
 const CARD_PAYMENT_METHOD = "Tarjeta";
 const SINPE_PAYMENT_METHOD = "SINPE Movil";
@@ -36,23 +37,18 @@ const PAYMENT_METHODS = [
   {
     id: CARD_PAYMENT_METHOD,
     label: "Tarjeta",
-    descripcion:
-      "El cobro se procesa en la plataforma del banco. Anota la referencia que devuelve el comercio.",
     requiereReferencia: true,
     requiereComprobante: false,
   },
   {
     id: SINPE_PAYMENT_METHOD,
     label: "SINPE Móvil",
-    descripcion:
-      "Transfiere el total y adjunta la captura del comprobante para que el equipo verifique el pago.",
     requiereReferencia: true,
     requiereComprobante: true,
   },
   {
     id: CASH_PAYMENT_METHOD,
     label: "Efectivo contra entrega",
-    descripcion: "Pagas al recibir el pedido en la dirección de entrega indicada.",
     requiereReferencia: false,
     requiereComprobante: false,
   },
@@ -83,101 +79,6 @@ function buildOrderItems(cartItems) {
     color: String(item.color || "").trim(),
     cantidad: Math.max(1, Number(item.cantidad) || 1),
   }));
-}
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function buildReceiptHtml(receipt) {
-  const desgloseComprobante = desglosarImpuesto(receipt.total);
-  const rows = receipt.items
-    .map(
-      (item) => `
-        <tr>
-          <td>${escapeHtml(item.nombre)}</td>
-          <td style="text-align:center;">${item.cantidad}</td>
-          <td style="text-align:right;">${escapeHtml(formatCatalogPrice(item.precio))}</td>
-          <td style="text-align:right;">${escapeHtml(formatCatalogPrice(item.subtotal))}</td>
-        </tr>`
-    )
-    .join("");
-
-  return `<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <title>Comprobante del pedido ${escapeHtml(receipt.idPedido)}</title>
-    <style>
-      body { font-family: Arial, Helvetica, sans-serif; color: #16140f; margin: 32px; }
-      h1 { font-size: 20px; margin: 0 0 4px; }
-      .meta { color: #5f5749; font-size: 13px; margin-bottom: 20px; }
-      table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
-      th, td { border-bottom: 1px solid #ded6c7; padding: 8px 6px; font-size: 13px; }
-      th { text-align: left; background: #f5f0e6; }
-      .totales td { border: none; padding: 3px 6px; font-size: 13px; }
-      .total { font-size: 16px; font-weight: bold; }
-      .foot { color: #5f5749; font-size: 12px; margin-top: 24px; }
-    </style>
-  </head>
-  <body>
-    <h1>Concre Innova</h1>
-    <p class="meta">
-      Pedido #${escapeHtml(receipt.idPedido)}<br />
-      Fecha: ${escapeHtml(receipt.fecha)}<br />
-      Dirección de entrega: ${escapeHtml(receipt.direccionEntrega)}<br />
-      Método de pago: ${escapeHtml(receipt.metodoPago)}
-      ${receipt.referencia ? `<br />Referencia: ${escapeHtml(receipt.referencia)}` : ""}
-    </p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th style="text-align:center;">Cantidad</th>
-          <th style="text-align:right;">Precio</th>
-          <th style="text-align:right;">Subtotal</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-
-    <table class="totales">
-      <tr>
-        <td>Subtotal</td>
-        <td style="text-align:right;">${escapeHtml(formatCatalogPrice(desgloseComprobante.subtotal))}</td>
-      </tr>
-      <tr>
-        <td>IVA (${escapeHtml(formatearPorcentajeImpuesto(desgloseComprobante.tasa))}) incluido</td>
-        <td style="text-align:right;">${escapeHtml(formatCatalogPrice(desgloseComprobante.impuesto))}</td>
-      </tr>
-    </table>
-
-    <p class="total">Total pagado: ${escapeHtml(formatCatalogPrice(receipt.total))}</p>
-    <p class="foot">Este documento es un comprobante digital de tu compra.</p>
-  </body>
-</html>
-  `;
-}
-
-function downloadReceipt(receipt) {
-  const html = buildReceiptHtml(receipt);
-  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  const orderId = receipt?.idPedido ?? `temp-${Date.now()}`;
-
-  anchor.href = url;
-  anchor.download = `comprobante-pedido-${orderId}.html`;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-  URL.revokeObjectURL(url);
 }
 
 function Checkout() {
@@ -718,12 +619,7 @@ function Checkout() {
                       checked={metodoPago === method.id}
                       onChange={(event) => setMetodoPago(event.target.value)}
                     />
-                    <span className="checkout-payment-option-body">
-                      <span className="checkout-payment-option-title">{method.label}</span>
-                      <span className="checkout-payment-option-text">
-                        {method.descripcion}
-                      </span>
-                    </span>
+                    <span className="checkout-payment-option-title">{method.label}</span>
                   </label>
                 ))}
               </div>
@@ -791,9 +687,9 @@ function Checkout() {
                 <button
                   className="btn checkout-receipt-btn"
                   type="button"
-                  onClick={() => downloadReceipt(receipt)}
+                  onClick={() => descargarDocumento("pedido", receipt)}
                 >
-                  Descargar comprobante HTML
+                  Descargar comprobante
                 </button>
               </div>
             )}

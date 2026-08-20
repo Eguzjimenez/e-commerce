@@ -255,7 +255,7 @@ function VisualizadorProducto({ producto, productosRecomendados = [], onClose })
     }
 
     if (!archivo.type.startsWith("image/")) {
-      setAviso("Selecciona un archivo de imagen valido.");
+      setAviso("Selecciona un archivo de imagen válido.");
       return;
     }
 
@@ -276,7 +276,7 @@ function VisualizadorProducto({ producto, productosRecomendados = [], onClose })
 
       if (!usuarioAutenticado) {
         setAviso(
-          "Imagen cargada. Inicia sesion si quieres guardar esta visualizacion en tu perfil."
+          "Imagen cargada. Inicia sesión si quieres guardar esta visualización en tu perfil."
         );
       }
     } catch (error) {
@@ -389,7 +389,7 @@ function VisualizadorProducto({ producto, productosRecomendados = [], onClose })
 
   const guardarVisualizacion = async () => {
     if (!usuarioAutenticado) {
-      setAviso("Inicia sesion para guardar la visualizacion en tu perfil.");
+      setAviso("Inicia sesión para guardar la visualización en tu perfil.");
       return;
     }
 
@@ -404,7 +404,7 @@ function VisualizadorProducto({ producto, productosRecomendados = [], onClose })
     }
 
     const { value: nombre } = await Swal.fire({
-      title: "Guardar visualizacion",
+      title: "Guardar visualización",
       input: "text",
       inputLabel: "Nombre del proyecto",
       inputValue:
@@ -438,13 +438,13 @@ function VisualizadorProducto({ producto, productosRecomendados = [], onClose })
 
       await Swal.fire({
         icon: "success",
-        title: "Visualizacion guardada",
-        text: respuesta?.mensaje || "La simulacion quedo guardada en tu perfil.",
+        title: "Visualización guardada",
+        text: respuesta?.mensaje || "La simulación quedo guardada en tu perfil.",
         timer: 1600,
         showConfirmButton: false,
       });
     } catch (error) {
-      setAviso(error?.message || "No fue posible guardar la visualizacion.");
+      setAviso(error?.message || "No fue posible guardar la visualización.");
     } finally {
       setGuardando(false);
     }
@@ -494,15 +494,15 @@ function VisualizadorProducto({ producto, productosRecomendados = [], onClose })
       setVisualizacionActualId(visualizacion.idVisualizacion);
       setMostrarGuardadas(false);
     } catch (error) {
-      setAviso(error?.message || "No fue posible abrir la visualizacion guardada.");
+      setAviso(error?.message || "No fue posible abrir la visualización guardada.");
     }
   };
 
   const eliminarVisualizacionGuardada = async (visualizacion) => {
     const confirmacion = await Swal.fire({
       icon: "question",
-      title: "Eliminar visualizacion",
-      text: `Se eliminara "${visualizacion.nombre}" de tu perfil.`,
+      title: "Eliminar visualización",
+      text: `Se eliminará "${visualizacion.nombre}" de tu perfil.`,
       showCancelButton: true,
       confirmButtonText: "Eliminar",
       cancelButtonText: "Cancelar",
@@ -521,13 +521,13 @@ function VisualizadorProducto({ producto, productosRecomendados = [], onClose })
 
       await refrescarVisualizacionesGuardadas();
     } catch (error) {
-      setAviso(error?.message || "No fue posible eliminar la visualizacion.");
+      setAviso(error?.message || "No fue posible eliminar la visualización.");
     }
   };
 
   const agregarSimulacionAlCarrito = async () => {
     if (items.length === 0) {
-      setAviso("Agrega productos a la simulacion antes de comprarlos.");
+      setAviso("Agrega productos a la simulación antes de comprarlos.");
       return;
     }
 
@@ -554,7 +554,7 @@ function VisualizadorProducto({ producto, productosRecomendados = [], onClose })
     await Swal.fire({
       icon: "success",
       title: "Productos agregados al carrito",
-      text: `${items.length} producto(s) de tu simulacion se agregaron por ${formatCatalogPrice(
+      text: `${items.length} producto(s) de tu simulación se agregaron por ${formatCatalogPrice(
         totalSimulacion
       )}.`,
     });
@@ -780,7 +780,7 @@ function VisualizadorProducto({ producto, productosRecomendados = [], onClose })
                 onClick={guardarVisualizacion}
                 disabled={guardando || items.length === 0}
               >
-                {guardando ? "Guardando..." : "Guardar Visualizacion"}
+                {guardando ? "Guardando..." : "Guardar Visualización"}
               </button>
             </div>
           </aside>

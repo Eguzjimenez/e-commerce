@@ -1,95 +1,17 @@
 .admin-layout {
-  display: grid;
-  grid-template-columns: 272px minmax(0, 1fr);
+  display: block;
   min-height: calc(100vh - 128px);
   background: var(--linen);
   color: var(--ink);
 }
 
-.admin-sidebar {
-  margin: 24px 0 24px 24px;
-  background: var(--forest-ink);
-  border: 1px solid rgba(203, 182, 160, 0.18);
-  border-radius: var(--radius-md);
-  color: var(--on-dark);
-  padding: 26px;
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-
-.admin-brand-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.admin-brand-mark {
-  width: 34px;
-  height: 34px;
-  background:
-    linear-gradient(135deg, var(--sage), var(--laurel));
-  border: 1px solid rgba(var(--paper-rgb), 0.24);
-}
-
-.admin-sidebar-brand h2 {
-  margin: 0;
-  color: var(--on-dark);
-  font-size: 1.9rem;
-  line-height: 1;
-}
-
-.admin-sidebar-brand p {
-  margin: 10px 0 0;
-  color: var(--on-dark-muted);
-  font-size: 0.88rem;
-}
-
-.admin-sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.admin-nav-link {
-  position: relative;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  color: var(--on-dark-muted);
-  font-size: 0.9rem;
-  font-weight: 700;
-  padding: 12px 14px;
-  text-decoration: none;
-  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
-}
-
-.admin-nav-link:hover {
-  background: rgba(var(--paper-rgb), 0.08);
-  border-color: rgba(203, 182, 160, 0.18);
-  color: var(--on-dark);
-}
-
-.admin-nav-link.active {
-  background: var(--paper);
-  border-color: var(--paper);
-  color: var(--ink);
-}
-
-.admin-nav-link.active::before {
-  content: "";
-  position: absolute;
-  left: -1px;
-  top: 8px;
-  bottom: 8px;
-  width: 3px;
-  background: var(--clay);
-}
-
 .admin-main {
+  width: min(var(--max-page), calc(100% - 40px));
   min-width: 0;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  padding: 24px;
+  padding: 24px 0 32px;
 }
 
 .admin-header {
@@ -439,22 +361,6 @@
 }
 
 @media (max-width: 1000px) {
-  .admin-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-sidebar {
-    margin: 16px;
-  }
-
-  .admin-sidebar-nav {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  }
-
-  .admin-main {
-    padding: 16px;
-  }
 
   .admin-header {
     flex-direction: column;

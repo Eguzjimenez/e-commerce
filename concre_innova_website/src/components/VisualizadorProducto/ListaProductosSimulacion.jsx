@@ -31,7 +31,7 @@ function ListaProductosSimulacion({
       {items.map((item) => (
         <li
           key={item.idItem}
-          className={`simulacion-item ${
+          className={`simulación-item ${
             itemSeleccionadoId === item.idItem ? "activo" : ""
           }`}
         >
@@ -109,7 +109,7 @@ function ListaProductosSimulacion({
             type="button"
             className="simulacion-item-eliminar"
             onClick={() => onEliminarItem(item.idItem)}
-            aria-label={`Quitar ${item.producto.nombre} de la simulacion`}
+            aria-label={`Quitar ${item.producto.nombre} de la simulación`}
           >
             Quitar
           </button>

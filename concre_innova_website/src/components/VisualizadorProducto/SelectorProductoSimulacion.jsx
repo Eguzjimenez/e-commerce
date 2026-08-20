@@ -80,7 +80,7 @@ function SelectorProductoSimulacion({
       <form className="simulacion-selector-busqueda" onSubmit={handleBuscar}>
         <input
           type="search"
-          aria-label="Buscar productos para la simulacion"
+          aria-label="Buscar productos para la simulación"
           placeholder="Buscar planta o macetero"
           value={terminoBusqueda}
           onChange={(event) => setTerminoBusqueda(event.target.value)}
@@ -95,7 +95,7 @@ function SelectorProductoSimulacion({
       </p>
 
       {cargando && <p className="simulacion-estado">Cargando productos...</p>}
-      {!cargando && error && <p className="simulacion-estado error">{error}</p>}
+      {!cargando && error && <p className="simulación-estado error">{error}</p>}
 
       {!cargando && !error && productosMostrados.length === 0 && (
         <p className="simulacion-estado">
@@ -127,7 +127,7 @@ function SelectorProductoSimulacion({
               title={
                 deshabilitado
                   ? "Sube primero la foto de tu espacio"
-                  : `Agregar ${producto.nombre} a la simulacion`
+                  : `Agregar ${producto.nombre} a la simulación`
               }
             >
               Agregar

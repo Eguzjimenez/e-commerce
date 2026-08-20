@@ -17,12 +17,12 @@ import NotificationBell from "../NotificationBell/NotificationBell";
 import { ADMIN_ROUTES, PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 import { getAuth, getUserRole, isLoggedIn, logout } from "../../services/authService";
 import {
-  canManageQuotations,
   canPurchase,
   isAdminRole,
   isStaffRole,
 } from "../../constants/roleAccess";
 import { ROLES } from "../../constants/roles";
+import { ADMIN_NAV_ITEMS } from "../../constants/adminNavigation";
 import { getCartCount } from "../../services/cartService";
 import PreferenceToggles from "../PreferenceToggles/PreferenceToggles";
 import { getFavoriteCountAsync } from "../../services/favoriteService";
@@ -80,7 +80,6 @@ function Navbar() {
   const admin = isAdminRole(userRole);
   // El vendedor tambien opera el panel interno: no debe ver la navegacion de compra.
   const staff = isStaffRole(userRole);
-  const quotationStaff = canManageQuotations(userRole);
   const purchaseAccess = canPurchase(userRole);
   const isClient = userRole === ROLES.CLIENTE;
   const panelRoute = admin ? ADMIN_ROUTES.DASHBOARD : ADMIN_ROUTES.PRODUCTS;
@@ -162,8 +161,7 @@ function Navbar() {
           )}
         </div>
 
-        {!staff && (
-          <button
+        <button
             className="menu-toggle"
             type="button"
             aria-label={menuOpen ? "Cerrar menu" : "Abrir menu"}
@@ -171,12 +169,24 @@ function Navbar() {
             onClick={() => setMenuOpen(!menuOpen)}
           >
             {menuOpen ? <X size={20} strokeWidth={1.8} /> : <Menu size={20} strokeWidth={1.8} />}
-          </button>
-        )}
+        </button>
       </div>
 
-      {!staff && (
-      <ul className={`nav-menu ${menuOpen ? "active" : ""}`}>
+      <ul className={`nav-menu ${menuOpen ? "active" : ""} ${staff ? "nav-menu-staff" : ""}`.trim()}>
+        {/* El panel dejo de tener barra lateral propia: sus accesos viven en
+            este mismo menu, para que la navegacion sea una sola. */}
+        {staff &&
+          ADMIN_NAV_ITEMS.filter((item) => item.roles.includes(userRole)).map((item) => (
+            <li key={item.to}>
+              <Link
+                to={item.to}
+                className={getNavLinkClass(item.to)}
+                aria-current={isActivePath(item.to) ? "page" : undefined}
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
         {!staff && (
           <>
             <li>
@@ -257,26 +267,6 @@ function Navbar() {
             </Link>
           </li>
         )}
-        {quotationStaff && (
-          <li>
-            <Link
-              to={admin ? ADMIN_ROUTES.DASHBOARD : ADMIN_ROUTES.QUOTATIONS}
-              className={getNavLinkClass(
-                admin ? ADMIN_ROUTES.DASHBOARD : ADMIN_ROUTES.QUOTATIONS
-              )}
-              aria-current={
-                isActivePath(
-                  admin ? ADMIN_ROUTES.DASHBOARD : ADMIN_ROUTES.QUOTATIONS
-                )
-                  ? "page"
-                  : undefined
-              }
-            >
-              <ShieldCheck size={15} strokeWidth={1.8} />
-              {admin ? "Panel" : "Atención de cotizaciones"}
-            </Link>
-          </li>
-        )}
         {authenticated && (
           <li className="nav-menu-auth-action">
             <button className="logout-btn" type="button" onClick={handleLogout}>
@@ -298,7 +288,6 @@ function Navbar() {
           </li>
         )}
       </ul>
-      )}
     </nav>
   );
 }

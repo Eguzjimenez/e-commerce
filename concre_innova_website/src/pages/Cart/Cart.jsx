@@ -130,9 +130,7 @@ function Cart() {
         setStockSummary({
           status: allAvailable ? "available" : "unavailable",
           response,
-          message: allAvailable
-            ? "Todos los productos tienen stock disponible."
-             : "Hay productos sin stock suficiente.",
+          message: allAvailable ? "" : "Hay productos sin stock suficiente.",
         });
       } catch (error) {
         if (error?.name === "AbortError") {
@@ -193,7 +191,7 @@ function Cart() {
     const confirmation = await Swal.fire({
       icon: "question",
       title: "Eliminar producto",
-      text: `Se eliminara ${product.name} del carrito.`,
+      text: `Se eliminará ${product.name} del carrito.`,
       showCancelButton: true,
       confirmButtonText: "Eliminar",
       cancelButtonText: "Cancelar",
@@ -303,7 +301,7 @@ function Cart() {
     if (stockSummary.status !== "available") {
       await Swal.fire({
         icon: "warning",
-        title: "Stock pendiente de validacion",
+        title: "Stock pendiente de validación",
         text:
           stockSummary.message ||
           "Espera a que se valide la disponibilidad de todos los productos.",

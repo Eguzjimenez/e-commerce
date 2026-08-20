@@ -106,7 +106,7 @@ async function request(path, options = {}, reintentado = false) {
     }
 
     throw new Error(
-      "No fue posible conectar con el servidor. Verifica tu conexion e intenta nuevamente."
+      "No fue posible conectar con el servidor. Verifica tu conexión e intenta nuevamente."
     );
   }
 

@@ -584,7 +584,7 @@ function Catalog() {
                       step="1"
                       value={selectedMinPrice}
                       onChange={handleMinPriceChange}
-                      aria-label="Precio minimo"
+                      aria-label="Precio mínimo"
                     />
 
                     <input
@@ -595,7 +595,7 @@ function Catalog() {
                       step="1"
                       value={selectedMaxPrice}
                       onChange={handleMaxPriceChange}
-                      aria-label="Precio maximo"
+                      aria-label="Precio máximo"
                     />
                   </div>
 

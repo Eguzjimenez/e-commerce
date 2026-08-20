@@ -19,7 +19,7 @@ export const ADMIN_NAV_ITEMS = [
   },
   {
     to: ADMIN_ROUTES.CATEGORIES,
-    label: "Categorias",
+    label: "Categorías",
     roles: ROLE_GROUPS.SALES_MANAGEMENT,
   },
   {
@@ -64,12 +64,12 @@ export const ADMIN_NAV_ITEMS = [
   },
   {
     to: ADMIN_ROUTES.COMPANY_INFO,
-    label: "Informacion de empresa",
+    label: "Información de empresa",
     roles: ROLE_GROUPS.ADMIN_ONLY,
   },
   {
     to: ADMIN_ROUTES.BITACORA,
-    label: "Bitacora",
+    label: "Bitácora",
     roles: ROLE_GROUPS.ADMIN_ONLY,
   },
 ];

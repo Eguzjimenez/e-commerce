@@ -73,7 +73,7 @@ function ProductDetail() {
           setProduct(null);
           setRelatedProducts([]);
           setVariants([]);
-          setError("No se encontro el producto solicitado.");
+          setError("No se encontró el producto solicitado.");
           return;
         }
 

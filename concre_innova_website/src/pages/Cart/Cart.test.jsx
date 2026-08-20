@@ -197,12 +197,17 @@ test("shows the authoritative subtotal after automatic stock validation", async 
 
   render(<Cart />);
 
-  expect(
-    await screen.findByText("Todos los productos tienen stock disponible.")
-  ).toBeInTheDocument();
   // El monto validado por la API es ahora el total a pagar; subtotal e IVA son
   // el desglose de ese mismo importe.
-  expect(screen.getByText("Total a pagar").parentElement).toHaveTextContent(/₡13\s000/);
+  await waitFor(() =>
+    expect(screen.getByText("Total a pagar").parentElement).toHaveTextContent(/₡13\s000/)
+  );
+
+  // Con todo disponible no se anuncia nada: solo se avisa de los problemas.
+  expect(
+    screen.queryByText("Todos los productos tienen stock disponible.")
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText("Hay productos sin stock suficiente.")).not.toBeInTheDocument();
   expect(screen.getByText("Subtotal")).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Ir a pagar" })).toBeEnabled();
 });

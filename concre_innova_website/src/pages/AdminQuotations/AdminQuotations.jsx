@@ -299,7 +299,7 @@ function AdminQuotations() {
 
       await Swal.fire({
         icon: "success",
-        title: "Cotizacion respondida",
+        title: "Cotización respondida",
         text: `Importe enviado: ${formatCatalogPrice(result.total)}.`,
       });
     } catch (error) {
@@ -336,11 +336,11 @@ function AdminQuotations() {
 
     const confirmation = await Swal.fire({
       icon: "question",
-      title: `${decision} cotizacion`,
+      title: `${decision} cotización`,
       text:
         decision === "Aprobar"
-          ? "La cotizacion quedara habilitada para convertirse en pedido."
-          : "La cotizacion quedara cerrada como rechazada.",
+          ? "La cotización quedara habilitada para convertirse en pedido."
+          : "La cotización quedara cerrada como rechazada.",
       showCancelButton: true,
       confirmButtonText: decision,
       cancelButtonText: "Cancelar",
@@ -379,14 +379,14 @@ function AdminQuotations() {
 
       await Swal.fire({
         icon: "success",
-        title: `Cotizacion ${result.estado.toLowerCase()}`,
+        title: `Cotización ${result.estado.toLowerCase()}`,
         text: result.mensaje,
       });
     } catch (error) {
       await Swal.fire({
         icon: "error",
-        title: "No se pudo resolver la cotizacion",
-        text: error?.message || "Intenta realizar la accion nuevamente.",
+        title: "No se pudo resolver la cotización",
+        text: error?.message || "Intenta realizar la acción nuevamente.",
       });
     } finally {
       setSubmitting(false);
