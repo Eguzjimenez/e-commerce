@@ -100,50 +100,6 @@
   transform: none;
 }
 
-.nav-search-form {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  justify-self: start;
-  gap: 10px;
-  width: min(280px, 100%);
-  border-bottom: 1px solid var(--soil-black);
-  padding-bottom: 8px;
-}
-
-.nav-search-button {
-  width: 28px;
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  background: transparent;
-  color: var(--soil-black);
-  cursor: pointer;
-  padding: 0;
-}
-
-.nav-search-form input {
-  width: 100%;
-  min-height: 30px;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  color: var(--soil-black);
-  font-size: 1rem;
-  padding: 0;
-}
-
-.nav-search-form input:focus {
-  border-color: transparent;
-  box-shadow: none;
-}
-
-.nav-search-form input::placeholder {
-  color: var(--soil-black);
-  opacity: 0.86;
-}
-
 .nav-brand-block {
   position: relative;
   display: grid;
@@ -381,16 +337,8 @@
     /* minmax(0, 1fr) permite que la columna se encoja por debajo de su
        contenido; con 1fr la barra desbordaba horizontalmente a 320 px. */
     grid-template-columns: minmax(0, 1fr) auto auto;
-    grid-template-areas:
-      "brand actions menu"
-      "search search search";
+    grid-template-areas: "brand actions menu";
     gap: 14px;
-  }
-
-  .nav-search-form {
-    grid-area: search;
-    width: 100%;
-    min-width: 0;
   }
 
   .nav-brand-block {
@@ -421,11 +369,6 @@
 
   .nav-icon-label {
     display: none;
-  }
-
-  .navbar-compact .nav-container {
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    grid-template-areas: "brand actions menu";
   }
 
   .navbar-admin .nav-container {
@@ -526,4 +469,16 @@
   .nav-register-link {
     display: none;
   }
+}
+
+/* Los controles del encabezado no mostraban ningun anillo al navegar con
+   teclado. Se reutiliza el mismo patron de foco del resto del proyecto. */
+.nav-brand-block:focus-visible,
+.nav-icon-link:focus-visible,
+.menu-toggle:focus-visible,
+.nav-menu a:focus-visible,
+.nav-menu button:focus-visible {
+  outline: 2px solid var(--forest-600);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
 }

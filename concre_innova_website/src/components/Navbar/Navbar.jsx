@@ -7,7 +7,6 @@ import {
   LogOut,
   Mail,
   Menu,
-  Search,
   ShieldCheck,
   ShoppingBag,
   UserPlus,
@@ -35,7 +34,6 @@ function Navbar() {
   const [auth, setAuth] = useState(getAuth());
   const [cartCount, setCartCount] = useState(getCartCount());
   const [favoriteCount, setFavoriteCount] = useState(0);
-  const [navSearchTerm, setNavSearchTerm] = useState("");
 
   // Los favoritos son por usuario: sin sesion la peticion solo produce un 401.
   const refreshFavoriteCount = useCallback(() => {
@@ -91,46 +89,15 @@ function Navbar() {
     : PUBLIC_ROUTES.HOME;
   const isActivePath = (path) =>
     path === PUBLIC_ROUTES.HOME ? location.pathname === path : location.pathname.startsWith(path);
-  const authPage = [
-    PUBLIC_ROUTES.LOGIN,
-    PUBLIC_ROUTES.REGISTER,
-    PUBLIC_ROUTES.FORGOT_PASSWORD,
-  ].some((path) => location.pathname.startsWith(path));
-  const showSearch = !staff && !authPage;
-  const navClassName = ["navbar", staff ? "navbar-admin" : "", showSearch ? "" : "navbar-compact"]
+  const navClassName = ["navbar", "navbar-compact", staff ? "navbar-admin" : ""]
     .filter(Boolean)
     .join(" ");
   const getNavLinkClass = (path, className = "") =>
     [className, isActivePath(path) ? "active" : ""].filter(Boolean).join(" ");
 
-  const handleNavSearchSubmit = (event) => {
-    event.preventDefault();
-    const trimmedSearch = navSearchTerm.trim();
-    const nextCatalogRoute = trimmedSearch
-      ? `${PUBLIC_ROUTES.CATALOG}?search=${encodeURIComponent(trimmedSearch)}`
-      : PUBLIC_ROUTES.CATALOG;
-
-    navigate(nextCatalogRoute);
-  };
-
   return (
     <nav className={navClassName}>
       <div className="nav-container">
-        {showSearch && (
-          <form className="nav-search-form" onSubmit={handleNavSearchSubmit}>
-            <button type="submit" className="nav-search-button" aria-label="Buscar productos">
-              <Search size={21} strokeWidth={1.8} />
-            </button>
-            <input
-              type="search"
-              placeholder="Buscar productos"
-              aria-label="Buscar productos"
-              value={navSearchTerm}
-              onChange={(event) => setNavSearchTerm(event.target.value)}
-            />
-          </form>
-        )}
-
         {authenticated && <PreferenceToggles />}
 
         <Link to={logoRoute} className="nav-brand-block">
