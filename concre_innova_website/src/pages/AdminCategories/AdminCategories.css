@@ -332,3 +332,113 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* ---- Filtros y rejilla ---- */
+.admin-categories-filters {
+  display: grid;
+  grid-template-columns: minmax(200px, 1.8fr) minmax(140px, 1fr) minmax(140px, 1fr);
+  gap: 12px;
+  align-items: end;
+}
+
+.admin-categories-field {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.admin-categories-field > span {
+  color: var(--bark);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.admin-categories-field input,
+.admin-categories-field select {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.admin-categories-search {
+  position: relative;
+  display: block;
+}
+
+.admin-categories-search svg {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.admin-categories-search input {
+  padding-left: 34px;
+}
+
+.admin-categories-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin: 0;
+  padding: 34px 24px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--muted);
+  text-align: center;
+}
+
+.admin-content .admin-category-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+}
+
+.admin-category-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-content .admin-category-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.admin-content .admin-category-description {
+  flex: 1;
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.admin-category-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.admin-content .admin-category-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 900px) {
+  .admin-categories-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

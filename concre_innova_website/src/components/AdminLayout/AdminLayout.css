@@ -481,3 +481,78 @@
   background: var(--sand);
   color: var(--ink);
 }
+
+/* ---- Escala tipográfica del panel ----
+   El contenido usaba tamaños que iban de 0.7rem a 1rem sin criterio, y los
+   datos principales se pintaban en gris. Aquí se fija una base legible y se
+   reserva el gris para lo secundario. */
+.admin-content {
+  font-size: 0.95rem;
+}
+
+.admin-content .admin-section-subtitle,
+.admin-content .admin-products-count,
+.admin-content .admin-users-count,
+.admin-content .bitacora-count,
+.admin-content .admin-categories-count {
+  font-size: 0.88rem;
+}
+
+/* Ninguna etiqueta baja de 0.75rem: por debajo deja de leerse cómodamente. */
+.admin-content .admin-category-status,
+.admin-content .inventory-status-badge,
+.admin-content .order-status-badge,
+.admin-content .quotation-status,
+.admin-content .badge,
+.admin-content .admin-invoice-badge,
+.admin-content dt,
+.admin-content small {
+  font-size: 0.78rem;
+}
+
+.admin-content .admin-table-wrapper th {
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+}
+
+/* Los títulos de sección bajan de escala: 3.4rem competía con el contenido. */
+.admin-header h1 {
+  font-size: clamp(1.7rem, 2.8vw, 2.25rem);
+  line-height: 1.15;
+}
+
+.admin-header {
+  min-height: 0;
+  padding: 6px 0 22px;
+}
+
+.admin-header p {
+  font-size: 0.92rem;
+  max-width: 62ch;
+}
+
+.admin-content .admin-section-title {
+  font-size: 1.35rem;
+}
+
+/* Los paneles de gráfico no deben estirarse más allá de lo legible. */
+.admin-content .admin-reports-chart-box,
+.admin-content .admin-dashboard-section {
+  overflow: hidden;
+}
+
+/* El dato de una tabla es contenido principal: va en tinta, no en gris.
+   El gris queda para las celdas de apoyo que cada vista marque. */
+.admin-content .admin-inventory-table td,
+.admin-content .admin-orders-table td,
+.admin-content .bitacora-table td,
+.admin-content .admin-users-table td,
+.admin-content .admin-reports-table td,
+.admin-content .admin-table-wrapper td {
+  color: var(--ink);
+}
+
+.admin-content .admin-table-wrapper td .admin-cell-muted {
+  color: var(--muted);
+  font-size: 0.82rem;
+}

@@ -2,6 +2,8 @@ import "./AdminReports.css";
 import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
+import PaginationControls from "../../components/PaginationControls/PaginationControls";
+import { descargarDocumento } from "../../services/documentService";
 import { AreaChart, BarChart, HorizontalBars } from "../../components/AdminChart/AdminChart";
 import { getCatalogCategories } from "../../services/catalogService";
 import { normalizeCatalogCategories } from "../../services/catalogPresentationService";
@@ -143,6 +145,7 @@ function AdminReports() {
   const [categorias, setCategorias] = useState([]);
 
   const [reporte, setReporte] = useState(null);
+  const [detallePage, setDetallePage] = useState(1);
   const [productos, setProductos] = useState([]);
   const [clientesFrecuentes, setClientesFrecuentes] = useState([]);
   const [comparativo, setComparativo] = useState(null);
@@ -292,6 +295,50 @@ function AdminReports() {
   );
 
   const totales = reporte?.totales;
+
+  /** El detalle se recorre por páginas en vez de una tabla interminable. */
+  const DETALLE_POR_PAGINA = 15;
+
+  const detallePaginado = useMemo(() => {
+    const filas = reporte?.items || [];
+    const totalPages = Math.max(1, Math.ceil(filas.length / DETALLE_POR_PAGINA));
+    const pagina = Math.min(detallePage, totalPages);
+
+    return {
+      items: filas.slice((pagina - 1) * DETALLE_POR_PAGINA, pagina * DETALLE_POR_PAGINA),
+      totalItems: filas.length,
+      pageNumber: pagina,
+      pageSize: DETALLE_POR_PAGINA,
+      totalPages,
+      hasPreviousPage: pagina > 1,
+      hasNextPage: pagina < totalPages,
+    };
+  }, [reporte, detallePage]);
+
+  /** Descarga el detalle con el diseño de la marca, no como datos sueltos. */
+  const descargarDetalle = () => {
+    descargarDocumento("reporte", {
+      titulo: "Detalle de ventas",
+      subtitulo: `${fechaDesde || "inicio"} al ${fechaHasta || "hoy"}`,
+      columnas: [
+        { clave: "fecha", titulo: "Fecha" },
+        { clave: "producto", titulo: "Producto" },
+        { clave: "categoria", titulo: "Categoría" },
+        { clave: "unidades", titulo: "Unidades", numerica: true },
+        { clave: "pedidos", titulo: "Pedidos", numerica: true },
+        { clave: "ingresos", titulo: "Ingresos", numerica: true },
+      ],
+      filas: (reporte?.items || []).map((item) => ({
+        fecha: new Date(item.fecha).toLocaleDateString("es-CR"),
+        producto: item.producto,
+        categoria: item.categoria,
+        unidades: item.unidades,
+        pedidos: item.pedidos,
+        ingresos: formatCurrency(item.ingresos),
+      })),
+      notas: `Total de registros: ${reporte?.items?.length || 0}.`,
+    });
+  };
 
   return (
     <AdminLayout title="Reportes"
@@ -557,9 +604,20 @@ function AdminReports() {
             </section>
 
             <section className="admin-reports-card">
-              <header>
-                <h2>Detalle del periodo</h2>
-                <p>{reporte.items.length} registros encontrados.</p>
+              <header className="admin-reports-detail-head">
+                <div>
+                  <h2>Detalle del periodo</h2>
+                  <p>{reporte.items.length} registros encontrados.</p>
+                </div>
+
+                <button
+                  type="button"
+                  className="admin-reports-download"
+                  onClick={() => descargarDetalle()}
+                  disabled={reporte.items.length === 0}
+                >
+                  Descargar detalle
+                </button>
               </header>
 
               <div className="admin-table-wrapper">
@@ -575,7 +633,7 @@ function AdminReports() {
                     </tr>
                   </thead>
                   <tbody>
-                    {reporte.items.map((item, index) => (
+                    {detallePaginado.items.map((item, index) => (
                       <tr key={`${item.fecha}-${item.producto}-${index}`}>
                         <td>{new Date(item.fecha).toLocaleDateString("es-CR")}</td>
                         <td>{item.producto}</td>
@@ -596,6 +654,14 @@ function AdminReports() {
                   </tbody>
                 </table>
               </div>
+
+              {detallePaginado.totalPages > 1 && (
+                <PaginationControls
+                  pagination={detallePaginado}
+                  isLoading={loading}
+                  onPageChange={setDetallePage}
+                />
+              )}
             </section>
           </>
         )}

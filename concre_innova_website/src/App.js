@@ -6,11 +6,15 @@ import AppRoutes from "./routes/AppRoutes";
 import ChatBot from "./pages/Chat/Chat";
 import { verifyStoredRecoveryToken } from "./services/authService";
 import { getStoredTheme } from "./services/preferencesService";
+import { iniciarVigilanciaDeSesion } from "./services/sessionService";
 
 function App() {
   useEffect(() => {
     verifyStoredRecoveryToken();
   }, []);
+
+  // La sesion se renueva mientras la persona trabaja, en vez de expulsarla.
+  useEffect(() => iniciarVigilanciaDeSesion(), []);
 
   useEffect(() => {
     const applyTheme = () => {

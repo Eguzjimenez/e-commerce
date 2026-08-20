@@ -2,6 +2,7 @@ import "./AdminProducts.css";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Swal from "sweetalert2";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
+import { createTipoProducto } from "../../services/tipoProductoService";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import Modal from "../../components/Modal/Modal";
 import PaginationControls from "../../components/PaginationControls/PaginationControls";
@@ -99,6 +100,59 @@ function AdminProducts() {
   // La consulta espera a que se termine de escribir en vez de salir por tecla.
   const busquedaDiferida = useDebouncedValue(searchTerm);
 
+  /**
+   * Al elegir "crear tipo nuevo" se pide el nombre, se registra y queda
+   * seleccionado, evitando salir del formulario a otra pantalla.
+   */
+  const handleTypeChange = async (event) => {
+    if (event.target.value !== "__nuevo__") {
+      handleNewProductChange(event);
+      return;
+    }
+
+    const { value: nombre } = await Swal.fire({
+      title: "Nuevo tipo de producto",
+      input: "text",
+      inputLabel: "Nombre del tipo",
+      inputPlaceholder: "Interior, Exterior, Decorativo...",
+      showCancelButton: true,
+      confirmButtonText: "Crear",
+      cancelButtonText: "Cancelar",
+      inputValidator: (valor) =>
+        String(valor || "").trim().length < 2 ? "Escribe un nombre válido." : undefined,
+    });
+
+    if (!nombre) {
+      return;
+    }
+
+    try {
+      const resultado = await createTipoProducto({
+        nombreTipo: nombre.trim(),
+        descripcion: "",
+      });
+
+      const tipos = await loadLookups();
+      const creado = (tipos || []).find(
+        (tipo) =>
+          String(tipo.nombreTipo ?? tipo.NombreTipo ?? "").trim().toLowerCase() ===
+          nombre.trim().toLowerCase()
+      );
+
+      const idCreado = resultado?.idTipo ?? creado?.idTipo ?? creado?.IdTipo ?? "";
+
+      if (idCreado) {
+        setNewProduct((previo) => ({ ...previo, idTipo: String(idCreado) }));
+      }
+    } catch (crearError) {
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo crear el tipo",
+        text: crearError.message || "Intenta de nuevo.",
+      });
+    }
+  };
+
   const loadLookups = async () => {
     try {
       const [categoriesResponse, typesResponse] = await Promise.all([
@@ -107,7 +161,9 @@ function AdminProducts() {
       ]);
 
       setCategoryList(Array.isArray(categoriesResponse) ? categoriesResponse : []);
-      setTypeList(Array.isArray(typesResponse) ? typesResponse : []);
+      const tipos = Array.isArray(typesResponse) ? typesResponse : [];
+      setTypeList(tipos);
+      return tipos;
     } catch (loadError) {
       setError(loadError.message || "No se pudieron cargar los catalogos.");
       setCategoryList([]);
@@ -661,7 +717,7 @@ function AdminProducts() {
                     <select
                       name="idTipo"
                       value={newProduct.idTipo || ""}
-                      onChange={handleNewProductChange}
+                      onChange={handleTypeChange}
                     >
                       <option value="">Sin tipo</option>
                       {normalizedTypes.map((type) => (
@@ -669,7 +725,11 @@ function AdminProducts() {
                           {type.name}
                         </option>
                       ))}
+                      <option value="__nuevo__">+ Crear tipo nuevo...</option>
                     </select>
+                    <small>
+                      Los tipos se definen aquí mismo; no necesitan una pantalla aparte.
+                    </small>
                   </label>
 
                   <label>

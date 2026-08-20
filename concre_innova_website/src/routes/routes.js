@@ -30,6 +30,7 @@ export const ADMIN_ROUTES = {
   PRODUCT_TYPES: "/admin/product-types",
   QUOTATIONS: "/admin/quotations",
   ORDERS: "/admin/orders",
+  INVOICES: "/admin/invoices",
   CHAT: "/admin/chat",
   CONSULTAS: "/admin/consultas",
   REPORTS: "/admin/reports",
