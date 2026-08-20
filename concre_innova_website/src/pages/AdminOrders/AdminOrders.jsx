@@ -322,8 +322,8 @@ function AdminOrders() {
                   <p><strong>Estado:</strong> {viewOrder.estado}</p>
                   <p><strong>Cliente:</strong> {viewOrder.nombreCliente}</p>
                   <p><strong>Correo:</strong> {viewOrder.correoCliente}</p>
-                  <p><strong>Telefono:</strong> {viewOrder.telefonoCliente || "-"}</p>
-                  <p><strong>Direccion de entrega:</strong> {viewOrder.direccionEntrega}</p>
+                  <p><strong>Teléfono:</strong> {viewOrder.telefonoCliente || "-"}</p>
+                  <p><strong>Dirección de entrega:</strong> {viewOrder.direccionEntrega}</p>
                   <p><strong>Metodo de pago:</strong> {viewOrder.metodoPago || "-"}</p>
                   <p><strong>Total:</strong> ${Number(viewOrder.total).toFixed(2)}</p>
 

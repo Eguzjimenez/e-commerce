@@ -11,6 +11,10 @@
 }
 
 .catalog-collection-header {
+  padding: 26px 28px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
   min-height: 76px;
   display: flex;
   align-items: flex-end;
@@ -84,12 +88,23 @@
 
 .catalog-shop-card {
   min-width: 0;
-  background: transparent;
-  border: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
   cursor: pointer;
   outline: none;
+  transition: border-color 200ms ease, box-shadow 240ms ease, transform 240ms ease;
   animation: catalogCardIn var(--catalog-motion-reveal) ease both;
   animation-delay: calc(var(--card-index, 0) * 38ms);
+}
+
+.catalog-shop-card:hover {
+  border-color: var(--clay);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-4px);
 }
 
 .catalog-shop-card:focus-visible {
@@ -102,6 +117,7 @@
   aspect-ratio: 1 / 1;
   overflow: hidden;
   background: var(--catalog-media-bg);
+  border-bottom: 1px solid var(--line);
 }
 
 .catalog-card-visual::after {
@@ -112,7 +128,11 @@
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;
+  /* contain evita que se corte el macetero; el fondo del contenedor completa
+     el cuadro y mantiene todas las fichas con la misma proporcion. */
+  object-fit: contain;
+  object-position: center;
+  padding: 14px;
   transition: transform var(--catalog-motion-reveal) ease, opacity var(--catalog-motion-medium) ease;
 }
 
@@ -169,7 +189,11 @@
 }
 
 .catalog-card-body {
-  padding: 18px 0 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 18px 20px;
 }
 
 .catalog-card-body h3 {
@@ -183,11 +207,40 @@
 
 .catalog-card-body strong {
   display: block;
-  margin-top: 7px;
   color: var(--soil-black);
-  font-size: clamp(0.96rem, 1vw, 1.08rem);
-  font-weight: 500;
+  font-size: clamp(1.12rem, 1.3vw, 1.32rem);
+  font-weight: 700;
   line-height: 1.2;
+}
+
+.catalog-card-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.catalog-card-action {
+  margin-top: auto;
+  padding-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.catalog-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--laurel);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.catalog-shop-card:hover .catalog-card-cta {
+  color: var(--clay);
 }
 
 .catalog-status,
@@ -299,7 +352,7 @@
 }
 
 .catalog-filter-section {
-  border-top: 1px solid rgba(22, 20, 15, 0.16);
+  border-top: 1px solid var(--catalog-border);
   padding: 16px 0 18px;
 }
 
@@ -352,7 +405,7 @@
   align-items: center;
   justify-content: center;
   background: transparent;
-  border: 1px solid rgba(22, 20, 15, 0.72);
+  border: 1px solid var(--catalog-border);
   color: var(--soil-black);
   cursor: pointer;
   font-size: 0.92rem;
@@ -379,8 +432,8 @@
 
 .catalog-option-grid button.active,
 .catalog-sort-stack button.active {
-  background: var(--soil-black);
-  border-color: var(--soil-black);
+  background: var(--forest-700);
+  border-color: var(--forest-700);
   color: var(--on-dark);
 }
 
@@ -405,7 +458,7 @@
 }
 
 .catalog-price-slider-track {
-  background: rgba(22, 20, 15, 0.16);
+  background: var(--catalog-border);
 }
 
 .catalog-price-slider-range {
@@ -471,7 +524,7 @@
   margin-top: 0;
   padding: 18px 0 2px;
   background: var(--paper);
-  border-top: 1px solid rgba(22, 20, 15, 0.16);
+  border-top: 1px solid var(--catalog-border);
 }
 
 .catalog-clear-button,
@@ -493,7 +546,7 @@
 
 .catalog-clear-button {
   background: transparent;
-  border: 1px solid rgba(22, 20, 15, 0.72);
+  border: 1px solid var(--catalog-border);
   color: var(--soil-black);
 }
 

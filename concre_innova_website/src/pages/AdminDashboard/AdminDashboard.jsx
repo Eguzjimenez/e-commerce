@@ -102,7 +102,7 @@ function AdminDashboard() {
               <section className="admin-dashboard-section">
                 <header>
                   <h2>Ingresos por mes</h2>
-                  <p>Ventas facturadas en los ultimos meses.</p>
+                  <p>Ventas facturadas en los últimos meses.</p>
                 </header>
                 <BarChart
                   data={ventasMensuales}

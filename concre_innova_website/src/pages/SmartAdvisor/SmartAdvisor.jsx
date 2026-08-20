@@ -240,8 +240,8 @@ function SmartAdvisor() {
 
       {!isLoadingQuestionnaire && !errorMessage && totalQuestions === 0 && (
         <div className="advisor-empty">
-          <h2>El asesor no esta disponible</h2>
-          <p>Vuelve a intentarlo mas tarde o explora el catalogo completo.</p>
+          <h2>El asesor no está disponible</h2>
+          <p>Vuelve a intentarlo más tarde o explora el catálogo completo.</p>
         </div>
       )}
 
@@ -250,9 +250,9 @@ function SmartAdvisor() {
           {stage === ADVISOR_STAGES.WELCOME && (
             <article className="advisor-welcome">
               <Sparkles size={28} strokeWidth={1.6} aria-hidden="true" />
-              <h2>Bienvenido a tu asesoria personalizada</h2>
+              <h2>Bienvenido a tu asesoría personalizada</h2>
               <p>
-                Son {totalQuestions} preguntas rapidas sobre el espacio, la luz
+                Son {totalQuestions} preguntas rápidas sobre el espacio, la luz
                 disponible, el tiempo de cuidado y el estilo que prefieres.
               </p>
               <button

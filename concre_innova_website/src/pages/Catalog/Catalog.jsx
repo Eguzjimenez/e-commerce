@@ -14,6 +14,7 @@ import {
 import {
   CATALOG_FILTER_OPTIONS,
   filterAndSortCatalogProducts,
+  buildCatalogProductSummary,
   formatCatalogPrice,
   getCatalogQueryOptions,
   getCatalogProductImage,
@@ -102,7 +103,7 @@ function Catalog() {
         setSelectedMaxPrice(nextPriceBounds.max);
       } catch (loadError) {
         if (isMounted && !isAbortError(loadError)) {
-          setError(loadError.message || "No se pudieron cargar las categorias.");
+          setError(loadError.message || "No se pudieron cargar las categorías.");
         }
       } finally {
         if (isMounted && !abortController.signal.aborted) {
@@ -186,7 +187,7 @@ function Catalog() {
         setPagination(pagedProducts);
       } catch (loadError) {
         if (isMounted && !isAbortError(loadError)) {
-          setError(loadError.message || "No se pudo cargar el catalogo.");
+          setError(loadError.message || "No se pudo cargar el catálogo.");
           setProducts([]);
           setPagination({
             ...DEFAULT_PAGINATION,
@@ -327,7 +328,7 @@ function Catalog() {
         <div>
           <span className="catalog-collection-kicker">{activeCategoryName}</span>
           <h1 id="catalog-title">
-            Catalogo <span>({pagination.totalItems})</span>
+            Catálogo <span>({pagination.totalItems})</span>
           </h1>
         </div>
 
@@ -341,9 +342,9 @@ function Catalog() {
         </button>
       </section>
 
-      <section className="catalog-shop-layout" aria-label="Productos del catalogo">
+      <section className="catalog-shop-layout" aria-label="Productos del catálogo">
         <div className="catalog-product-area">
-          {isLoading && <p className="catalog-status">Cargando catalogo...</p>}
+          {isLoading && <p className="catalog-status">Cargando catálogo...</p>}
           {!isLoading && error && <p className="catalog-error">{error}</p>}
 
           {!isLoading && !error && (
@@ -392,7 +393,16 @@ function Catalog() {
 
                     <div className="catalog-card-body">
                       <h3>{product.nombre}</h3>
+                      {buildCatalogProductSummary(product) && (
+                        <p className="catalog-card-meta">{buildCatalogProductSummary(product)}</p>
+                      )}
                       <strong>{formatCatalogPrice(product.precio)}</strong>
+
+                      <div className="catalog-card-action">
+                        <span className="catalog-card-cta" aria-hidden="true">
+                          Ver detalle
+                        </span>
+                      </div>
                     </div>
                   </article>
                 );
@@ -401,7 +411,7 @@ function Catalog() {
               {filteredProducts.length === 0 && (
                 <div className="catalog-empty">
                   <h3>No hay productos con esos filtros</h3>
-                  <p>Prueba otra categoria o limpia la busqueda.</p>
+                  <p>Prueba otra categoría o limpia la búsqueda.</p>
                 </div>
               )}
             </div>
@@ -427,7 +437,7 @@ function Catalog() {
             className="catalog-filter-drawer"
             role="dialog"
             aria-modal="true"
-            aria-label="Filtros de catalogo"
+            aria-label="Filtros de catálogo"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="catalog-filter-drawer-header">
@@ -452,7 +462,7 @@ function Catalog() {
               <div className="catalog-filter-scroll">
                 <section className="catalog-filter-section">
                   <div className="catalog-filter-section-heading">
-                    <span>Busqueda</span>
+                    <span>Búsqueda</span>
                   </div>
                   <input
                     className="input catalog-shop-search"
@@ -467,9 +477,9 @@ function Catalog() {
 
                 <section className="catalog-filter-section">
                   <div className="catalog-filter-section-heading">
-                    <span>Categoria</span>
+                    <span>Categoría</span>
                   </div>
-                  <div className="catalog-option-grid" role="radiogroup" aria-label="Categoria">
+                  <div className="catalog-option-grid" role="radiogroup" aria-label="Categoría">
                     <button
                       type="button"
                       className={selectedCategoryId === "all" ? "active" : ""}
@@ -531,9 +541,9 @@ function Catalog() {
 
                 <section className="catalog-filter-section">
                   <div className="catalog-filter-section-heading">
-                    <span>Tamano</span>
+                    <span>Tamaño</span>
                   </div>
-                  <div className="catalog-option-grid" role="radiogroup" aria-label="Tamano">
+                  <div className="catalog-option-grid" role="radiogroup" aria-label="Tamaño">
                     {CATALOG_FILTER_OPTIONS.SIZES.map((option) => (
                       <button
                         type="button"

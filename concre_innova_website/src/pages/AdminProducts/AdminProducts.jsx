@@ -466,7 +466,7 @@ function AdminProducts() {
             </label>
 
             <label className="admin-products-field">
-              <span>Categoria</span>
+              <span>Categoría</span>
               <select
                 className="admin-products-select"
                 value={selectedCategoryId}
@@ -611,7 +611,7 @@ function AdminProducts() {
                 </label>
 
                 <label>
-                  Descripcion
+                  Descripción
                   <textarea
                     name="descripcion"
                     value={newProduct.descripcion}
@@ -635,7 +635,7 @@ function AdminProducts() {
                   </label>
 
                   <label>
-                    Categoria
+                    Categoría
                     <select
                       name="idCategoria"
                       value={newProduct.idCategoria}
@@ -668,7 +668,7 @@ function AdminProducts() {
                   </label>
 
                   <label>
-                    Tamano
+                    Tamaño
                     <input
                       type="text"
                       name="tamano"
@@ -798,10 +798,10 @@ function AdminProducts() {
 
               <div className="admin-view-product-info">
                 <p><strong>Nombre:</strong> {viewProduct.nombre || "-"}</p>
-                <p><strong>Descripcion:</strong> {viewProduct.descripcion || "-"}</p>
-                <p><strong>Categoria:</strong> {viewProduct.category || "-"}</p>
+                <p><strong>Descripción:</strong> {viewProduct.descripcion || "-"}</p>
+                <p><strong>Categoría:</strong> {viewProduct.category || "-"}</p>
                 <p><strong>Tipo:</strong> {viewProduct.typeName || "-"}</p>
-                <p><strong>Tamano:</strong> {viewProduct.tamano || "-"}</p>
+                <p><strong>Tamaño:</strong> {viewProduct.tamano || "-"}</p>
                 <p><strong>Material:</strong> {viewProduct.material || "-"}</p>
                 <p><strong>Caracteristicas:</strong> {viewProduct.caracteristicas || "-"}</p>
                 <p><strong>Precio:</strong> ${viewProduct.price.toFixed(2)}</p>

@@ -107,7 +107,7 @@ function AdminUsers() {
       await Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.message || "No se pudo cargar la informacion de usuarios.",
+        text: error.message || "No se pudo cargar la información de usuarios.",
       });
     } finally {
       setLoading(false);
@@ -201,8 +201,8 @@ function AdminUsers() {
     if (!emailPattern.test(formData.correo.trim())) {
       await Swal.fire({
         icon: "warning",
-        title: "Correo invalido",
-        text: "Ingresa un correo electronico valido.",
+        title: "Correo inválido",
+        text: "Ingresa un correo electrónico válido.",
       });
       return;
     }
@@ -210,8 +210,8 @@ function AdminUsers() {
     if (!/^\d+$/.test(formData.telefono) || formData.telefono.length === 0) {
       await Swal.fire({
         icon: "warning",
-        title: "Telefono invalido",
-        text: "El telefono solo puede contener numeros.",
+        title: "Teléfono inválido",
+        text: "El teléfono solo puede contener números.",
       });
       return;
     }
@@ -324,7 +324,7 @@ function AdminUsers() {
   };
 
   return (
-    <AdminLayout title="Gestion de Usuarios">
+    <AdminLayout title="Gestión de usuarios">
       <div className="admin-users-page">
         <div className="admin-users-topbar">
           <div className="admin-users-filters">
@@ -372,7 +372,7 @@ function AdminUsers() {
               <tr>
                 <th>Nombre</th>
                 <th>Correo</th>
-                <th>Telefono</th>
+                <th>Teléfono</th>
                 <th>Rol</th>
                 <th>Acciones</th>
               </tr>
@@ -487,7 +487,7 @@ function AdminUsers() {
                   />
                 </div>
                 <div className="form-row">
-                  <label>Telefono</label>
+                  <label>Teléfono</label>
                   <input
                     name="telefono"
                     type="tel"
@@ -514,13 +514,13 @@ function AdminUsers() {
                 </div>
                 {modalMode === "add" && (
                   <div className="form-row">
-                    <label>Contrasena</label>
+                    <label>Contraseña</label>
                     <input
                       name="contrasena"
                       type="password"
                       value={formData.contrasena}
                       onChange={handleFormChange}
-                      placeholder="Contrasena"
+                      placeholder="Contraseña"
                       minLength="8"
                       required
                     />
@@ -563,7 +563,7 @@ function AdminUsers() {
                     <strong>{selectedUser.correo}</strong>
                   </div>
                   <div className="detail-item">
-                    <span>Telefono</span>
+                    <span>Teléfono</span>
                     <strong>{selectedUser.telefono || "No disponible"}</strong>
                   </div>
                   <div className="detail-item">

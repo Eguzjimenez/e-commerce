@@ -102,7 +102,7 @@ function AdminPermissions() {
   };
 
   return (
-    <AdminLayout title="Gestion de Permisos">
+    <AdminLayout title="Gestión de Permisos">
       <div className="admin-permissions-page">
         <div className="admin-permissions-toolbar">
           <label>

@@ -216,7 +216,7 @@ function QuotationHistory() {
           <input
             type="search"
             maxLength={100}
-            placeholder="Numero, producto o descripcion"
+            placeholder="Número, producto o descripción"
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
           />
@@ -434,7 +434,7 @@ function QuotationHistory() {
                       disabled={processingDecision}
                     >
                       <Check size={18} aria-hidden="true" />
-                      Aceptar cotizacion
+                      Aceptar cotización
                     </button>
                     <button
                       type="button"
@@ -443,7 +443,7 @@ function QuotationHistory() {
                       disabled={processingDecision}
                     >
                       <X size={18} aria-hidden="true" />
-                      Rechazar cotizacion
+                      Rechazar cotización
                     </button>
                   </div>
                 )}
@@ -452,10 +452,10 @@ function QuotationHistory() {
           </div>
 
           {pagination.totalPages > 1 && (
-            <nav className="quotation-history-pagination" aria-label="Paginacion">
+            <nav className="quotation-history-pagination" aria-label="Paginación">
               <button
                 type="button"
-                aria-label="Pagina anterior"
+                aria-label="Página anterior"
                 disabled={!pagination.hasPreviousPage}
                 onClick={() => setPage((currentPage) => currentPage - 1)}
               >
@@ -466,7 +466,7 @@ function QuotationHistory() {
               </span>
               <button
                 type="button"
-                aria-label="Pagina siguiente"
+                aria-label="Página siguiente"
                 disabled={!pagination.hasNextPage}
                 onClick={() => setPage((currentPage) => currentPage + 1)}
               >

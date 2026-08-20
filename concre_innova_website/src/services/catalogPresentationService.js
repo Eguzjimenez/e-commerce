@@ -13,23 +13,18 @@ export const CATALOG_FILTER_OPTIONS = {
     { value: "Macetas", label: "Macetas" },
     { value: "Plantas", label: "Plantas" },
   ],
+  // Los valores corresponden a los que realmente existen en el catalogo:
+  // ofrecer opciones sin resultados solo produce busquedas vacias.
   SIZES: [
     { value: "all", label: "Todos" },
-    { value: "20cm", label: "20cm" },
-    { value: "30cm", label: "30cm" },
+    { value: "Pequeño", label: "Pequeño" },
     { value: "Mediano", label: "Mediano" },
     { value: "Grande", label: "Grande" },
-    { value: "XL", label: "XL" },
-    { value: "No especificado", label: "No especificado" },
+    { value: "Jumbo", label: "Jumbo" },
   ],
   MATERIALS: [
     { value: "all", label: "Todos" },
-    { value: "Ceramica", label: "Ceramica" },
-    { value: "Marmol", label: "Marmol" },
-    { value: "Terracota", label: "Terracota" },
     { value: "Concreto", label: "Concreto" },
-    { value: "Natural", label: "Natural" },
-    { value: "No especificado", label: "No especificado" },
   ],
   AVAILABILITY: [
     { value: "all", label: "Todas" },
@@ -522,4 +517,16 @@ export function getFeaturedCatalogProducts(products, limit = 6) {
   return (Array.isArray(products) ? products : [])
     .filter((product) => getCatalogProductStock(product) > 0)
     .slice(0, limit);
+}
+
+/**
+ * Resume los atributos reales del producto en una línea corta para la ficha del
+ * catálogo. Se omiten los valores sin definir para no mostrar campos vacíos.
+ */
+export function buildCatalogProductSummary(product) {
+  const atributos = [product?.tamano, product?.material]
+    .map((valor) => String(valor || "").trim())
+    .filter((valor) => valor && valor.toLowerCase() !== "no especificado");
+
+  return [...new Set(atributos)].join(" · ");
 }

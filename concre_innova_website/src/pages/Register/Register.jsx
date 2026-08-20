@@ -111,7 +111,7 @@ function Register() {
         <div className="auth-heading">
           <span>Cliente</span>
           <h1>Crear cuenta</h1>
-          <p>Registra tus datos para comprar y guardar informacion de contacto.</p>
+          <p>Registra tus datos para comprar y guardar información de contacto.</p>
         </div>
 
         <form className="register-form" onSubmit={handleSubmit}>
@@ -136,7 +136,7 @@ function Register() {
           <input
             className="register-input"
             name="telefono"
-            placeholder="Telefono"
+            placeholder="Teléfono"
             type="tel"
             value={formData.telefono}
             onChange={handleChange}
@@ -148,7 +148,7 @@ function Register() {
             className="register-input"
             name="contrasena"
             type="password"
-            placeholder="Contrasena"
+            placeholder="Contraseña"
             value={formData.contrasena}
             onChange={handleChange}
             minLength="8"
@@ -158,7 +158,7 @@ function Register() {
             className="register-input"
             name="confirmarContrasena"
             type="password"
-            placeholder="Confirmar contrasena"
+            placeholder="Confirmar contraseña"
             value={formData.confirmarContrasena}
             onChange={handleChange}
             minLength="8"
@@ -171,7 +171,7 @@ function Register() {
         </form>
 
         <div className="register-links">
-          <Link to="/login">Ya tienes cuenta? Inicia sesion</Link>
+          <Link to="/login">Ya tienes cuenta? Inicia sesión</Link>
         </div>
       </div>
     </div>

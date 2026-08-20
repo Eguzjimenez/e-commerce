@@ -220,16 +220,37 @@
   color: var(--on-dark-muted);
 }
 
+/* Tres filas con peso creciente: subtotal e IVA como detalle y el total a pagar
+   como dato principal del resumen. */
 .summary-total {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin: 34px 0 22px;
+  align-items: baseline;
+  gap: 16px;
+  margin: 10px 0 0;
+  color: var(--on-dark-muted);
+  font-size: 0.96rem;
+  font-weight: 600;
+}
+
+.summary-total:first-of-type {
+  margin-top: 30px;
   padding-top: 20px;
   border-top: 1px solid rgba(216, 208, 191, 0.28);
+}
+
+.summary-total--final {
+  margin: 14px 0 22px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(216, 208, 191, 0.28);
   color: var(--on-dark);
-  font-size: 1.28rem;
-  font-weight: 800;
+  font-size: 1.06rem;
+  font-weight: 700;
+}
+
+.summary-total--final strong {
+  font-size: 1.5rem;
+  line-height: 1.1;
 }
 
 .cart-stock-status {

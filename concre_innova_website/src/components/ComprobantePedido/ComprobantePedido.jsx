@@ -7,6 +7,7 @@ import {
   StyleSheet,
   PDFDownloadLink,
 } from "@react-pdf/renderer";
+import { desglosarImpuesto } from "../../services/pricingService";
 
 const styles = StyleSheet.create({
   page: {
@@ -232,7 +233,7 @@ function formatearDinero(valor) {
 function DocumentoComprobante({ pedido }) {
   const productos = Array.isArray(pedido?.items) ? pedido.items : [];
 
-  const totalCalculado = productos.reduce(
+  const subtotalCalculado = productos.reduce(
     (total, producto) =>
       total +
       Number(producto.precioUnitario || producto.precio || 0) *
@@ -240,7 +241,11 @@ function DocumentoComprobante({ pedido }) {
     0
   );
 
-  const total = pedido?.total !== undefined ? Number(pedido.total) : totalCalculado;
+  const total = pedido?.total !== undefined ? Number(pedido.total) : subtotalCalculado;
+  const desglose = desglosarImpuesto(total);
+  const subtotal =
+    pedido?.subtotal !== undefined ? Number(pedido.subtotal) : desglose.subtotal;
+  const iva = pedido?.iva !== undefined ? Number(pedido.iva) : desglose.impuesto;
 
   return (
     <Document
@@ -354,8 +359,16 @@ function DocumentoComprobante({ pedido }) {
 
         <View style={styles.totalContainer}>
           <View style={styles.totalBox}>
-            <Text style={styles.totalLabel}>TOTAL PAGADO</Text>
-            <Text style={styles.total}>{formatearDinero(total)}</Text>
+            <View>
+              <Text style={styles.totalLabel}>SUBTOTAL</Text>
+              <Text style={styles.totalLabel}>IVA</Text>
+              <Text style={styles.totalLabel}>TOTAL PAGADO</Text>
+            </View>
+            <View>
+              <Text style={styles.total}>{formatearDinero(subtotal)}</Text>
+              <Text style={styles.total}>{formatearDinero(iva)}</Text>
+              <Text style={styles.total}>{formatearDinero(total)}</Text>
+            </View>
           </View>
         </View>
 

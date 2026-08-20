@@ -230,7 +230,7 @@ function Navbar() {
                 className={getNavLinkClass(PUBLIC_ROUTES.CATALOG)}
                 aria-current={isActivePath(PUBLIC_ROUTES.CATALOG) ? "page" : undefined}
               >
-                Catalogo
+                Catálogo
               </Link>
             </li>
             <li>
@@ -299,7 +299,7 @@ function Navbar() {
               aria-current={isActivePath(PRIVATE_ROUTES.SETTINGS) ? "page" : undefined}
             >
               <SlidersHorizontal size={15} strokeWidth={1.8} />
-              Configuracion
+              Configuración
             </Link>
           </li>
         )}
@@ -375,7 +375,7 @@ function Navbar() {
           <li className="nav-menu-auth-action">
             <button className="logout-btn" type="button" onClick={handleLogout}>
               <LogOut size={15} strokeWidth={1.8} />
-              Cerrar sesion
+              Cerrar sesión
             </button>
           </li>
         )}

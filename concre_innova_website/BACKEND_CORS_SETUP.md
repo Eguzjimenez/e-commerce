@@ -18,7 +18,6 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod()
             .AllowCredentials());
 });
-
 builder.Services.AddControllers();
 // ... otros servicios
 

@@ -103,12 +103,12 @@ function Favorites() {
       <section className="favorites-heading">
         <div>
           <span className="favorites-eyebrow">Lista de deseos</span>
-          <h1>Mis Favoritos</h1>
+          <h1>Mis favoritos</h1>
           <p>Revisa y gestiona los productos guardados para futuras compras.</p>
         </div>
 
         <Link to={PUBLIC_ROUTES.CATALOG} className="favorites-catalog-link">
-          Ver catalogo
+          Ver catálogo
         </Link>
       </section>
 
@@ -162,9 +162,9 @@ function Favorites() {
       {!isLoading && favorites.length === 0 && (
         <section className="favorites-empty">
           <h2>No tienes favoritos guardados</h2>
-          <p>Explora el catalogo y guarda productos para revisarlos despues.</p>
+          <p>Explora el catálogo y guarda productos para revisarlos después.</p>
           <Link to={PUBLIC_ROUTES.CATALOG} className="btn">
-            Ir al catalogo
+            Ir al catálogo
           </Link>
         </section>
       )}

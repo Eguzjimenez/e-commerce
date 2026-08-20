@@ -662,7 +662,7 @@ function VisualizadorProducto({ producto, productosRecomendados = [], onClose })
               {!imagenEspacio ? (
                 <div className="visualizador-empty">
                   <h3>Sube una foto de tu espacio</h3>
-                  <p>Luego podras colocar productos, moverlos y escalarlos.</p>
+                  <p>Luego podrás colocar productos, moverlos y escalarlos.</p>
                 </div>
               ) : (
                 <Stage

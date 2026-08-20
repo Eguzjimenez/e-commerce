@@ -108,8 +108,8 @@ function ForgotPassword() {
           <form className="forgot-form" onSubmit={handleValidateEmail} noValidate>
             <div className="auth-heading">
               <span>Recuperacion</span>
-              <h1>Recuperar contrasena</h1>
-              <p>Ingresa tu correo para enviarte un codigo de verificacion.</p>
+              <h1>Recuperar contraseña</h1>
+              <p>Ingresa tu correo para enviarte un código de verificacion.</p>
             </div>
 
             <input
@@ -122,7 +122,7 @@ function ForgotPassword() {
             />
 
             <button type="submit" className="forgot-btn">
-              Enviar codigo
+              Enviar código
             </button>
           </form>
         )}
@@ -131,14 +131,14 @@ function ForgotPassword() {
           <form className="forgot-form" onSubmit={handleVerifyCode}>
             <div className="auth-heading">
               <span>Verificacion</span>
-              <h1>Codigo de seguridad</h1>
+              <h1>Código de seguridad</h1>
               <p>Ingresa el codigo de 6 digitos enviado a {email}.</p>
             </div>
 
             <input
               className="forgot-input"
               type="text"
-              placeholder="Codigo de verificacion"
+              placeholder="Código de verificacion"
               required
               maxLength="6"
               inputMode="numeric"
@@ -147,11 +147,11 @@ function ForgotPassword() {
             />
 
             <button className="forgot-btn" type="submit">
-              Verificar codigo
+              Verificar código
             </button>
 
             <button className="forgot-link-button" type="button" onClick={handleValidateEmail}>
-              Reenviar codigo
+              Reenviar código
             </button>
           </form>
         )}
@@ -160,14 +160,14 @@ function ForgotPassword() {
           <form className="forgot-form" onSubmit={handlePasswordChange}>
             <div className="auth-heading">
               <span>Seguridad</span>
-              <h1>Nueva contrasena</h1>
-              <p>Usa una clave de minimo 8 caracteres, con mayuscula, minuscula, numero y simbolo.</p>
+              <h1>Nueva contraseña</h1>
+              <p>Usa una clave de minimo 8 caracteres, con mayuscula, minuscula, número y simbolo.</p>
             </div>
 
             <input
               className="forgot-input"
               type="password"
-              placeholder="Nueva contrasena segura"
+              placeholder="Nueva contraseña segura"
               required
               minLength="8"
               value={password}
@@ -176,7 +176,7 @@ function ForgotPassword() {
             <input
               className="forgot-input"
               type="password"
-              placeholder="Confirmar contrasena"
+              placeholder="Confirmar contraseña"
               required
               minLength="8"
               value={passwordConfirm}
@@ -184,7 +184,7 @@ function ForgotPassword() {
             />
 
             <button className="forgot-btn" type="submit">
-              Cambiar contrasena
+              Cambiar contraseña
             </button>
           </form>
         )}

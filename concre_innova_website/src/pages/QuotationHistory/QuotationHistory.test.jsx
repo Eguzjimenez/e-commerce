@@ -87,7 +87,7 @@ test("accepts a responded quotation and sends it to seller review", async () => 
   expect(screen.getByText("Cambio desde Pendiente")).toBeInTheDocument();
 
   fireEvent.click(
-    await screen.findByRole("button", { name: "Aceptar cotizacion" })
+    await screen.findByRole("button", { name: "Aceptar cotización" })
   );
 
   await waitFor(() =>

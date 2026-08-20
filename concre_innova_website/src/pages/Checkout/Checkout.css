@@ -212,25 +212,62 @@
   color: var(--muted);
 }
 
+/* Resumen de cobro: subtotal, impuesto y total con jerarquia descendente, para
+   que el cliente identifique de un vistazo cuanto paga de IVA y cuanto en total. */
 .checkout-total-box {
   margin-top: auto;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 16px;
-  border-radius: 18px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px;
+  border-radius: var(--radius-lg);
   background: var(--forest-700);
-  color: white;
+  color: var(--on-dark);
 }
 
-.checkout-total-box span {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.92rem;
+.checkout-total-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.checkout-total-row > span:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.checkout-total-row span {
+  color: var(--on-dark-muted);
+  font-size: 0.94rem;
+  font-weight: 600;
+}
+
+.checkout-total-row small {
+  color: var(--sage);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.checkout-total-row--final {
+  margin-top: 2px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(252, 250, 246, 0.22);
+}
+
+.checkout-total-row--final span {
+  color: var(--on-dark);
+  font-size: 1.02rem;
   font-weight: 700;
 }
 
-.checkout-total-box strong {
-  font-size: 1.5rem;
+.checkout-total-row--final strong {
+  color: var(--on-dark);
+  font-size: 1.6rem;
+  line-height: 1.1;
 }
 
 .checkout-form-panel {

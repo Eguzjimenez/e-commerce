@@ -22,7 +22,7 @@ function MyAccount() {
 
   const loadUserProfile = useCallback(async () => {
     if (!Number.isInteger(userId) || userId <= 0) {
-      setError("No se pudo identificar al usuario de la sesion.");
+      setError("No se pudo identificar al usuario de la sesión.");
       setLoading(false);
       return;
     }
@@ -42,7 +42,7 @@ function MyAccount() {
         contrasena: "",
       });
     } catch (loadError) {
-      setError(loadError?.message || "No se pudo cargar la informacion de la cuenta.");
+      setError(loadError?.message || "No se pudo cargar la información de la cuenta.");
       setProfile(null);
     } finally {
       setLoading(false);
@@ -79,12 +79,12 @@ function MyAccount() {
       const response = await updateUserInfo(payload);
 
       if (Number(response?.codigo) !== 1) {
-        throw new Error(response?.mensaje || "No se pudo actualizar la informacion.");
+        throw new Error(response?.mensaje || "No se pudo actualizar la información.");
       }
 
       await Swal.fire({
         icon: "success",
-        title: "Informacion actualizada",
+        title: "Información actualizada",
         text: response?.mensaje || "Los cambios se guardaron correctamente.",
         timer: 1600,
         showConfirmButton: false,
@@ -113,10 +113,10 @@ function MyAccount() {
           </span>
           Mi cuenta
         </h1>
-        <p>Consulta y actualiza la informacion de tu cuenta de cliente.</p>
+        <p>Consulta y actualiza la información de tu cuenta de cliente.</p>
       </header>
 
-      {loading && <div className="my-account-status">Cargando informacion...</div>}
+      {loading && <div className="my-account-status">Cargando información...</div>}
 
       {!loading && error && <div className="my-account-error">{error}</div>}
 
@@ -157,7 +157,7 @@ function MyAccount() {
                 </label>
 
                 <label>
-                  <span>Telefono</span>
+                  <span>Teléfono</span>
                   <input
                     name="telefono"
                     value={form.telefono}
@@ -166,7 +166,7 @@ function MyAccount() {
                 </label>
 
                 <label>
-                  <span>Direccion</span>
+                  <span>Dirección</span>
                   <input
                     name="direccion"
                     value={form.direccion}
@@ -175,7 +175,7 @@ function MyAccount() {
                 </label>
 
                 <label>
-                  <span>Nueva contrasena</span>
+                  <span>Nueva contraseña</span>
                   <input
                     type="password"
                     name="contrasena"

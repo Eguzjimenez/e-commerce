@@ -50,7 +50,7 @@ function validateSelectedImages(files) {
   }
 
   if (files.length > MAX_IMAGES) {
-    return `Solo puedes adjuntar hasta ${MAX_IMAGES} imagenes.`;
+    return `Solo puedes adjuntar hasta ${MAX_IMAGES} imágenes.`;
   }
 
   const invalidType = files.find(
@@ -88,7 +88,7 @@ function validateRequestedProducts(rows) {
         row.cantidad > 1000
     )
   ) {
-    return "Selecciona productos validos y cantidades entre 1 y 1000.";
+    return "Selecciona productos válidos y cantidades entre 1 y 1000.";
   }
 
   if (
@@ -176,7 +176,7 @@ function QuotationRequest() {
       event.target.value = "";
       await Swal.fire({
         icon: "warning",
-        title: "Imagenes no validas",
+        title: "Imágenes no válidas",
         text: validationMessage,
       });
       return;
@@ -297,7 +297,7 @@ function QuotationRequest() {
     <main className="quotation-request-page">
       <header className="quotation-request-header">
         <span>Cotizaciones</span>
-        <h1>Nueva cotizacion</h1>
+        <h1>Nueva cotización</h1>
       </header>
 
       <form className="quotation-request-form" onSubmit={handleSubmit}>
@@ -305,7 +305,7 @@ function QuotationRequest() {
           <div className="quotation-request-section-heading">
             <div>
               <strong>Productos y cantidades</strong>
-              <span>Indica los articulos que necesitas cotizar.</span>
+              <span>Indica los artículos que necesitas cotizar.</span>
             </div>
             <button
               type="button"
@@ -387,7 +387,7 @@ function QuotationRequest() {
           </div>
         </section>
 
-        <label htmlFor="quotation-description">Descripcion</label>
+        <label htmlFor="quotation-description">Descripción</label>
         <textarea
           id="quotation-description"
           value={description}
