@@ -1,19 +1,18 @@
 .product-detail-page {
   display: grid;
   grid-template-columns: minmax(300px, 1fr) minmax(0, 1.05fr);
-  gap: clamp(28px, 4.5vw, 56px);
-  align-items: start;
+  gap: clamp(24px, 3.5vw, 40px);
+  align-items: stretch;
   margin-top: clamp(32px, 5vw, 64px);
 }
 
 /* La foto se muestra completa: la caja fija la proporción y el encaje sin
    recorte viene del bloque central de index.css. */
 .product-detail-media {
-  position: sticky;
-  top: 96px;
-  aspect-ratio: 1 / 1;
+  min-height: 100%;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
+  background: var(--paper);
   overflow: hidden;
 }
 
@@ -158,17 +157,16 @@
 }
 
 .product-detail-sheet {
-  padding-top: 20px;
-  border-top: 1px solid var(--line);
+  padding-top: 4px;
 }
 
 .product-detail-sheet h2 {
-  margin: 0 0 12px;
-  color: var(--forest-700);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 .product-detail-specs {
@@ -325,7 +323,7 @@
   }
 
   .product-detail-media {
-    position: static;
+    aspect-ratio: 1 / 1;
     max-width: 460px;
     margin: 0 auto;
     width: 100%;

@@ -9,16 +9,12 @@ import Home from "../pages/Home/Home";
 import Catalog from "../pages/Catalog/Catalog";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import Favorites from "../pages/Favorites/Favorites";
-import SmartAdvisor from "../pages/SmartAdvisor/SmartAdvisor";
 import Cart from "../pages/Cart/Cart";
 import Checkout from "../pages/Checkout/Checkout";
 import History from "../pages/History/History";
-import QuotationRequest from "../pages/QuotationRequest/QuotationRequest";
 import QuotationHistory from "../pages/QuotationHistory/QuotationHistory";
 import MyAccount from "../pages/MyAccount/MyAccount";
 import Contact from "../pages/Contact/Contact";
-import Notifications from "../pages/Notifications/Notifications";
-import Settings from "../pages/Settings/Settings";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import ForgotPassword from "../pages/forgot-password/ForgotPassword";
@@ -48,7 +44,6 @@ function AppRoutes() {
         <Route path={PUBLIC_ROUTES.PRODUCT_DETAIL} element={<ProductDetail />} />
         <Route path={PUBLIC_ROUTES.PRODUCT} element={<ProductDetail />} />
         <Route path={PUBLIC_ROUTES.FAVORITES} element={<Favorites />} />
-        <Route path={PUBLIC_ROUTES.SMART_ADVISOR} element={<SmartAdvisor />} />
         <Route path={PUBLIC_ROUTES.CONTACT} element={<Contact />} />
 
         <Route path={PRIVATE_ROUTES.CART} element={<Cart />} />
@@ -69,14 +64,6 @@ function AppRoutes() {
           }
         />
         <Route
-          path={PRIVATE_ROUTES.NEW_QUOTATION}
-          element={
-            <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
-              <QuotationRequest />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path={PRIVATE_ROUTES.MY_QUOTATIONS}
           element={
             <ProtectedRoute allowedRoles={ROLE_GROUPS.PURCHASE}>
@@ -89,22 +76,6 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={[ROLES.CLIENTE]}>
               <MyAccount />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path={PRIVATE_ROUTES.NOTIFICATIONS}
-          element={
-            <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
-              <Notifications />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path={PRIVATE_ROUTES.SETTINGS}
-          element={
-            <ProtectedRoute allowedRoles={ROLE_GROUPS.AUTHENTICATED}>
-              <Settings />
             </ProtectedRoute>
           }
         />

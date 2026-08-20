@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Heart, SlidersHorizontal, X } from "lucide-react";
+import { Heart, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import Swal from "sweetalert2";
 import {
   getCatalogFilters,
   getCatalogProducts,
 } from "../../services/catalogService";
 import PaginationControls from "../../components/PaginationControls/PaginationControls";
+import Modal from "../../components/Modal/Modal";
+import SmartAdvisor from "../SmartAdvisor/SmartAdvisor";
 import {
   getFavoriteProductIdsAsync,
   toggleFavorite,
@@ -68,6 +70,7 @@ function Catalog() {
   const [priceBounds, setPriceBounds] = useState({ min: 0, max: 0 });
   const [favoriteProductIds, setFavoriteProductIds] = useState(new Set());
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [asesorAbierto, setAsesorAbierto] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [filtersReady, setFiltersReady] = useState(false);
@@ -360,7 +363,17 @@ function Catalog() {
           </h1>
         </div>
 
-        <button
+        <div className="catalog-header-actions">
+          <button
+            type="button"
+            className="catalog-advisor-trigger"
+            onClick={() => setAsesorAbierto(true)}
+          >
+            <Sparkles size={18} strokeWidth={1.8} aria-hidden="true" />
+            Asesor inteligente
+          </button>
+
+          <button
           type="button"
           className="catalog-filter-trigger"
           onClick={() => setFilterDrawerOpen(true)}
@@ -371,7 +384,8 @@ function Catalog() {
           {activeFilterCount > 0 && (
             <span className="catalog-filter-trigger-badge">{activeFilterCount}</span>
           )}
-        </button>
+          </button>
+        </div>
       </section>
 
       <section className="catalog-shop-layout" aria-label="Productos del catálogo">
@@ -712,6 +726,16 @@ function Catalog() {
           )}
         </div>
       </section>
+
+      <Modal
+        open={asesorAbierto}
+        onClose={() => setAsesorAbierto(false)}
+        title="Asesor inteligente"
+      >
+        <div className="advisor-in-modal">
+          <SmartAdvisor />
+        </div>
+      </Modal>
 
       {filterDrawerOpen && (
         <div

@@ -326,13 +326,17 @@ function Cart() {
 
   return (
     <div className="cart-page container">
-      <div className="cart-heading">
+      <header className="cart-heading">
         <div>
           <span className="cart-eyebrow">Compra</span>
           <h1>Carrito</h1>
-          <p>Revisa los productos seleccionados antes de continuar con el pago.</p>
         </div>
-      </div>
+        <p className="cart-heading-count">
+          {products.length === 0
+            ? "Sin productos"
+            : `${products.length} producto(s) · ${totalUnits} unidad(es)`}
+        </p>
+      </header>
 
       <div className="cart-layout">
         <div className="cart-list">
@@ -430,14 +434,21 @@ function Cart() {
           })}
 
           {products.length === 0 && (
-            <div className="cart-empty">Tu carrito esta vacio.</div>
+            <div className="cart-empty">
+              <p>Tu carrito está vacío.</p>
+              <button
+                className="btn"
+                type="button"
+                onClick={() => navigate(PUBLIC_ROUTES.CATALOG)}
+              >
+                Ver catálogo
+              </button>
+            </div>
           )}
         </div>
 
         <aside className="cart-summary">
-          <h2>Resumen</h2>
-          <p className="summary-copy">Productos distintos: {products.length}</p>
-          <p className="summary-copy">Unidades: {totalUnits}</p>
+          <h2>Resumen del pedido</h2>
 
           <div className="summary-total">
             <span>Subtotal</span>
@@ -454,15 +465,15 @@ function Cart() {
             <strong>{formatCatalogPrice(desgloseCarrito.total)}</strong>
           </div>
 
-          <p
-            className={`cart-stock-status ${stockSummary.status}`}
-            role="status"
-            aria-live="polite"
-          >
-            {products.length > 0
-              ? stockSummary.message || "Preparando validacion de stock..."
-              : "Agrega productos para calcular el subtotal."}
-          </p>
+          {products.length > 0 && stockSummary.message && (
+            <p
+              className={`cart-stock-status ${stockSummary.status}`}
+              role="status"
+              aria-live="polite"
+            >
+              {stockSummary.message}
+            </p>
+          )}
 
           <button
             className="btn checkout-btn"

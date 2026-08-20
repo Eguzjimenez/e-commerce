@@ -4,7 +4,6 @@ export const PUBLIC_ROUTES = {
   PRODUCT: "/product",
   PRODUCT_DETAIL: "/product/:idProducto",
   FAVORITES: "/favorites",
-  SMART_ADVISOR: "/asesor-inteligente",
   CONTACT: "/contacto",
   LOGIN: "/login",
   REGISTER: "/register",
@@ -19,11 +18,8 @@ export const PRIVATE_ROUTES = {
   CART: "/cart",
   CHECKOUT: "/checkout",
   MY_ORDERS: "/mis-pedidos",
-  NEW_QUOTATION: "/cotizaciones/nueva",
   MY_QUOTATIONS: "/mis-cotizaciones",
-  MY_ACCOUNT: "/mi-cuenta",
-  NOTIFICATIONS: "/notificaciones",
-  SETTINGS: "/configuracion"
+  MY_ACCOUNT: "/mi-cuenta"
 };
 
 export const ADMIN_ROUTES = {

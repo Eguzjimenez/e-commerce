@@ -3,6 +3,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Plus,
   RotateCcw,
   Search,
   X,
@@ -14,6 +15,8 @@ import {
   getMyQuotations,
   getQuotationImageUrl,
 } from "../../services/quotationService";
+import Modal from "../../components/Modal/Modal";
+import QuotationRequest from "../QuotationRequest/QuotationRequest";
 import "./QuotationHistory.css";
 
 const PAGE_SIZE = 10;
@@ -52,6 +55,8 @@ function QuotationHistory() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [processingDecision, setProcessingDecision] = useState(false);
+  const [formularioAbierto, setFormularioAbierto] = useState(false);
+  const [recarga, setRecarga] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -101,7 +106,7 @@ function QuotationHistory() {
 
     loadQuotations();
     return () => controller.abort();
-  }, [appliedFilters.search, appliedFilters.status, page]);
+  }, [appliedFilters.search, appliedFilters.status, page, recarga]);
 
   const selectedQuotation = useMemo(
     () =>
@@ -203,8 +208,20 @@ function QuotationHistory() {
   return (
     <main className="quotation-history-page">
       <header className="quotation-history-header">
-        <span>Cotizaciones</span>
-        <h1>Historial de cotizaciones</h1>
+        <div>
+          <span>Cotizaciones</span>
+          <h1>Mis cotizaciones</h1>
+        </div>
+
+        {/* Pedir una cotización nueva es una acción de esta pantalla, no otra. */}
+        <button
+          type="button"
+          className="quotation-history-new"
+          onClick={() => setFormularioAbierto(true)}
+        >
+          <Plus size={17} strokeWidth={2} aria-hidden="true" />
+          Nueva cotización
+        </button>
       </header>
 
       <form
@@ -476,6 +493,21 @@ function QuotationHistory() {
           )}
         </>
       )}
+
+      <Modal
+        open={formularioAbierto}
+        onClose={() => setFormularioAbierto(false)}
+        title="Nueva cotización"
+      >
+        <QuotationRequest
+          embedded
+          onSubmitted={() => {
+            setFormularioAbierto(false);
+            setPage(1);
+            setRecarga((valor) => valor + 1);
+          }}
+        />
+      </Modal>
     </main>
   );
 }

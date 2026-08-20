@@ -37,29 +37,6 @@ const homeSlides = [
   },
 ];
 
-const collectionCards = [
-  {
-    title: "Macetas de autor",
-    text: "Concreto, cerámica y acabados sobrios",
-    image: macetaNoirImage,
-  },
-  {
-    title: "Flores de temporada",
-    text: "Ramos y detalles naturales preparados",
-    image: heroBotanicalImage,
-  },
-  {
-    title: "Plantas interiores",
-    text: "Selección para salas, oficinas y terrazas",
-    image: macetaNoirImage,
-  },
-  {
-    title: "Regalos vivos",
-    text: "Set curado: planta, maceta y tarjeta",
-    image: heroBotanicalImage,
-  },
-];
-
 const storyPhotos = [
   ["Fachada o entrada del local", macetaNoirImage],
   ["Mesa de trabajo y preparacion", heroBotanicalImage],
@@ -240,35 +217,6 @@ function Home() {
               />
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="home-section home-collections">
-        <div className="home-section-heading">
-          <div>
-            <span className="home-section-kicker">Colecciones</span>
-            <h2>Comprar por intención</h2>
-          </div>
-          <p>
-            La experiencia prioriza decisiones claras: decorar, regalar, renovar o cuidar.
-            Cada colección puede mapearse a categorías existentes del catálogo.
-          </p>
-        </div>
-
-        <div className="home-collection-grid">
-          {collectionCards.map((collection) => (
-            <Link
-              className="home-collection-card"
-              key={collection.title}
-              to={PUBLIC_ROUTES.CATALOG}
-            >
-              <img src={collection.image} alt="" aria-hidden="true" />
-              <div>
-                <h3>{collection.title}</h3>
-                <p>{collection.text}</p>
-              </div>
-            </Link>
-          ))}
         </div>
       </section>
 

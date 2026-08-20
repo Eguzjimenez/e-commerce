@@ -1,20 +1,15 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Bell,
   ClipboardList,
   Heart,
-  ImagePlus,
   ListChecks,
   LogOut,
   Mail,
   Menu,
-  MessageCircle,
   Search,
   ShieldCheck,
   ShoppingBag,
-  SlidersHorizontal,
-  Sparkles,
   UserPlus,
   UserRound,
   X,
@@ -30,7 +25,7 @@ import {
 } from "../../constants/roleAccess";
 import { ROLES } from "../../constants/roles";
 import { getCartCount } from "../../services/cartService";
-import { openChatAssistant } from "../../services/chatService";
+import PreferenceToggles from "../PreferenceToggles/PreferenceToggles";
 import { getFavoriteCountAsync } from "../../services/favoriteService";
 
 function Navbar() {
@@ -136,6 +131,8 @@ function Navbar() {
           </form>
         )}
 
+        {authenticated && <PreferenceToggles />}
+
         <Link to={logoRoute} className="nav-brand-block">
           <span className="nav-logo">Concre Innova</span>
           <span className="nav-location">Naranjo, Alajuela</span>
@@ -235,16 +232,6 @@ function Navbar() {
             </li>
             <li>
               <Link
-                to={PUBLIC_ROUTES.SMART_ADVISOR}
-                className={getNavLinkClass(PUBLIC_ROUTES.SMART_ADVISOR)}
-                aria-current={isActivePath(PUBLIC_ROUTES.SMART_ADVISOR) ? "page" : undefined}
-              >
-                <Sparkles size={15} strokeWidth={1.8} />
-                Asesor Inteligente
-              </Link>
-            </li>
-            <li>
-              <Link
                 to={PUBLIC_ROUTES.CONTACT}
                 className={getNavLinkClass(PUBLIC_ROUTES.CONTACT)}
                 aria-current={isActivePath(PUBLIC_ROUTES.CONTACT) ? "page" : undefined}
@@ -255,18 +242,6 @@ function Navbar() {
             </li>
           </>
         )}
-        {authenticated && purchaseAccess && !staff && (
-          <li>
-            <Link
-              to={PRIVATE_ROUTES.NEW_QUOTATION}
-              className={getNavLinkClass(PRIVATE_ROUTES.NEW_QUOTATION)}
-              aria-current={isActivePath(PRIVATE_ROUTES.NEW_QUOTATION) ? "page" : undefined}
-            >
-              <ImagePlus size={15} strokeWidth={1.8} />
-              Cotizar
-            </Link>
-          </li>
-        )}
         {authenticated && isClient && (
           <li>
             <Link
@@ -276,30 +251,6 @@ function Navbar() {
             >
               <UserRound size={15} strokeWidth={1.8} />
               Mi cuenta
-            </Link>
-          </li>
-        )}
-        {authenticated && !staff && (
-          <li>
-            <Link
-              to={PRIVATE_ROUTES.NOTIFICATIONS}
-              className={getNavLinkClass(PRIVATE_ROUTES.NOTIFICATIONS)}
-              aria-current={isActivePath(PRIVATE_ROUTES.NOTIFICATIONS) ? "page" : undefined}
-            >
-              <Bell size={15} strokeWidth={1.8} />
-              Notificaciones
-            </Link>
-          </li>
-        )}
-        {authenticated && !staff && (
-          <li>
-            <Link
-              to={PRIVATE_ROUTES.SETTINGS}
-              className={getNavLinkClass(PRIVATE_ROUTES.SETTINGS)}
-              aria-current={isActivePath(PRIVATE_ROUTES.SETTINGS) ? "page" : undefined}
-            >
-              <SlidersHorizontal size={15} strokeWidth={1.8} />
-              Configuración
             </Link>
           </li>
         )}
@@ -357,18 +308,6 @@ function Navbar() {
               <ShieldCheck size={15} strokeWidth={1.8} />
               {admin ? "Panel" : "Atención de cotizaciones"}
             </Link>
-          </li>
-        )}
-        {!staff && (
-          <li>
-            <button
-              className="nav-chat-button"
-              type="button"
-              onClick={openChatAssistant}
-            >
-              <MessageCircle size={15} strokeWidth={1.8} />
-              Chat
-            </button>
           </li>
         )}
         {authenticated && (

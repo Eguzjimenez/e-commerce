@@ -280,3 +280,10 @@
     grid-template-columns: minmax(0, 1fr) 82px 38px;
   }
 }
+
+/* Dentro del diálogo del historial, el formulario pierde el marco de página. */
+.quotation-request-page.is-embedded {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
