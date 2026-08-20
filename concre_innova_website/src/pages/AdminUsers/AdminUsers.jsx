@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
+import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import PaginationControls from "../../components/PaginationControls/PaginationControls";
 import {
   deactivateUser,
@@ -58,13 +59,17 @@ function AdminUsers() {
     idRol: 3,
   });
 
+  // La consulta espera a que se termine de escribir en vez de salir por tecla.
+  const busquedaDiferida = useDebouncedValue(searchTerm);
+
   useEffect(() => {
     loadRoles();
   }, []);
 
   useEffect(() => {
     loadUsers(userPage);
-  }, [userPage, searchTerm, selectedRole]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userPage, busquedaDiferida, selectedRole]);
 
   const loadRoles = async () => {
     try {
@@ -86,7 +91,7 @@ function AdminUsers() {
       const usersData = await getUserList({
         page,
         pageSize: ADMIN_USERS_PAGE_SIZE,
-        searchTerm,
+        searchTerm: busquedaDiferida,
         roleId: selectedRole === "Todos" ? undefined : selectedRole,
       });
       const pagedUsers = normalizePaginatedResponse(
@@ -324,7 +329,8 @@ function AdminUsers() {
   };
 
   return (
-    <AdminLayout title="Gestión de usuarios">
+    <AdminLayout title="Usuarios"
+      subtitle="Administra las cuentas y el rol asignado a cada persona.">
       <div className="admin-users-page">
         <div className="admin-users-topbar">
           <div className="admin-users-filters">

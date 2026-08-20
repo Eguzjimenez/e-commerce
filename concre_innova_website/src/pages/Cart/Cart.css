@@ -81,7 +81,6 @@
 .cart-product-preview img {
   width: 104px;
   height: 104px;
-  object-fit: cover;
   border-radius: var(--radius-md);
 }
 

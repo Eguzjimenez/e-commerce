@@ -88,7 +88,8 @@ function AdminCompanyInfo() {
   };
 
   return (
-    <AdminLayout title="Información de la empresa">
+    <AdminLayout title="Información de la empresa"
+      subtitle="Datos de contacto y presentación que ve el público.">
       <div className="admin-company-page">
         {error && <div className="admin-products-error">{error}</div>}
         {loading && <div className="admin-products-empty">Cargando información...</div>}

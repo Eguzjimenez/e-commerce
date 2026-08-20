@@ -222,7 +222,8 @@ function AdminChat() {
   };
 
   return (
-    <AdminLayout title="Chat Administrativo">
+    <AdminLayout title="Chat con clientes"
+      subtitle="Atiende las conversaciones escaladas a soporte.">
       <div className="admin-chat-page">
         <div className="admin-chat-sidebar">
           <div className="admin-chat-sidebar-header">

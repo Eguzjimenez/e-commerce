@@ -161,15 +161,15 @@ function AdminProductTypes() {
   };
 
   return (
-    <AdminLayout title="Gestión de Tipos de Producto">
+    <AdminLayout
+      title="Tipos de producto"
+      subtitle="Administra los tipos disponibles para clasificar los productos."
+    >
       <div className="admin-types-page">
         <div className="admin-types-topbar">
-          <div>
-            <h2 className="admin-section-title">Tipos de producto</h2>
-            <p className="admin-section-subtitle">
-              Administra los tipos disponibles para clasificar los productos.
-            </p>
-          </div>
+          <p className="admin-categories-count">
+            {loading ? "Cargando..." : `${types.length} tipo(s) registrados`}
+          </p>
 
           <button className="admin-primary-button" onClick={openAddModal}>
             Agregar tipo

@@ -64,7 +64,8 @@ function AdminDashboard() {
   }));
 
   return (
-    <AdminLayout title="Panel Principal">
+    <AdminLayout title="Panel principal"
+      subtitle="Resumen del negocio: ventas, inventario y productos destacados.">
       <div className="admin-dashboard">
         {error && <div className="admin-products-error">{error}</div>}
 

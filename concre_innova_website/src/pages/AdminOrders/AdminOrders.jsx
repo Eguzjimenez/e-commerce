@@ -192,7 +192,8 @@ function AdminOrders() {
   };
 
   return (
-    <AdminLayout title="Gestión de Pedidos">
+    <AdminLayout title="Pedidos"
+      subtitle="Consulta el detalle, cambia el estado y cancela cuando corresponda.">
       <div className="admin-orders-page">
         <div className="admin-orders-topbar">
           <div className="admin-orders-filters">

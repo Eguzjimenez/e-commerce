@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
+import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import PaginationControls from "../../components/PaginationControls/PaginationControls";
 import { getBitacora } from "../../services/bitacoraService";
 import { DEFAULT_PAGINATION, normalizePaginatedResponse } from "../../services/paginationService";
@@ -45,9 +46,13 @@ function AdminBitacora() {
     pageSize: BITACORA_PAGE_SIZE,
   });
 
+  // La consulta espera a que se termine de escribir en vez de salir por tecla.
+  const busquedaDiferida = useDebouncedValue(searchTerm);
+
   useEffect(() => {
     loadBitacora(bitacoraPage);
-  }, [bitacoraPage, searchTerm, filterOp]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bitacoraPage, busquedaDiferida, filterOp]);
 
   const loadBitacora = async (page = bitacoraPage) => {
     setLoading(true);
@@ -56,7 +61,7 @@ function AdminBitacora() {
       const data = await getBitacora({
         page,
         pageSize: BITACORA_PAGE_SIZE,
-        searchTerm,
+        searchTerm: busquedaDiferida,
         operation: filterOp === "Todos" ? undefined : filterOp,
       });
       const pagedBitacora = normalizePaginatedResponse(
@@ -89,7 +94,8 @@ function AdminBitacora() {
   }, [registros]);
 
   return (
-    <AdminLayout title="Bitácora de Actividad">
+    <AdminLayout title="Bitácora"
+      subtitle="Revisa quién hizo qué y cuándo dentro del sistema.">
       <div className="bitacora-page">
 
         {/* Topbar */}

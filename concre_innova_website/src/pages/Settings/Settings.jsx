@@ -179,7 +179,8 @@ function Settings() {
 
   if (panelUser) {
     return (
-      <AdminLayout title="Preferencias del sistema">
+      <AdminLayout title="Preferencias"
+      subtitle="Ajusta notificaciones y apariencia de tu cuenta.">
         <div className="settings-panel">{content}</div>
       </AdminLayout>
     );

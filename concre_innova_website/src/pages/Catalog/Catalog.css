@@ -6,8 +6,8 @@
   --catalog-motion-fast: 180ms;
   --catalog-motion-medium: 240ms;
   --catalog-motion-reveal: 360ms;
-  width: min(100% - 56px, 1880px);
-  margin: 42px auto 104px;
+  width: min(100% - 56px, 1560px);
+  margin: 42px auto 96px;
 }
 
 .catalog-collection-header {
@@ -48,9 +48,11 @@
   transform: translateY(-0.16em);
 }
 
+/* El disparador solo aparece cuando el panel deja de estar fijo en el layout. */
 .catalog-filter-trigger {
+  position: relative;
+  display: none;
   min-height: 42px;
-  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
@@ -64,6 +66,20 @@
   transition: color var(--catalog-motion-fast) ease, transform var(--catalog-motion-medium) ease;
 }
 
+.catalog-filter-trigger-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--laurel);
+  color: var(--paper);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
 .catalog-filter-trigger:hover,
 .catalog-filter-trigger:focus-visible {
   color: var(--catalog-accent);
@@ -71,8 +87,13 @@
   transform: translateY(-1px);
 }
 
+/* El filtro vive junto a los productos en vez de esconderse tras un cajon:
+   ocupa el espacio vacio de la izquierda y queda siempre a la vista. */
 .catalog-shop-layout {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(238px, 282px) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
 }
 
 .catalog-product-area {
@@ -81,8 +102,8 @@
 
 .catalog-product-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 34px 24px;
+  grid-template-columns: repeat(auto-fill, minmax(236px, 1fr));
+  gap: 26px 20px;
   align-items: start;
 }
 
@@ -349,22 +370,28 @@
 }
 
 .catalog-filter-section {
-  border-top: 1px solid var(--catalog-border);
-  padding: 16px 0 18px;
+  border-top: 1px solid var(--line);
+  padding: 14px 0;
+}
+
+.catalog-filter-section:first-child {
+  border-top: none;
+  padding-top: 12px;
 }
 
 .catalog-filter-section-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 12px;
+  gap: 12px;
+  margin-bottom: 9px;
 }
 
 .catalog-filter-section-heading span {
-  color: var(--soil-black);
-  font-size: 0.94rem;
+  color: var(--forest-700);
+  font-size: 0.76rem;
   font-weight: 800;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -391,24 +418,25 @@
 
 .catalog-option-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 7px;
 }
 
 .catalog-option-grid button,
 .catalog-sort-stack button {
-  min-height: 52px;
+  min-height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border: 1px solid var(--catalog-border);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  border: 1px solid var(--line);
   color: var(--soil-black);
   cursor: pointer;
-  font-size: 0.92rem;
-  font-weight: 500;
+  font-size: 0.85rem;
+  font-weight: 600;
   line-height: 1.2;
-  padding: 8px 10px;
+  padding: 7px 9px;
   text-align: center;
   transition:
     background var(--catalog-motion-fast) ease,
@@ -431,7 +459,8 @@
 .catalog-sort-stack button.active {
   background: var(--forest-700);
   border-color: var(--forest-700);
-  color: var(--on-dark);
+  color: var(--paper);
+  font-weight: 700;
 }
 
 .catalog-price-filter {
@@ -516,23 +545,24 @@
 .catalog-filter-actions {
   flex: 0 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 9px;
   margin-top: 0;
-  padding: 18px 0 2px;
-  background: var(--paper);
-  border-top: 1px solid var(--catalog-border);
+  padding: 14px 0 0;
+  border-top: 1px solid var(--line);
 }
 
 .catalog-clear-button,
 .catalog-filter-apply {
-  min-height: 56px;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   font-weight: 800;
-  padding: 0 18px;
+  font-size: 0.82rem;
+  padding: 0 14px;
   text-transform: uppercase;
   transition:
     background var(--catalog-motion-fast) ease,
@@ -547,9 +577,11 @@
   color: var(--soil-black);
 }
 
+/* En escritorio el filtro se aplica al instante: el boton solo sirve al cajon. */
 .catalog-filter-apply {
-  background: var(--soil-black);
-  border: 1px solid var(--soil-black);
+  display: none;
+  background: var(--forest-700);
+  border: 1px solid var(--forest-700);
   color: var(--on-dark);
 }
 
@@ -593,9 +625,79 @@
   }
 }
 
-@media (max-width: 1180px) {
-  .catalog-product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+/* Por debajo de 1024px el panel vuelve a comportarse como cajon lateral. */
+@media (max-width: 1024px) {
+  .catalog-filter-trigger {
+    display: inline-flex;
+  }
+
+  .catalog-shop-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Cerrado se retira del flujo: un panel desplazado con transform seguia
+     contando para el ancho del documento y creaba barra horizontal. */
+  .catalog-filter-panel {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    z-index: 220;
+    width: min(420px, 100vw);
+    max-height: none;
+    border: none;
+    border-radius: 0;
+    background: var(--paper);
+    box-shadow: -22px 0 46px rgba(22, 20, 15, 0.16);
+    padding: 24px 20px;
+  }
+
+  .catalog-filter-panel.is-open {
+    display: flex;
+    animation: catalogPanelIn var(--catalog-motion-medium) ease both;
+  }
+
+  .catalog-filter-actions {
+    grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
+  }
+
+  .catalog-filter-apply {
+    display: inline-flex;
+  }
+
+  .catalog-filter-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--soil-black);
+    cursor: pointer;
+  }
+
+  .catalog-filter-close:hover,
+  .catalog-filter-close:focus-visible {
+    color: var(--catalog-accent);
+  }
+}
+
+@keyframes catalogPanelIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-filter-panel.is-open {
+    animation: none;
   }
 }
 
@@ -614,11 +716,6 @@
 
   .catalog-filter-trigger {
     align-self: flex-end;
-  }
-
-  .catalog-product-grid {
-    grid-template-columns: 1fr;
-    gap: 30px;
   }
 
   .catalog-favorite-button {

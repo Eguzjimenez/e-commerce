@@ -1,10 +1,11 @@
 import "./AdminCategories.css";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
 import { getCategoriesAdministracion, createCategory, updateCategory, deleteCategory } from "../../services/categoryService";
 import {
   buildCategoryRequestPayload,
+  findDuplicateCategory,
   getCategoryFormValidation,
   normalizeCatalogCategories,
 } from "../../services/catalogPresentationService";
@@ -45,6 +46,12 @@ function AdminCategories() {
   };
 
   const categories = normalizeCatalogCategories(categoryList);
+
+  // El choque de nombres se avisa mientras se escribe, no solo al guardar.
+  const categoriaDuplicada = useMemo(
+    () => findDuplicateCategory(categoryForm.nombreCategoria, categories, categoryForm.idCategoria),
+    [categoryForm.nombreCategoria, categoryForm.idCategoria, categories]
+  );
 
   const openAddModal = () => {
     setModalMode("add");
@@ -161,15 +168,17 @@ function AdminCategories() {
   };
 
   return (
-    <AdminLayout title="Gestión de Categorías">
+    <AdminLayout
+      title="Categorías"
+      subtitle="Administra los grupos de productos disponibles en la tienda."
+    >
       <div className="admin-categories-page">
         <div className="admin-categories-topbar">
-          <div>
-            <h2 className="admin-section-title">Categorías del catálogo</h2>
-            <p className="admin-section-subtitle">
-              Administra los grupos de productos disponibles en la tienda.
-            </p>
-          </div>
+          <p className="admin-categories-count">
+            {loading
+              ? "Cargando..."
+              : `${categories.length} categoría(s) registradas`}
+          </p>
 
           <button className="admin-primary-button" onClick={openAddModal}>
             Agregar categoría
@@ -235,8 +244,15 @@ function AdminCategories() {
                     name="nombreCategoria"
                     value={categoryForm.nombreCategoria}
                     onChange={handleFormChange}
+                    aria-invalid={categoriaDuplicada ? "true" : undefined}
+                    aria-describedby={categoriaDuplicada ? "categoria-duplicada" : undefined}
                     required
                   />
+                  {categoriaDuplicada && (
+                    <small className="admin-category-duplicate" id="categoria-duplicada">
+                      Ya existe la categoría «{categoriaDuplicada.name}». Usa otro nombre.
+                    </small>
+                  )}
                 </label>
 
                 <label>
@@ -263,8 +279,18 @@ function AdminCategories() {
                   <button type="button" className="admin-category-btn secondary" onClick={closeModal} disabled={saving}>
                     Cancelar
                   </button>
-                  <button type="submit" className="admin-category-btn" disabled={saving}>
-                    {saving ? (modalMode === "edit" ? "Actualizando..." : "Guardando...") : (modalMode === "edit" ? "Actualizar" : "Registrar categoria")}
+                  <button
+                    type="submit"
+                    className="admin-category-btn"
+                    disabled={saving || Boolean(categoriaDuplicada)}
+                  >
+                    {saving
+                      ? modalMode === "edit"
+                        ? "Actualizando..."
+                        : "Guardando..."
+                      : modalMode === "edit"
+                      ? "Actualizar"
+                      : "Registrar categoría"}
                   </button>
                 </div>
               </form>

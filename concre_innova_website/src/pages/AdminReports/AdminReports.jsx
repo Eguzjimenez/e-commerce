@@ -294,7 +294,8 @@ function AdminReports() {
   const totales = reporte?.totales;
 
   return (
-    <AdminLayout title="Reportes de Ventas">
+    <AdminLayout title="Reportes"
+      subtitle="Analiza ingresos, productos y clientes por período.">
       <div className="admin-reports-page">
         <form className="admin-reports-toolbar" onSubmit={handleGenerate}>
           <div className="admin-reports-field">
