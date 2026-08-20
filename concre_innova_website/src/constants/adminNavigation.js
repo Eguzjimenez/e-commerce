@@ -23,11 +23,6 @@ export const ADMIN_NAV_ITEMS = [
     roles: ROLE_GROUPS.SALES_MANAGEMENT,
   },
   {
-    to: ADMIN_ROUTES.PRODUCT_TYPES,
-    label: "Tipos de producto",
-    roles: ROLE_GROUPS.ADMIN_ONLY,
-  },
-  {
     to: ADMIN_ROUTES.QUOTATIONS,
     label: "Cotizaciones",
     roles: ROLE_GROUPS.QUOTATION_STAFF,
@@ -35,6 +30,11 @@ export const ADMIN_NAV_ITEMS = [
   {
     to: ADMIN_ROUTES.ORDERS,
     label: "Pedidos",
+    roles: ROLE_GROUPS.ADMIN_ONLY,
+  },
+  {
+    to: ADMIN_ROUTES.INVOICES,
+    label: "Facturas",
     roles: ROLE_GROUPS.ADMIN_ONLY,
   },
   {

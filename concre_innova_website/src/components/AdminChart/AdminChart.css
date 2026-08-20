@@ -325,3 +325,53 @@
     font-size: 9px;
   }
 }
+
+/* ---- Escala de los gráficos ----
+   Los lienzos crecían con el ancho del panel hasta dominar la pantalla,
+   mientras sus etiquetas quedaban en un tamaño ilegible. Se acota el alto y
+   se sube la tipografía interna para que ambos elementos convivan. */
+.admin-chart-svg {
+  max-height: 300px;
+  margin: 0 auto;
+}
+
+.admin-chart-axis-label,
+.admin-chart-category-label,
+.admin-chart-area-month {
+  font-size: 12px;
+}
+
+.admin-chart-bar-top,
+.admin-chart-area-value {
+  font-size: 13px;
+}
+
+.admin-chart-average-label {
+  font-size: 11.5px;
+}
+
+.admin-chart-donut svg {
+  width: 148px;
+  height: 148px;
+}
+
+.admin-chart-donut-number {
+  font-size: 1.75rem;
+}
+
+.admin-chart-donut-label {
+  font-size: 0.82rem;
+}
+
+.admin-chart-hbar-label,
+.admin-chart-hbar-value strong {
+  font-size: 0.9rem;
+}
+
+.admin-chart-hbar-share {
+  font-size: 0.78rem;
+}
+
+.admin-chart-legend li {
+  font-size: 0.84rem;
+}

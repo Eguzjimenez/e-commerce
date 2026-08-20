@@ -25,9 +25,9 @@ import AdminDashboard from "../pages/AdminDashboard/AdminDashboard";
 import AdminInventory from "../pages/AdminInventory/AdminInventory";
 import AdminProducts from "../pages/AdminProducts/AdminProducts";
 import AdminCategories from "../pages/AdminCategories/AdminCategories";
-import AdminProductTypes from "../pages/AdminProductTypes/AdminProductTypes";
 import AdminQuotations from "../pages/AdminQuotations/AdminQuotations";
 import AdminOrders from "../pages/AdminOrders/AdminOrders";
+import AdminInvoices from "../pages/AdminInvoices/AdminInvoices";
 import AdminChat from "../pages/AdminChat/AdminChat";
 import AdminConsultas from "../pages/AdminConsultas/AdminConsultas";
 import AdminReports from "../pages/AdminReports/AdminReports";
@@ -138,14 +138,6 @@ function AppRoutes() {
         }
       />
       <Route
-        path={ADMIN_ROUTES.PRODUCT_TYPES}
-        element={
-          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
-            <AdminProductTypes />
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path={ADMIN_ROUTES.REPORTS}
         element={
           <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
@@ -199,6 +191,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={ROLE_GROUPS.QUOTATION_STAFF}>
             <AdminQuotations />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ADMIN_ROUTES.INVOICES}
+        element={
+          <ProtectedRoute allowedRoles={ROLE_GROUPS.ADMIN_ONLY}>
+            <AdminInvoices />
           </ProtectedRoute>
         }
       />
