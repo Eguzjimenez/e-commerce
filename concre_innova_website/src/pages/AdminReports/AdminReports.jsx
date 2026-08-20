@@ -382,37 +382,40 @@ function AdminReports() {
 
             <section className="admin-reports-card">
               <header>
-                <h2>Ingresos por dia</h2>
-                <p>Evolucion de las ventas dentro del periodo seleccionado.</p>
+                <h2>Ingresos por día</h2>
+                <p>Evolución de las ventas dentro del período seleccionado.</p>
               </header>
               <AreaChart
                 data={serieDiaria}
                 valueFormatter={formatCurrency}
-                emptyMessage="No hay ventas registradas en este periodo."
+                emptyMessage="No hay ventas registradas en este período."
+                ariaLabel="Ingresos por día"
               />
             </section>
 
             <div className="admin-reports-grid">
               <section className="admin-reports-card">
                 <header>
-                  <h2>Productos mas vendidos</h2>
-                  <p>Ranking por unidades vendidas en el periodo.</p>
+                  <h2>Productos más vendidos</h2>
+                  <p>Ranking por unidades vendidas en el período.</p>
                 </header>
                 <HorizontalBars
                   data={rankingProductos}
-                  emptyMessage="Aun no hay productos vendidos en este periodo."
+                  emptyMessage="Aún no hay productos vendidos en este período."
+                  totalLabel="Unidades vendidas"
                 />
               </section>
 
               <section className="admin-reports-card">
                 <header>
                   <h2>Ingresos por categoría</h2>
-                  <p>Participacion de cada linea de productos.</p>
+                  <p>Participación de cada línea de productos.</p>
                 </header>
                 <BarChart
                   data={ventasPorCategoria}
                   valueFormatter={formatCurrency}
-                  emptyMessage="Sin ingresos por categoria en este periodo."
+                  emptyMessage="Sin ingresos por categoría en este período."
+                  ariaLabel="Ingresos por categoría"
                 />
               </section>
             </div>
@@ -498,6 +501,8 @@ function AdminReports() {
                       { label: "Periodo actual", value: comparativo.periodoB.ingresos },
                     ]}
                     valueFormatter={formatCurrency}
+                    ariaLabel="Comparativo de ingresos entre períodos"
+                    showAverage={false}
                   />
                 </div>
               )}

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
+  Check,
+  Leaf,
   RotateCcw,
   ShoppingCart,
   Sparkles,
@@ -30,6 +32,36 @@ const ADVISOR_STAGES = {
   QUESTIONNAIRE: "questionnaire",
   RESULTS: "results",
 };
+
+const PASOS_ASESORIA = [
+  {
+    titulo: "Cuéntanos del espacio",
+    detalle: "Ubicación, luz y tiempo que puedes dedicarle.",
+  },
+  {
+    titulo: "Cruzamos tus respuestas",
+    detalle: "Cada respuesta pondera categorías, tipos y características.",
+  },
+  {
+    titulo: "Recibes tu selección",
+    detalle: "Plantas y maceteros compatibles, listos para el carrito.",
+  },
+];
+
+/**
+ * El rail muestra una etiqueta corta por pregunta. El codigo del cuestionario
+ * ya es un identificador legible ("espacio", "luz"), asi que se reutiliza en
+ * lugar de recortar el texto completo de la pregunta.
+ */
+function getEtiquetaCorta(question, indice) {
+  const codigo = String(question?.codigo || "").replace(/[_-]+/g, " ").trim();
+
+  if (!codigo) {
+    return `Pregunta ${indice + 1}`;
+  }
+
+  return codigo.charAt(0).toUpperCase() + codigo.slice(1);
+}
 
 function readCartSummary() {
   return {
@@ -120,6 +152,24 @@ function SmartAdvisor() {
     [recommendationGroups]
   );
 
+  /** Etiqueta elegida en cada pregunta, para resumirla junto a los resultados. */
+  const respuestasElegidas = useMemo(
+    () =>
+      questions
+        .map((question) => {
+          const idOpcion = selectedOptionByQuestionId[question.idPregunta];
+          const opcion = question.opciones?.find(
+            (option) => option.idOpcion === idOpcion
+          );
+
+          return opcion
+            ? { idPregunta: question.idPregunta, etiqueta: opcion.etiqueta }
+            : null;
+        })
+        .filter(Boolean),
+    [questions, selectedOptionByQuestionId]
+  );
+
   const resetQuestionnaireState = useCallback(() => {
     setSelectedOptionByQuestionId({});
     setCurrentQuestionIndex(0);
@@ -145,6 +195,13 @@ function SmartAdvisor() {
 
   const handleNextQuestion = () => {
     setCurrentQuestionIndex((index) => Math.min(totalQuestions - 1, index + 1));
+  };
+
+  /** Solo se permite saltar a preguntas ya visitadas o a la siguiente pendiente. */
+  const handleJumpToQuestion = (index) => {
+    if (index <= answeredCount) {
+      setCurrentQuestionIndex(index);
+    }
   };
 
   const handleGenerateRecommendations = async () => {
@@ -217,243 +274,337 @@ function SmartAdvisor() {
     }
   };
 
+  const porcentajeAvance = totalQuestions
+    ? Math.round((answeredCount / totalQuestions) * 100)
+    : 0;
+
   return (
-    <section className="advisor-page container">
-      <header className="advisor-header">
-        <span className="advisor-eyebrow">Asesor Inteligente</span>
-        <h1>Encuentra las plantas y maceteros ideales para tu espacio</h1>
-        <p>
-          Responde unas preguntas sobre tu entorno y recibe recomendaciones
-          preparadas para las condiciones de tu hogar u oficina.
-        </p>
+    <div className="advisor-page">
+      {/* Plano 1: banda de contexto, separada del area de trabajo. */}
+      <header className="advisor-hero">
+        <div className="advisor-hero-inner container">
+          <span className="advisor-eyebrow">
+            <Sparkles size={14} strokeWidth={2} aria-hidden="true" />
+            Asesor Inteligente
+          </span>
+          <h1>Encuentra las plantas y maceteros ideales para tu espacio</h1>
+          <p>
+            Responde unas preguntas sobre tu entorno y recibe recomendaciones
+            preparadas para las condiciones de tu hogar u oficina.
+          </p>
+
+          {stage !== ADVISOR_STAGES.WELCOME && totalQuestions > 0 && (
+            <div className="advisor-hero-progress">
+              <div
+                className="advisor-progress-bar"
+                role="progressbar"
+                aria-label="Avance del cuestionario"
+                aria-valuemin={0}
+                aria-valuemax={totalQuestions}
+                aria-valuenow={answeredCount}
+              >
+                <span style={{ width: `${porcentajeAvance}%` }} />
+              </div>
+              <span className="advisor-hero-progress-label">
+                {answeredCount} de {totalQuestions} respondidas
+              </span>
+            </div>
+          )}
+        </div>
       </header>
 
-      {isLoadingQuestionnaire && (
-        <p className="advisor-status">Cargando el asesor...</p>
-      )}
+      <div className="advisor-body container">
+        {isLoadingQuestionnaire && (
+          <p className="advisor-status">Cargando el asesor...</p>
+        )}
 
-      {!isLoadingQuestionnaire && errorMessage && (
-        <p className="advisor-error" role="alert">
-          {errorMessage}
-        </p>
-      )}
+        {!isLoadingQuestionnaire && errorMessage && (
+          <p className="advisor-error" role="alert">
+            {errorMessage}
+          </p>
+        )}
 
-      {!isLoadingQuestionnaire && !errorMessage && totalQuestions === 0 && (
-        <div className="advisor-empty">
-          <h2>El asesor no está disponible</h2>
-          <p>Vuelve a intentarlo más tarde o explora el catálogo completo.</p>
-        </div>
-      )}
+        {!isLoadingQuestionnaire && !errorMessage && totalQuestions === 0 && (
+          <div className="advisor-empty">
+            <h2>El asesor no está disponible</h2>
+            <p>Vuelve a intentarlo más tarde o explora el catálogo completo.</p>
+          </div>
+        )}
 
-      {!isLoadingQuestionnaire && totalQuestions > 0 && (
-        <>
-          {stage === ADVISOR_STAGES.WELCOME && (
-            <article className="advisor-welcome">
-              <Sparkles size={28} strokeWidth={1.6} aria-hidden="true" />
-              <h2>Bienvenido a tu asesoría personalizada</h2>
-              <p>
-                Son {totalQuestions} preguntas rápidas sobre el espacio, la luz
-                disponible, el tiempo de cuidado y el estilo que prefieres.
-              </p>
-              <button
-                className="btn"
-                type="button"
-                onClick={handleStartQuestionnaire}
-              >
-                Iniciar cuestionario
-              </button>
-            </article>
-          )}
-
-          {stage === ADVISOR_STAGES.QUESTIONNAIRE && currentQuestion && (
-            <article className="advisor-questionnaire">
-              <div className="advisor-progress">
-                <span>
-                  Pregunta {currentQuestionIndex + 1} de {totalQuestions}
-                </span>
-                <div
-                  className="advisor-progress-bar"
-                  role="progressbar"
-                  aria-valuemin={0}
-                  aria-valuemax={totalQuestions}
-                  aria-valuenow={answeredCount}
-                >
-                  <span
-                    style={{
-                      width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              <h2 id="advisor-current-question">{currentQuestion.texto}</h2>
-              {currentQuestion.ayuda && (
-                <p className="advisor-question-help">{currentQuestion.ayuda}</p>
-              )}
-
-              <fieldset
-                className="advisor-options"
-                aria-labelledby="advisor-current-question"
-              >
-                {currentQuestion.opciones?.map((option) => {
-                  const isSelected =
-                    selectedOptionByQuestionId[currentQuestion.idPregunta] ===
-                    option.idOpcion;
-
-                  return (
-                    <label
-                      key={option.idOpcion}
-                      className={`advisor-option ${isSelected ? "selected" : ""}`}
-                    >
-                      <input
-                        type="radio"
-                        name={`pregunta-${currentQuestion.idPregunta}`}
-                        value={option.idOpcion}
-                        checked={isSelected}
-                        onChange={() =>
-                          handleSelectOption(
-                            currentQuestion.idPregunta,
-                            option.idOpcion
-                          )
-                        }
-                      />
-                      <span className="advisor-option-label">
-                        {option.etiqueta}
-                      </span>
-                      {option.descripcion && (
-                        <span className="advisor-option-description">
-                          {option.descripcion}
-                        </span>
-                      )}
-                    </label>
-                  );
-                })}
-              </fieldset>
-
-              <div className="advisor-questionnaire-actions">
-                <button
-                  className="advisor-secondary-button"
-                  type="button"
-                  onClick={handlePreviousQuestion}
-                  disabled={currentQuestionIndex === 0}
-                >
-                  <ArrowLeft size={17} aria-hidden="true" />
-                  Anterior
-                </button>
-
-                {!isLastQuestion && (
+        {!isLoadingQuestionnaire && totalQuestions > 0 && (
+          <>
+            {/* Plano 2: presentacion, con los pasos del proceso a la vista. */}
+            {stage === ADVISOR_STAGES.WELCOME && (
+              <section className="advisor-welcome">
+                <article className="advisor-welcome-card">
+                  <span className="advisor-welcome-icon" aria-hidden="true">
+                    <Leaf size={26} strokeWidth={1.6} />
+                  </span>
+                  <h2>Bienvenido a tu asesoría personalizada</h2>
+                  <p>
+                    Son {totalQuestions} preguntas rápidas sobre el espacio, la luz
+                    disponible, el tiempo de cuidado y el estilo que prefieres.
+                  </p>
                   <button
                     className="btn"
                     type="button"
-                    onClick={handleNextQuestion}
-                    disabled={!hasAnsweredCurrentQuestion}
+                    onClick={handleStartQuestionnaire}
                   >
-                    Siguiente
+                    Iniciar cuestionario
                     <ArrowRight size={17} aria-hidden="true" />
                   </button>
-                )}
+                </article>
 
-                {isLastQuestion && (
-                  <button
-                    className="btn"
-                    type="button"
-                    onClick={handleGenerateRecommendations}
-                    disabled={
-                      !hasCompletedQuestionnaire || isGeneratingRecommendations
-                    }
+                <ol className="advisor-steps">
+                  {PASOS_ASESORIA.map((paso, indice) => (
+                    <li className="advisor-step" key={paso.titulo}>
+                      <span className="advisor-step-number">{indice + 1}</span>
+                      <div>
+                        <h3>{paso.titulo}</h3>
+                        <p>{paso.detalle}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
+
+            {/* Plano 3: area de trabajo con rail de navegacion y tarjeta activa. */}
+            {stage === ADVISOR_STAGES.QUESTIONNAIRE && currentQuestion && (
+              <section className="advisor-workspace">
+                <nav className="advisor-rail" aria-label="Preguntas del asesor">
+                  <p className="advisor-rail-title">Tu cuestionario</p>
+                  <ol>
+                    {questions.map((question, indice) => {
+                      const respondida = Boolean(
+                        selectedOptionByQuestionId[question.idPregunta]
+                      );
+                      const activa = indice === currentQuestionIndex;
+                      const accesible = indice <= answeredCount;
+
+                      return (
+                        <li key={question.idPregunta}>
+                          <button
+                            type="button"
+                            className={[
+                              "advisor-rail-item",
+                              activa ? "is-active" : "",
+                              respondida ? "is-done" : "",
+                            ]
+                              .filter(Boolean)
+                              .join(" ")}
+                            onClick={() => handleJumpToQuestion(indice)}
+                            disabled={!accesible}
+                            aria-current={activa ? "step" : undefined}
+                            title={question.texto}
+                          >
+                            <span className="advisor-rail-marker" aria-hidden="true">
+                              {respondida ? <Check size={13} strokeWidth={3} /> : indice + 1}
+                            </span>
+                            <span className="advisor-rail-text">
+                              {getEtiquetaCorta(question, indice)}
+                            </span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </nav>
+
+                <article className="advisor-questionnaire">
+                  <span className="advisor-question-step">
+                    Pregunta {currentQuestionIndex + 1} de {totalQuestions}
+                  </span>
+
+                  <h2 id="advisor-current-question">{currentQuestion.texto}</h2>
+                  {currentQuestion.ayuda && (
+                    <p className="advisor-question-help">{currentQuestion.ayuda}</p>
+                  )}
+
+                  <fieldset
+                    className="advisor-options"
+                    aria-labelledby="advisor-current-question"
                   >
-                    <Sparkles size={17} aria-hidden="true" />
-                    {isGeneratingRecommendations
-                      ? "Generando..."
-                      : "Obtener Recomendaciones"}
-                  </button>
-                )}
+                    {currentQuestion.opciones?.map((option) => {
+                      const isSelected =
+                        selectedOptionByQuestionId[currentQuestion.idPregunta] ===
+                        option.idOpcion;
 
-                <button
-                  className="advisor-secondary-button"
-                  type="button"
-                  onClick={handleRestartQuestionnaire}
-                  disabled={isGeneratingRecommendations}
-                >
-                  <RotateCcw size={17} aria-hidden="true" />
-                  Reiniciar Cuestionario
-                </button>
-              </div>
-            </article>
-          )}
-
-          {stage === ADVISOR_STAGES.RESULTS && (
-            <div className="advisor-results">
-              <div className="advisor-results-header">
-                <div>
-                  <h2>Tus recomendaciones</h2>
-                  <p>
-                    {totalRecommendations > 0
-                      ? `${totalRecommendations} producto(s) seleccionados para tu espacio.`
-                      : "Todavia no hay productos disponibles para estas respuestas."}
-                  </p>
-                </div>
-
-                <div className="advisor-cart-summary" aria-live="polite">
-                  <span>Carrito: {cartSummary.unidades} unidad(es)</span>
-                  <strong>{formatCatalogPrice(cartSummary.subtotal)}</strong>
-                </div>
-
-                <button
-                  className="advisor-secondary-button"
-                  type="button"
-                  onClick={handleRestartQuestionnaire}
-                >
-                  <RotateCcw size={17} aria-hidden="true" />
-                  Reiniciar Cuestionario
-                </button>
-              </div>
-
-              {recommendationGroups.map((group) => (
-                <section className="advisor-group" key={group.clasificacion}>
-                  <h3>{getAdvisorGroupTitle(group.clasificacion)}</h3>
-
-                  <div className="advisor-recommendation-grid">
-                    {group.productos?.map((product) => (
-                      <article
-                        className="advisor-recommendation-card"
-                        key={product.idProducto}
-                      >
-                        <img
-                          src={getCatalogProductImage(product)}
-                          alt={product.nombre}
-                          onError={(event) =>
-                            handleCatalogImageFallback(event, product.imagen)
-                          }
-                        />
-
-                        <div className="advisor-recommendation-body">
-                          <span className="advisor-recommendation-category">
-                            {product.nombreCategoria}
+                      return (
+                        <label
+                          key={option.idOpcion}
+                          className={`advisor-option ${isSelected ? "selected" : ""}`}
+                        >
+                          <input
+                            type="radio"
+                            name={`pregunta-${currentQuestion.idPregunta}`}
+                            value={option.idOpcion}
+                            checked={isSelected}
+                            onChange={() =>
+                              handleSelectOption(
+                                currentQuestion.idPregunta,
+                                option.idOpcion
+                              )
+                            }
+                          />
+                          <span className="advisor-option-body">
+                            <span className="advisor-option-label">
+                              {option.etiqueta}
+                            </span>
+                            {option.descripcion && (
+                              <span className="advisor-option-description">
+                                {option.descripcion}
+                              </span>
+                            )}
                           </span>
-                          <h4>{product.nombre}</h4>
-                          <p>{product.descripcion}</p>
-                          <strong>{formatCatalogPrice(product.precio)}</strong>
-                        </div>
+                        </label>
+                      );
+                    })}
+                  </fieldset>
 
+                  <div className="advisor-questionnaire-actions">
+                    <button
+                      className="advisor-secondary-button"
+                      type="button"
+                      onClick={handlePreviousQuestion}
+                      disabled={currentQuestionIndex === 0}
+                    >
+                      <ArrowLeft size={17} aria-hidden="true" />
+                      Anterior
+                    </button>
+
+                    <div className="advisor-questionnaire-actions-main">
+                      <button
+                        className="advisor-secondary-button"
+                        type="button"
+                        onClick={handleRestartQuestionnaire}
+                        disabled={isGeneratingRecommendations}
+                      >
+                        <RotateCcw size={17} aria-hidden="true" />
+                        Reiniciar Cuestionario
+                      </button>
+
+                      {!isLastQuestion && (
                         <button
                           className="btn"
                           type="button"
-                          onClick={() => handleAddRecommendationToCart(product)}
+                          onClick={handleNextQuestion}
+                          disabled={!hasAnsweredCurrentQuestion}
                         >
-                          <ShoppingCart size={17} aria-hidden="true" />
-                          Agregar al carrito
+                          Siguiente
+                          <ArrowRight size={17} aria-hidden="true" />
                         </button>
-                      </article>
-                    ))}
+                      )}
+
+                      {isLastQuestion && (
+                        <button
+                          className="btn"
+                          type="button"
+                          onClick={handleGenerateRecommendations}
+                          disabled={
+                            !hasCompletedQuestionnaire || isGeneratingRecommendations
+                          }
+                        >
+                          <Sparkles size={17} aria-hidden="true" />
+                          {isGeneratingRecommendations
+                            ? "Generando..."
+                            : "Obtener Recomendaciones"}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </section>
-              ))}
-            </div>
-          )}
-        </>
-      )}
-    </section>
+                </article>
+              </section>
+            )}
+
+            {stage === ADVISOR_STAGES.RESULTS && (
+              <div className="advisor-results">
+                <div className="advisor-results-header">
+                  <div className="advisor-results-intro">
+                    <h2>Tus recomendaciones</h2>
+                    <p>
+                      {totalRecommendations > 0
+                        ? `${totalRecommendations} producto(s) seleccionados para tu espacio.`
+                        : "Todavía no hay productos disponibles para estas respuestas."}
+                    </p>
+
+                    {respuestasElegidas.length > 0 && (
+                      <ul className="advisor-answer-chips">
+                        {respuestasElegidas.map((respuesta) => (
+                          <li key={respuesta.idPregunta}>{respuesta.etiqueta}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <div className="advisor-results-aside">
+                    <div className="advisor-cart-summary" aria-live="polite">
+                      <span>Carrito: {cartSummary.unidades} unidad(es)</span>
+                      <strong>{formatCatalogPrice(cartSummary.subtotal)}</strong>
+                    </div>
+
+                    <button
+                      className="advisor-secondary-button"
+                      type="button"
+                      onClick={handleRestartQuestionnaire}
+                    >
+                      <RotateCcw size={17} aria-hidden="true" />
+                      Reiniciar Cuestionario
+                    </button>
+                  </div>
+                </div>
+
+                {recommendationGroups.map((group) => (
+                  <section className="advisor-group" key={group.clasificacion}>
+                    <header className="advisor-group-header">
+                      <h3>{getAdvisorGroupTitle(group.clasificacion)}</h3>
+                      <span>{group.productos?.length || 0} opciones</span>
+                    </header>
+
+                    <div className="advisor-recommendation-grid">
+                      {group.productos?.map((product) => (
+                        <article
+                          className="advisor-recommendation-card"
+                          key={product.idProducto}
+                        >
+                          <div className="advisor-recommendation-media">
+                            <img
+                              src={getCatalogProductImage(product)}
+                              alt={product.nombre}
+                              onError={(event) =>
+                                handleCatalogImageFallback(event, product.imagen)
+                              }
+                            />
+                          </div>
+
+                          <div className="advisor-recommendation-body">
+                            <span className="advisor-recommendation-category">
+                              {product.nombreCategoria}
+                            </span>
+                            <h4>{product.nombre}</h4>
+                            <p>{product.descripcion}</p>
+                            <strong>{formatCatalogPrice(product.precio)}</strong>
+                          </div>
+
+                          <button
+                            className="btn"
+                            type="button"
+                            onClick={() => handleAddRecommendationToCart(product)}
+                          >
+                            <ShoppingCart size={17} aria-hidden="true" />
+                            Agregar al carrito
+                          </button>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 

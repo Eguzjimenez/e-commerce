@@ -3,6 +3,7 @@ import { Navigate, Routes, Route } from "react-router-dom";
 import { PUBLIC_ROUTES, PRIVATE_ROUTES, ADMIN_ROUTES } from "./routes";
 import { ROLE_GROUPS } from "../constants/roleAccess";
 import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
+import GuestRoute from "../components/GuestRoute/GuestRoute";
 
 import Home from "../pages/Home/Home";
 import Catalog from "../pages/Catalog/Catalog";
@@ -107,9 +108,30 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-      <Route path={PUBLIC_ROUTES.LOGIN} element={<Login />} />
-      <Route path={PUBLIC_ROUTES.REGISTER} element={<Register />} />
-      <Route path={PUBLIC_ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
+      <Route
+        path={PUBLIC_ROUTES.LOGIN}
+        element={
+          <GuestRoute>
+            <Login />
+          </GuestRoute>
+        }
+      />
+      <Route
+        path={PUBLIC_ROUTES.REGISTER}
+        element={
+          <GuestRoute>
+            <Register />
+          </GuestRoute>
+        }
+      />
+      <Route
+        path={PUBLIC_ROUTES.FORGOT_PASSWORD}
+        element={
+          <GuestRoute>
+            <ForgotPassword />
+          </GuestRoute>
+        }
+      />
       <Route path="/acceso-denegado" element={<AccessDenied />} />
 
       <Route

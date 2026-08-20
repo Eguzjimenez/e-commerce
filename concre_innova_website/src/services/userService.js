@@ -70,3 +70,13 @@ export async function updateUserInfo(payload) {
     body: payload,
   });
 }
+
+/**
+ * Informacion del usuario en sesion, incluida su ficha de cliente. Se usa para
+ * precargar la direccion de entrega sin pedirla de nuevo en cada compra.
+ */
+export async function getMyInfo() {
+  return await request("/api/Users/info/me", {
+    method: "GET",
+  });
+}

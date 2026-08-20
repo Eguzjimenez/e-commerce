@@ -72,10 +72,17 @@ export async function login({ correo, contrasena }) {
   return auth;
 }
 
-export async function registerClient({ nombre, correo, telefono, contrasena }) {
+export async function registerClient({
+  nombre,
+  apellido,
+  correo,
+  telefono,
+  direccion,
+  contrasena,
+}) {
   return await request("/api/Auth/register-client", {
     method: "POST",
-    body: { nombre, correo, telefono, contrasena },
+    body: { nombre, apellido, correo, telefono, direccion, contrasena },
     skipAuthHeaders: true,
   });
 }

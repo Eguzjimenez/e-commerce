@@ -128,7 +128,7 @@ function Navbar() {
             </button>
             <input
               type="search"
-              placeholder="Search"
+              placeholder="Buscar productos"
               aria-label="Buscar productos"
               value={navSearchTerm}
               onChange={(event) => setNavSearchTerm(event.target.value)}
@@ -141,7 +141,7 @@ function Navbar() {
           <span className="nav-location">Naranjo, Alajuela</span>
         </Link>
 
-        <div className="nav-utility-actions" aria-label="Accesos rapidos">
+        <div className="nav-utility-actions" aria-label="Accesos rápidos">
           {staff && <span className="nav-role">{userRole}</span>}
 
           {staff && (
@@ -163,7 +163,7 @@ function Navbar() {
                 aria-current={isActivePath(PUBLIC_ROUTES.LOGIN) ? "page" : undefined}
               >
                 <UserRound size={22} strokeWidth={1.75} />
-                <span className="nav-icon-label">Account</span>
+                <span className="nav-icon-label">Ingresar</span>
               </Link>
               <Link
                 to={PUBLIC_ROUTES.REGISTER}
@@ -171,7 +171,7 @@ function Navbar() {
                 aria-current={isActivePath(PUBLIC_ROUTES.REGISTER) ? "page" : undefined}
               >
                 <UserPlus size={21} strokeWidth={1.75} />
-                <span className="nav-icon-label">Sign up</span>
+                <span className="nav-icon-label">Registro</span>
               </Link>
             </>
           )}
@@ -192,7 +192,7 @@ function Navbar() {
               aria-current={isActivePath(PRIVATE_ROUTES.CART) ? "page" : undefined}
             >
               <ShoppingBag size={22} strokeWidth={1.75} />
-              <span className="nav-icon-label">Cart</span>
+              <span className="nav-icon-label">Carrito</span>
               {cartCount > 0 && <span className="nav-count-badge">{cartCount}</span>}
             </Link>
           )}
@@ -355,7 +355,7 @@ function Navbar() {
               }
             >
               <ShieldCheck size={15} strokeWidth={1.8} />
-              {admin ? "Panel" : "Atencion de cotizaciones"}
+              {admin ? "Panel" : "Atención de cotizaciones"}
             </Link>
           </li>
         )}

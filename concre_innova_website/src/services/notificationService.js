@@ -19,6 +19,24 @@ export const NOTIFICATIONS_PAGE_SIZE = 10;
 export const NOTIFICATIONS_PREVIEW_SIZE = 5;
 export const NOTIFICATIONS_POLL_INTERVAL_MS = 20000;
 
+/**
+ * Textos compartidos por la campana y la pantalla de notificaciones, para que
+ * ambas superficies digan exactamente lo mismo ante el mismo estado.
+ */
+export const NOTIFICATIONS_COPY = {
+  titulo: "Notificaciones",
+  cargando: "Cargando notificaciones...",
+  vacio: "Todavía no tienes notificaciones.",
+  vacioSinLeer: "No tienes notificaciones sin leer.",
+  errorCarga: "No se pudieron cargar tus notificaciones.",
+  errorMarcar: "No se pudo actualizar la notificación.",
+  errorMarcarTodas: "No se pudieron actualizar las notificaciones.",
+  marcarTodas: "Marcar todas como leídas",
+  marcarUna: "Marcar como leída",
+  verTodas: "Ver todas",
+  sinLeer: "Sin leer",
+};
+
 export function notifyNotificationsChanged() {
   window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED_EVENT));
 }

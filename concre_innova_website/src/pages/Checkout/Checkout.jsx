@@ -1,15 +1,22 @@
 import "./Checkout.css";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { AlertTriangle, CheckCircle2, Loader2, MapPin } from "lucide-react";
 import { clearCart, getCart } from "../../services/cartService";
 import { formatCatalogPrice } from "../../services/catalogPresentationService";
 import { getUserId, isLoggedIn } from "../../services/authService";
+import { getMyInfo, updateUserInfo } from "../../services/userService";
 import {
   isStockItemUnavailable,
   registerOrder,
   validateCartStock,
 } from "../../services/orderService";
+import {
+  registrarComprobantePago,
+  validarComprobante,
+  validarReferencia,
+} from "../../services/pagoService";
 import { PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
 import {
   desglosarImpuesto,
@@ -18,10 +25,53 @@ import {
 import ComprobantePedido from "../../components/ComprobantePedido/ComprobantePedido";
 
 const CARD_PAYMENT_METHOD = "Tarjeta";
+const SINPE_PAYMENT_METHOD = "SINPE Movil";
+const CASH_PAYMENT_METHOD = "Efectivo contra entrega";
+
+/**
+ * El sistema no captura datos de tarjeta: registra la referencia que devuelve el
+ * medio de pago. SINPE Movil ademas exige el comprobante de la transferencia.
+ */
 const PAYMENT_METHODS = [
-  CARD_PAYMENT_METHOD,
-  "Efectivo contra entrega",
+  {
+    id: CARD_PAYMENT_METHOD,
+    label: "Tarjeta",
+    descripcion:
+      "El cobro se procesa en la plataforma del banco. Anota la referencia que devuelve el comercio.",
+    requiereReferencia: true,
+    requiereComprobante: false,
+  },
+  {
+    id: SINPE_PAYMENT_METHOD,
+    label: "SINPE Móvil",
+    descripcion:
+      "Transfiere el total y adjunta la captura del comprobante para que el equipo verifique el pago.",
+    requiereReferencia: true,
+    requiereComprobante: true,
+  },
+  {
+    id: CASH_PAYMENT_METHOD,
+    label: "Efectivo contra entrega",
+    descripcion: "Pagas al recibir el pedido en la dirección de entrega indicada.",
+    requiereReferencia: false,
+    requiereComprobante: false,
+  },
 ];
+
+const MAX_DIRECCION = 255;
+const MIN_DIRECCION = 10;
+
+const ESTADO_STOCK = {
+  PENDIENTE: "pendiente",
+  VALIDANDO: "validando",
+  DISPONIBLE: "disponible",
+  INSUFICIENTE: "insuficiente",
+  ERROR: "error",
+};
+
+function getPaymentMethod(id) {
+  return PAYMENT_METHODS.find((method) => method.id === id) || PAYMENT_METHODS[0];
+}
 
 function buildOrderItems(cartItems) {
   return (Array.isArray(cartItems) ? cartItems : []).map((item) => ({
@@ -33,91 +83,6 @@ function buildOrderItems(cartItems) {
     color: String(item.color || "").trim(),
     cantidad: Math.max(1, Number(item.cantidad) || 1),
   }));
-}
-
-function formatCardNumber(value) {
-  const digits = String(value || "").replace(/\D/g, "").slice(0, 16);
-  return digits.replace(/(.{4})/g, "$1 ").trim();
-}
-
-function formatExpiry(value) {
-  const digits = String(value || "").replace(/\D/g, "").slice(0, 4);
-
-  if (digits.length <= 2) {
-    return digits;
-  }
-
-  return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-}
-
-function validateCardData({ cardHolder, cardNumber, expiry, cvv }) {
-  const cardHolderValue = String(cardHolder || "").trim();
-  const cardDigits = String(cardNumber || "").replace(/\D/g, "");
-  const expiryDigits = String(expiry || "").replace(/\D/g, "");
-  const cvvDigits = String(cvv || "").replace(/\D/g, "");
-
-  if (cardHolderValue.length < 5 || !/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(cardHolderValue)) {
-    return "Ingresa el nombre del titular como aparece en la tarjeta.";
-  }
-
-  if (cardHolderValue.split(/\s+/).filter(Boolean).length < 2) {
-    return "Ingresa nombre y apellido del titular de la tarjeta.";
-  }
-
-  if (cardDigits.length !== 16) {
-    return "El numero de tarjeta debe tener 16 digitos.";
-  }
-
-  if (/^(\d)\1+$/.test(cardDigits)) {
-    return "El numero de tarjeta no es valido.";
-  }
-
-  let luhnSum = 0;
-  let shouldDouble = false;
-
-  for (let index = cardDigits.length - 1; index >= 0; index -= 1) {
-    let digit = Number(cardDigits[index]);
-
-    if (shouldDouble) {
-      digit *= 2;
-      if (digit > 9) {
-        digit -= 9;
-      }
-    }
-
-    luhnSum += digit;
-    shouldDouble = !shouldDouble;
-  }
-
-  if (luhnSum % 10 !== 0) {
-    return "El numero de tarjeta no es valido.";
-  }
-
-  if (expiryDigits.length !== 4) {
-    return "La fecha de vencimiento debe tener formato MM/AA.";
-  }
-
-  const month = Number(expiryDigits.slice(0, 2));
-  const year = Number(expiryDigits.slice(2));
-
-  if (month < 1 || month > 12) {
-    return "El mes de vencimiento es invalido.";
-  }
-
-  const now = new Date();
-  const currentYear = now.getFullYear() % 100;
-  const currentMonth = now.getMonth() + 1;
-  const isExpired = year < currentYear || (year === currentYear && month < currentMonth);
-
-  if (isExpired) {
-    return "La tarjeta esta vencida.";
-  }
-
-  if (cvvDigits.length < 3 || cvvDigits.length > 4) {
-    return "El CVV debe tener 3 o 4 digitos.";
-  }
-
-  return null;
 }
 
 function escapeHtml(value) {
@@ -139,54 +104,60 @@ function buildReceiptHtml(receipt) {
           <td style="text-align:center;">${item.cantidad}</td>
           <td style="text-align:right;">${escapeHtml(formatCatalogPrice(item.precio))}</td>
           <td style="text-align:right;">${escapeHtml(formatCatalogPrice(item.subtotal))}</td>
-        </tr>
-      `
+        </tr>`
     )
     .join("");
 
-  return `
-<!doctype html>
+  return `<!doctype html>
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <title>Comprobante de compra</title>
+    <title>Comprobante del pedido ${escapeHtml(receipt.idPedido)}</title>
     <style>
-      body { font-family: Arial, sans-serif; margin: 24px; color: #1d2a33; }
-      h1 { margin: 0 0 8px; }
-      .meta { margin: 4px 0; }
-      table { width: 100%; border-collapse: collapse; margin-top: 18px; }
-      th, td { border-bottom: 1px solid #d8dde1; padding: 10px 8px; }
-      th { background: #f4f6f8; text-align: left; }
-      .desglose { margin: 4px 0 0; text-align: right; font-size: 0.94rem; color: #4a463c; }
-      .total { margin-top: 10px; text-align: right; font-size: 1.15rem; font-weight: 700; }
-      .foot { margin-top: 26px; color: #5b6770; font-size: 0.9rem; }
+      body { font-family: Arial, Helvetica, sans-serif; color: #16140f; margin: 32px; }
+      h1 { font-size: 20px; margin: 0 0 4px; }
+      .meta { color: #5f5749; font-size: 13px; margin-bottom: 20px; }
+      table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+      th, td { border-bottom: 1px solid #ded6c7; padding: 8px 6px; font-size: 13px; }
+      th { text-align: left; background: #f5f0e6; }
+      .totales td { border: none; padding: 3px 6px; font-size: 13px; }
+      .total { font-size: 16px; font-weight: bold; }
+      .foot { color: #5f5749; font-size: 12px; margin-top: 24px; }
     </style>
   </head>
   <body>
-    <h1>Comprobante de compra</h1>
-    <p class="meta"><strong>Pedido:</strong> #${escapeHtml(receipt.idPedido)}</p>
-    <p class="meta"><strong>Fecha:</strong> ${escapeHtml(receipt.fecha)}</p>
-    <p class="meta"><strong>Cliente (usuario):</strong> ${escapeHtml(receipt.idUsuario)}</p>
-    <p class="meta"><strong>Dirección:</strong> ${escapeHtml(receipt.direccionEntrega)}</p>
-    <p class="meta"><strong>Método de pago:</strong> ${escapeHtml(receipt.metodoPago)}</p>
-    ${receipt.last4 ? `<p class="meta"><strong>Tarjeta:</strong> Terminada en ${escapeHtml(receipt.last4)}</p>` : ""}
+    <h1>Concre Innova</h1>
+    <p class="meta">
+      Pedido #${escapeHtml(receipt.idPedido)}<br />
+      Fecha: ${escapeHtml(receipt.fecha)}<br />
+      Dirección de entrega: ${escapeHtml(receipt.direccionEntrega)}<br />
+      Método de pago: ${escapeHtml(receipt.metodoPago)}
+      ${receipt.referencia ? `<br />Referencia: ${escapeHtml(receipt.referencia)}` : ""}
+    </p>
 
     <table>
       <thead>
         <tr>
           <th>Producto</th>
           <th style="text-align:center;">Cantidad</th>
-          <th style="text-align:right;">Precio unitario</th>
+          <th style="text-align:right;">Precio</th>
           <th style="text-align:right;">Subtotal</th>
         </tr>
       </thead>
-      <tbody>
-        ${rows}
-      </tbody>
+      <tbody>${rows}</tbody>
     </table>
 
-    <p class="desglose">Subtotal: ${escapeHtml(formatCatalogPrice(desgloseComprobante.subtotal))}</p>
-    <p class="desglose">IVA (${formatearPorcentajeImpuesto(desgloseComprobante.tasa)}) incluido: ${escapeHtml(formatCatalogPrice(desgloseComprobante.impuesto))}</p>
+    <table class="totales">
+      <tr>
+        <td>Subtotal</td>
+        <td style="text-align:right;">${escapeHtml(formatCatalogPrice(desgloseComprobante.subtotal))}</td>
+      </tr>
+      <tr>
+        <td>IVA (${escapeHtml(formatearPorcentajeImpuesto(desgloseComprobante.tasa))}) incluido</td>
+        <td style="text-align:right;">${escapeHtml(formatCatalogPrice(desgloseComprobante.impuesto))}</td>
+      </tr>
+    </table>
+
     <p class="total">Total pagado: ${escapeHtml(formatCatalogPrice(receipt.total))}</p>
     <p class="foot">Este documento es un comprobante digital de tu compra.</p>
   </body>
@@ -208,6 +179,7 @@ function downloadReceipt(receipt) {
   document.body.removeChild(anchor);
   URL.revokeObjectURL(url);
 }
+
 function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -215,22 +187,24 @@ function Checkout() {
   const [mensajeExito, setMensajeExito] = useState("");
   const [productos, setProductos] = useState([]);
   const [direccionEntrega, setDireccionEntrega] = useState("");
+  const [direccionGuardada, setDireccionGuardada] = useState("");
+  const [guardarDireccion, setGuardarDireccion] = useState(false);
+  const [perfil, setPerfil] = useState(null);
   const [metodoPago, setMetodoPago] = useState(CARD_PAYMENT_METHOD);
-  const [cardHolder, setCardHolder] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
+  const [referenciaPago, setReferenciaPago] = useState("");
+  const [comprobante, setComprobante] = useState(null);
   const [receipt, setReceipt] = useState(null);
-  const [stockValidationResult, setStockValidationResult] = useState(null);
-  const [isStockValidated, setIsStockValidated] = useState(false);
+  const [estadoStock, setEstadoStock] = useState(ESTADO_STOCK.PENDIENTE);
+  const [itemsSinStock, setItemsSinStock] = useState([]);
+  const [errorStock, setErrorStock] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const orderSubmissionInProgress = useRef(false);
+
+  const metodoSeleccionado = getPaymentMethod(metodoPago);
 
   useEffect(() => {
     const syncCart = () => {
       setProductos(getCart());
-      setIsStockValidated(false);
-      setStockValidationResult(null);
       setMensajeExito("");
     };
 
@@ -238,6 +212,38 @@ function Checkout() {
     window.addEventListener("cartchange", syncCart);
 
     return () => window.removeEventListener("cartchange", syncCart);
+  }, []);
+
+  // La direccion de entrega sale de la ficha del cliente: no se vuelve a pedir
+  // en cada compra, solo se confirma o se ajusta.
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      return undefined;
+    }
+
+    let vigente = true;
+
+    getMyInfo()
+      .then((info) => {
+        if (!vigente) {
+          return;
+        }
+
+        setPerfil(info);
+        const direccion = String(info?.direccion || "").trim();
+
+        if (direccion) {
+          setDireccionGuardada(direccion);
+          setDireccionEntrega((actual) => actual || direccion);
+        }
+      })
+      .catch(() => {
+        // Si el perfil no carga, el cliente todavia puede escribir la direccion.
+      });
+
+    return () => {
+      vigente = false;
+    };
   }, []);
 
   const total = useMemo(() => {
@@ -250,7 +256,49 @@ function Checkout() {
   // El impuesto no se suma: se desglosa el que ya viene incluido en el precio,
   // para que el total cobrado coincida exactamente con el que registra la API.
   const desglose = useMemo(() => desglosarImpuesto(total), [total]);
-  const requiresCardData = metodoPago === CARD_PAYMENT_METHOD;
+
+  /**
+   * Consulta el stock en la API. El sistema lo hace por su cuenta: el cliente
+   * nunca tiene que pedirlo, solo ve el resultado.
+   */
+  const revisarStock = useCallback(async (items) => {
+    if (items.length === 0) {
+      setEstadoStock(ESTADO_STOCK.PENDIENTE);
+      setItemsSinStock([]);
+      setErrorStock("");
+      return false;
+    }
+
+    setEstadoStock(ESTADO_STOCK.VALIDANDO);
+    setErrorStock("");
+
+    try {
+      const response = await validateCartStock(buildOrderItems(items));
+      const stockItems = Array.isArray(response?.items) ? response.items : [];
+      const faltantes = stockItems.filter(isStockItemUnavailable);
+      const todoDisponible = Boolean(response?.todoDisponible) && faltantes.length === 0;
+
+      setItemsSinStock(faltantes);
+      setEstadoStock(todoDisponible ? ESTADO_STOCK.DISPONIBLE : ESTADO_STOCK.INSUFICIENTE);
+
+      return todoDisponible;
+    } catch (error) {
+      setItemsSinStock([]);
+      setEstadoStock(ESTADO_STOCK.ERROR);
+      setErrorStock(error?.message || "No fue posible confirmar la disponibilidad.");
+      return false;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn() || productos.length === 0) {
+      setEstadoStock(ESTADO_STOCK.PENDIENTE);
+      setItemsSinStock([]);
+      return;
+    }
+
+    revisarStock(productos);
+  }, [productos, revisarStock]);
 
   const ensureUserSession = async () => {
     if (isLoggedIn()) {
@@ -260,7 +308,7 @@ function Checkout() {
     await Swal.fire({
       icon: "info",
       title: "Inicia sesión para continuar",
-      text: "Debes iniciar sesión antes de validar stock o confirmar la compra.",
+      text: "Debes iniciar sesión antes de confirmar la compra.",
     });
 
     navigate(PUBLIC_ROUTES.LOGIN, {
@@ -273,68 +321,48 @@ function Checkout() {
     return false;
   };
 
-  const handleValidateStock = async () => {
-    setMensajeExito("");
+  const handleComprobanteChange = (event) => {
+    const archivo = event.target.files?.[0] || null;
+    setComprobante(archivo);
+  };
 
-    if (productos.length === 0) {
-      await Swal.fire({
-        icon: "info",
-        title: "Carrito vacío",
-        text: "No hay productos para validar.",
-      });
-      return;
+  const validarDatosDePago = () => {
+    if (metodoSeleccionado.requiereReferencia) {
+      const errorReferencia = validarReferencia(referenciaPago);
+      if (errorReferencia) {
+        return errorReferencia;
+      }
     }
 
-    if (!(await ensureUserSession())) {
-      return;
+    if (metodoSeleccionado.requiereComprobante) {
+      const errorComprobante = validarComprobante(comprobante);
+      if (errorComprobante) {
+        return errorComprobante;
+      }
     }
 
-    setIsSubmitting(true);
+    return "";
+  };
+
+  /** Guarda la direccion en la ficha del cliente cuando este lo pide. */
+  const persistirDireccion = async (direccion) => {
+    if (!guardarDireccion || !perfil?.idUsuario || direccion === direccionGuardada) {
+      return;
+    }
 
     try {
-      const response = await validateCartStock(buildOrderItems(productos));
-      const stockItems = Array.isArray(response?.items) ? response.items : [];
-      const unavailableItems = stockItems.filter(isStockItemUnavailable);
-      const todoDisponible = Boolean(response?.todoDisponible) && unavailableItems.length === 0;
-
-      setStockValidationResult(response);
-
-      if (!todoDisponible) {
-        setIsStockValidated(false);
-
-        const details = stockItems.length
-          ? stockItems
-              .map(
-                (item) =>
-                  `${item.nombre || `Producto ${item.idProducto}`}: solicitada ${item.cantidadSolicitada}, disponible ${item.stockDisponible}, estado ${item.estado || "sin estado"}`
-              )
-              .join("\n")
-          : "No se pudo obtener el detalle del stock.";
-
-        await Swal.fire({
-          icon: "warning",
-          title: "No hay stock suficiente",
-          text: details,
-        });
-        return;
-      }
-
-      setIsStockValidated(true);
-      await Swal.fire({
-        icon: "success",
-        title: "Stock validado",
-        text: "Todos los productos tienen stock disponible. Ya puedes confirmar la compra.",
+      await updateUserInfo({
+        idUsuario: perfil.idUsuario,
+        nombre: perfil.nombre,
+        apellido: perfil.apellido,
+        correo: perfil.correo,
+        telefono: perfil.telefono,
+        direccion,
       });
-    } catch (error) {
-      setIsStockValidated(false);
-      setStockValidationResult(null);
-      await Swal.fire({
-        icon: "error",
-        title: "No se pudo validar stock",
-        text: error?.message || "Ocurrio un error al validar el stock.",
-      });
-    } finally {
-      setIsSubmitting(false);
+
+      setDireccionGuardada(direccion);
+    } catch {
+      // Guardar la direccion es una comodidad: no debe frenar el pedido.
     }
   };
 
@@ -348,48 +376,39 @@ function Checkout() {
     if (productos.length === 0) {
       await Swal.fire({
         icon: "info",
-        title: "Carrito vacio",
+        title: "Carrito vacío",
         text: "No hay productos para comprar.",
       });
       return;
     }
 
-    if (!isStockValidated) {
+    const direccion = direccionEntrega.trim();
+
+    if (direccion.length < MIN_DIRECCION) {
       await Swal.fire({
         icon: "warning",
-        title: "Valida stock primero",
-        text: "Antes de confirmar la compra debes validar el stock del carrito.",
+        title: "Dirección incompleta",
+        text: "Indica provincia, cantón y señas para poder entregar el pedido.",
       });
       return;
     }
 
-    if (!direccionEntrega.trim()) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Dirección requerida",
-        text: "Ingresa la dirección de entrega para continuar.",
-      });
-      return;
-    }
-
-    if (direccionEntrega.trim().length > 255) {
+    if (direccion.length > MAX_DIRECCION) {
       await Swal.fire({
         icon: "warning",
         title: "Dirección demasiado larga",
-        text: "La dirección de entrega no puede superar 255 caracteres.",
+        text: `La dirección de entrega no puede superar ${MAX_DIRECCION} caracteres.`,
       });
       return;
     }
 
-    const cardError = requiresCardData
-      ? validateCardData({ cardHolder, cardNumber, expiry, cvv })
-      : null;
+    const errorPago = validarDatosDePago();
 
-    if (cardError) {
+    if (errorPago) {
       await Swal.fire({
         icon: "warning",
-        title: "Datos de tarjeta incompletos",
-        text: cardError,
+        title: "Revisa los datos del pago",
+        text: errorPago,
       });
       return;
     }
@@ -407,9 +426,9 @@ function Checkout() {
     const confirmation = await Swal.fire({
       icon: "question",
       title: "Confirmar compra",
-      text: "El pedido se registrara con los productos actuales del carrito.",
+      text: "El pedido se registrará con los productos actuales del carrito.",
       showCancelButton: true,
-      confirmButtonText: "Si, confirmar",
+      confirmButtonText: "Sí, confirmar",
       cancelButtonText: "Cancelar",
     });
 
@@ -425,6 +444,19 @@ function Checkout() {
     setIsSubmitting(true);
 
     try {
+      // Revalidacion inmediata: entre cargar la pantalla y confirmar, otro
+      // cliente pudo haberse llevado las ultimas unidades.
+      const disponible = await revisarStock(productos);
+
+      if (!disponible) {
+        await Swal.fire({
+          icon: "warning",
+          title: "Sin stock suficiente",
+          text: "La disponibilidad cambió. Revisa el detalle del resumen antes de continuar.",
+        });
+        return;
+      }
+
       const purchasedItems = productos.map((item) => ({
         nombre: item.nombre || `Producto ${item.idProducto}`,
         cantidad: Number(item.cantidad) || 0,
@@ -432,11 +464,9 @@ function Checkout() {
         subtotal: (Number(item.cantidad) || 0) * (Number(item.precio) || 0),
       }));
 
-      const cardDigits = String(cardNumber || "").replace(/\D/g, "");
-      const last4 = requiresCardData ? cardDigits.slice(-4) : "";
       const response = await registerOrder({
         idUsuario,
-        direccionEntrega: direccionEntrega.trim(),
+        direccionEntrega: direccion,
         metodoPago,
         items: buildOrderItems(productos),
       });
@@ -445,52 +475,71 @@ function Checkout() {
         throw new Error(response?.mensaje || "No fue posible registrar el pedido.");
       }
 
+      const referencia = referenciaPago.trim();
+      let avisoPago = "";
+
+      if (metodoSeleccionado.requiereReferencia && response?.idPedido) {
+        try {
+          const resultadoPago = await registrarComprobantePago({
+            idPedido: response.idPedido,
+            referencia,
+            comprobante: metodoSeleccionado.requiereComprobante ? comprobante : null,
+          });
+
+          if (Number(resultadoPago?.codigo) !== 1) {
+            avisoPago =
+              resultadoPago?.mensaje ||
+              "El pedido quedó registrado, pero el comprobante no pudo guardarse.";
+          }
+        } catch (pagoError) {
+          avisoPago =
+            pagoError?.message ||
+            "El pedido quedó registrado, pero el comprobante no pudo guardarse.";
+        }
+      }
+
+      await persistirDireccion(direccion);
+
       clearCart();
       setProductos([]);
-      setIsStockValidated(false);
-      setStockValidationResult(null);
-      setCardHolder("");
-      setCardNumber("");
-      setExpiry("");
-      setCvv("");
+      setEstadoStock(ESTADO_STOCK.PENDIENTE);
+      setItemsSinStock([]);
+      setReferenciaPago("");
+      setComprobante(null);
 
       const totalPedido = Number(response?.total);
       const finalTotal = Number.isFinite(totalPedido) ? totalPedido : total;
       const totalText = formatCatalogPrice(finalTotal);
       const orderIdText = response?.idPedido != null ? ` (Pedido #${response.idPedido})` : "";
-      const receiptData = {
+
+      setReceipt({
         idPedido: response?.idPedido ?? "N/A",
         idUsuario,
         fecha: new Date().toLocaleString("es-CR"),
-        direccionEntrega: direccionEntrega.trim(),
+        direccionEntrega: direccion,
         metodoPago,
-        last4,
+        referencia,
         total: finalTotal,
         items: purchasedItems,
-      };
-
-      setReceipt(receiptData);
+      });
 
       setMensajeExito(
         `Compra realizada correctamente${orderIdText}. Total registrado: ${totalText}.`
       );
 
       await Swal.fire({
-        icon: "success",
+        icon: avisoPago ? "warning" : "success",
         title: "Pedido registrado",
-        text: response?.mensaje || "Tu pedido fue formalizado correctamente.",
+        text:
+          avisoPago ||
+          response?.mensaje ||
+          "Tu pedido fue formalizado correctamente.",
       });
     } catch (error) {
-      console.error("Error al registrar pedido", {
-        status: error?.status,
-        message: error?.message,
-        details: error?.details,
-      });
-
       await Swal.fire({
         icon: "error",
         title: "No se pudo confirmar la compra",
-        text: error?.message || "Ocurrio un error al registrar el pedido.",
+        text: error?.message || "Ocurrió un error al registrar el pedido.",
       });
     } finally {
       orderSubmissionInProgress.current = false;
@@ -498,20 +547,31 @@ function Checkout() {
     }
   };
 
+  const stockBloqueado =
+    estadoStock === ESTADO_STOCK.VALIDANDO ||
+    estadoStock === ESTADO_STOCK.INSUFICIENTE ||
+    estadoStock === ESTADO_STOCK.ERROR;
+
+  const direccionDistinta =
+    Boolean(direccionGuardada) && direccionEntrega.trim() !== direccionGuardada;
+
   return (
     <div className="checkout-page container">
       <div className="checkout-card">
         <div className="checkout-heading checkout-heading-wide">
           <span className="checkout-eyebrow">Pago seguro</span>
-          <h1>Pago</h1>
-          <p>Completa la información para finalizar tu compra.</p>
+          <h1>Finalizar compra</h1>
+          <p>Confirma la dirección de entrega y el método de pago de tu pedido.</p>
         </div>
 
         <div className="checkout-layout">
           <aside className="checkout-panel checkout-summary-panel">
             <div className="checkout-panel-head">
-              <h3>Resumen de compra</h3>
-              <p>{productos.length} productos en carrito</p>
+              <h2>Resumen de compra</h2>
+              <p>
+                {productos.length}{" "}
+                {productos.length === 1 ? "producto en el carrito" : "productos en el carrito"}
+              </p>
             </div>
 
             <div className="checkout-summary-list">
@@ -519,7 +579,10 @@ function Checkout() {
                 <p className="checkout-empty">No hay productos en el carrito.</p>
               ) : (
                 productos.map((producto) => (
-                  <div className="checkout-summary-item" key={producto.idProducto}>
+                  <div
+                    className="checkout-summary-item"
+                    key={`${producto.idProducto}-${producto.idVariante || 0}`}
+                  >
                     <div>
                       <strong>{producto.nombre}</strong>
                       <span>x{producto.cantidad}</span>
@@ -534,6 +597,49 @@ function Checkout() {
                 ))
               )}
             </div>
+
+            {productos.length > 0 && (
+              <div className={`checkout-stock-status is-${estadoStock}`} role="status">
+                {estadoStock === ESTADO_STOCK.VALIDANDO && (
+                  <>
+                    <Loader2 size={16} strokeWidth={2} aria-hidden="true" />
+                    <span>Verificando disponibilidad...</span>
+                  </>
+                )}
+
+                {estadoStock === ESTADO_STOCK.DISPONIBLE && (
+                  <>
+                    <CheckCircle2 size={16} strokeWidth={2} aria-hidden="true" />
+                    <span>Disponibilidad confirmada para todos los productos.</span>
+                  </>
+                )}
+
+                {estadoStock === ESTADO_STOCK.INSUFICIENTE && (
+                  <div>
+                    <p className="checkout-stock-title">
+                      <AlertTriangle size={16} strokeWidth={2} aria-hidden="true" />
+                      No hay stock suficiente
+                    </p>
+                    <ul>
+                      {itemsSinStock.map((item) => (
+                        <li key={`${item.idProducto}-${item.idVariante || 0}`}>
+                          {item.nombre || `Producto ${item.idProducto}`}: solicitas{" "}
+                          {item.cantidadSolicitada}, quedan {item.stockDisponible}.
+                        </li>
+                      ))}
+                    </ul>
+                    <p>Ajusta las cantidades en el carrito para continuar.</p>
+                  </div>
+                )}
+
+                {estadoStock === ESTADO_STOCK.ERROR && (
+                  <>
+                    <AlertTriangle size={16} strokeWidth={2} aria-hidden="true" />
+                    <span>{errorStock}</span>
+                  </>
+                )}
+              </div>
+            )}
 
             <div className="checkout-total-box">
               <div className="checkout-total-row">
@@ -558,111 +664,125 @@ function Checkout() {
 
           <section className="checkout-panel checkout-form-panel">
             <div className="checkout-panel-head">
-              <h3>Datos de pago</h3>
-              <p>Selecciona el método de pago y confirma la compra.</p>
+              <h2>Entrega y pago</h2>
+              <p>Revisa tus datos y elige cómo quieres pagar.</p>
             </div>
 
-            <input
-              className="input"
-              placeholder="Dirección de entrega"
-              value={direccionEntrega}
-              maxLength={255}
-              onChange={(event) => setDireccionEntrega(event.target.value)}
-            />
+            <div className="checkout-field">
+              <label className="checkout-label" htmlFor="checkout-direccion">
+                <MapPin size={15} strokeWidth={1.9} aria-hidden="true" />
+                Dirección de entrega
+              </label>
+              <textarea
+                className="checkout-input"
+                id="checkout-direccion"
+                rows={3}
+                value={direccionEntrega}
+                maxLength={MAX_DIRECCION}
+                autoComplete="street-address"
+                placeholder="Provincia, cantón, distrito y señas exactas"
+                onChange={(event) => setDireccionEntrega(event.target.value)}
+              />
+              <p className="checkout-help">
+                {direccionGuardada
+                  ? "Tomada de tu perfil. Puedes ajustarla solo para este pedido."
+                  : "Todavía no tienes una dirección guardada en tu perfil."}
+              </p>
+
+              {(direccionDistinta || !direccionGuardada) && (
+                <label className="checkout-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={guardarDireccion}
+                    onChange={(event) => setGuardarDireccion(event.target.checked)}
+                  />
+                  <span>Guardar esta dirección en mi perfil</span>
+                </label>
+              )}
+            </div>
 
             <fieldset className="checkout-payment-method">
               <legend>Método de pago</legend>
               <div className="checkout-payment-options">
-                {PAYMENT_METHODS.map((paymentMethod) => (
-                  <label className="checkout-payment-option" key={paymentMethod}>
+                {PAYMENT_METHODS.map((method) => (
+                  <label
+                    className={`checkout-payment-option ${
+                      metodoPago === method.id ? "is-selected" : ""
+                    }`.trim()}
+                    key={method.id}
+                  >
                     <input
                       type="radio"
                       name="metodoPago"
-                      value={paymentMethod}
-                      checked={metodoPago === paymentMethod}
+                      value={method.id}
+                      checked={metodoPago === method.id}
                       onChange={(event) => setMetodoPago(event.target.value)}
                     />
-                    <span>{paymentMethod}</span>
+                    <span className="checkout-payment-option-body">
+                      <span className="checkout-payment-option-title">{method.label}</span>
+                      <span className="checkout-payment-option-text">
+                        {method.descripcion}
+                      </span>
+                    </span>
                   </label>
                 ))}
               </div>
             </fieldset>
 
-            {requiresCardData && (
-              <>
+            {metodoSeleccionado.requiereReferencia && (
+              <div className="checkout-field">
+                <label className="checkout-label" htmlFor="checkout-referencia">
+                  Número de referencia del pago
+                </label>
                 <input
-                  className="input"
-                  placeholder="Nombre del titular"
-                  value={cardHolder}
-                  onChange={(event) => setCardHolder(event.target.value)}
+                  className="checkout-input"
+                  id="checkout-referencia"
+                  value={referenciaPago}
+                  maxLength={100}
+                  placeholder="Ej.: 987654321"
+                  onChange={(event) => setReferenciaPago(event.target.value)}
                 />
+                <p className="checkout-help">
+                  No pedimos el número de tarjeta ni el CVV: solo el comprobante que
+                  emite tu banco.
+                </p>
+              </div>
+            )}
 
+            {metodoSeleccionado.requiereComprobante && (
+              <div className="checkout-field">
+                <label className="checkout-label" htmlFor="checkout-comprobante">
+                  Comprobante de la transferencia
+                </label>
                 <input
-                  className="input"
-                  inputMode="numeric"
-                  placeholder="Número de tarjeta"
-                  value={cardNumber}
-                  onChange={(event) => setCardNumber(formatCardNumber(event.target.value))}
+                  className="checkout-input checkout-file"
+                  id="checkout-comprobante"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleComprobanteChange}
                 />
-
-                <div className="checkout-card-row">
-                  <input
-                    className="input"
-                    inputMode="numeric"
-                    placeholder="MM/AA"
-                    value={expiry}
-                    onChange={(event) => setExpiry(formatExpiry(event.target.value))}
-                  />
-
-                  <input
-                    className="input"
-                    inputMode="numeric"
-                    placeholder="CVV"
-                    value={cvv}
-                    onChange={(event) =>
-                      setCvv(
-                        String(event.target.value || "")
-                          .replace(/\D/g, "")
-                          .slice(0, 4)
-                      )
-                    }
-                  />
-                </div>
-              </>
+                <p className="checkout-help">
+                  {comprobante
+                    ? `Archivo seleccionado: ${comprobante.name}`
+                    : "Adjunta una imagen JPG, PNG o WEBP de hasta 5 MB."}
+                </p>
+              </div>
             )}
 
             <div className="checkout-actions">
-              <input
-                type="hidden"
-                value={metodoPago}
-                readOnly
-              />
-              <button className="btn" onClick={handleValidateStock} disabled={isSubmitting}>
-                Validar stock
-              </button>
-
               <button
                 className="btn"
+                type="button"
                 onClick={handleConfirmOrder}
-                disabled={isSubmitting || !isStockValidated}
-                aria-disabled={isSubmitting || !isStockValidated}
+                disabled={isSubmitting || productos.length === 0 || stockBloqueado}
+                aria-disabled={isSubmitting || productos.length === 0 || stockBloqueado}
               >
-                Confirmar compra
+                {isSubmitting ? "Procesando..." : "Confirmar compra"}
               </button>
             </div>
 
-            {stockValidationResult && (
-              <p className="checkout-feedback checkout-feedback-stock">
-                {isStockValidated
-                  ? "Stock verificado correctamente."
-                  : "Hay productos sin stock suficiente. Revisa el detalle en la notificacion."}
-              </p>
-            )}
-
             {mensajeExito && (
-              <p className="checkout-feedback checkout-feedback-success">
-                {mensajeExito}
-              </p>
+              <p className="checkout-feedback checkout-feedback-success">{mensajeExito}</p>
             )}
 
             {receipt && (

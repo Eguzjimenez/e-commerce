@@ -266,6 +266,34 @@ function Catalog() {
   const minPercent = ((selectedMinPrice - priceBounds.min) / priceRangeSpan) * 100;
   const maxPercent = ((selectedMaxPrice - priceBounds.min) / priceRangeSpan) * 100;
 
+  // Cuantos criterios se apartan del valor por defecto: alimenta el contador
+  // del panel y el aviso del boton en pantallas pequenas.
+  const activeFilterCount = useMemo(() => {
+    const criterios = [
+      searchTerm.trim() !== "",
+      selectedCategoryId !== "all",
+      selectedTypeId !== "all",
+      selectedSize !== "all",
+      selectedMaterial !== "all",
+      selectedAvailability !== "all",
+      selectedSortOrder !== PRODUCT_SORT_OPTIONS.NONE,
+      selectedMinPrice > priceBounds.min || selectedMaxPrice < priceBounds.max,
+    ];
+
+    return criterios.filter(Boolean).length;
+  }, [
+    searchTerm,
+    selectedCategoryId,
+    selectedTypeId,
+    selectedSize,
+    selectedMaterial,
+    selectedAvailability,
+    selectedSortOrder,
+    selectedMinPrice,
+    selectedMaxPrice,
+    priceBounds,
+  ]);
+
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedCategoryId("all");
@@ -336,13 +364,271 @@ function Catalog() {
           type="button"
           className="catalog-filter-trigger"
           onClick={() => setFilterDrawerOpen(true)}
+          aria-expanded={filterDrawerOpen}
         >
           <SlidersHorizontal size={21} strokeWidth={1.8} aria-hidden="true" />
-          Filtro
+          Filtros
+          {activeFilterCount > 0 && (
+            <span className="catalog-filter-trigger-badge">{activeFilterCount}</span>
+          )}
         </button>
       </section>
 
       <section className="catalog-shop-layout" aria-label="Productos del catálogo">
+        <aside
+          className={`catalog-filter-panel ${filterDrawerOpen ? "is-open" : ""}`.trim()}
+          aria-label="Filtros de catálogo"
+        >
+          <div className="catalog-filter-panel-header">
+            <h2>Filtros</h2>
+            {activeFilterCount > 0 && (
+              <span className="catalog-filter-count">{activeFilterCount} activos</span>
+            )}
+            <button
+              type="button"
+              className="catalog-filter-close"
+              aria-label="Cerrar filtros"
+              onClick={() => setFilterDrawerOpen(false)}
+            >
+              <X size={22} strokeWidth={1.8} />
+            </button>
+          </div>
+          <form
+            className="catalog-filter-content"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setFilterDrawerOpen(false);
+            }}
+          >
+            <div className="catalog-filter-scroll">
+              <section className="catalog-filter-section">
+                <div className="catalog-filter-section-heading">
+                  <span>Búsqueda</span>
+                </div>
+                <input
+                  className="input catalog-shop-search"
+                  placeholder="Buscar plantas, flores o macetas"
+                  value={searchTerm}
+                  onChange={(event) => {
+                    setSearchTerm(event.target.value);
+                    setCatalogPage(1);
+                  }}
+                />
+              </section>
+
+              <section className="catalog-filter-section">
+                <div className="catalog-filter-section-heading">
+                  <span>Categoría</span>
+                </div>
+                <div className="catalog-option-grid" role="radiogroup" aria-label="Categoría">
+                  <button
+                    type="button"
+                    className={selectedCategoryId === "all" ? "active" : ""}
+                    onClick={() => {
+                      setSelectedCategoryId("all");
+                      setCatalogPage(1);
+                    }}
+                  >
+                    Todas
+                  </button>
+
+                  {normalizedCategories.map((category) => (
+                    <button
+                      type="button"
+                      key={category.id}
+                      className={selectedCategoryId === category.id ? "active" : ""}
+                      onClick={() => {
+                        setSelectedCategoryId(category.id);
+                        setCatalogPage(1);
+                      }}
+                    >
+                      {category.name}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="catalog-filter-section">
+                <div className="catalog-filter-section-heading">
+                  <span>Tipo</span>
+                </div>
+                <div className="catalog-option-grid" role="radiogroup" aria-label="Tipo">
+                  <button
+                    type="button"
+                    className={selectedTypeId === "all" ? "active" : ""}
+                    onClick={() => {
+                      setSelectedTypeId("all");
+                      setCatalogPage(1);
+                    }}
+                  >
+                    Todos
+                  </button>
+
+                  {normalizedProductTypes.map((type) => (
+                    <button
+                      type="button"
+                      key={type.id}
+                      className={selectedTypeId === type.id ? "active" : ""}
+                      onClick={() => {
+                        setSelectedTypeId(type.id);
+                        setCatalogPage(1);
+                      }}
+                    >
+                      {type.name}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="catalog-filter-section">
+                <div className="catalog-filter-section-heading">
+                  <span>Tamaño</span>
+                </div>
+                <div className="catalog-option-grid" role="radiogroup" aria-label="Tamaño">
+                  {CATALOG_FILTER_OPTIONS.SIZES.map((option) => (
+                    <button
+                      type="button"
+                      key={option.value}
+                      className={selectedSize === option.value ? "active" : ""}
+                      onClick={() => {
+                        setSelectedSize(option.value);
+                        setCatalogPage(1);
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="catalog-filter-section">
+                <div className="catalog-filter-section-heading">
+                  <span>Material</span>
+                </div>
+                <div className="catalog-option-grid" role="radiogroup" aria-label="Material">
+                  {CATALOG_FILTER_OPTIONS.MATERIALS.map((option) => (
+                    <button
+                      type="button"
+                      key={option.value}
+                      className={selectedMaterial === option.value ? "active" : ""}
+                      onClick={() => {
+                        setSelectedMaterial(option.value);
+                        setCatalogPage(1);
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="catalog-filter-section">
+                <div className="catalog-filter-section-heading">
+                  <span>Disponibilidad</span>
+                </div>
+                <div
+                  className="catalog-option-grid"
+                  role="radiogroup"
+                  aria-label="Disponibilidad"
+                >
+                  {CATALOG_FILTER_OPTIONS.AVAILABILITY.map((option) => (
+                    <button
+                      type="button"
+                      key={option.value}
+                      className={selectedAvailability === option.value ? "active" : ""}
+                      onClick={() => {
+                        setSelectedAvailability(option.value);
+                        setCatalogPage(1);
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="catalog-filter-section">
+                <div className="catalog-filter-section-heading">
+                  <span>Precio</span>
+                </div>
+                <div className="catalog-price-filter">
+                  <div className="catalog-price-slider">
+                    <div className="catalog-price-slider-track" />
+                    <div
+                      className="catalog-price-slider-range"
+                      style={{
+                        left: `${minPercent}%`,
+                        right: `${100 - maxPercent}%`,
+                      }}
+                    />
+
+                    <input
+                      className="catalog-range-input catalog-range-input--min"
+                      type="range"
+                      min={priceBounds.min}
+                      max={priceBounds.max}
+                      step="1"
+                      value={selectedMinPrice}
+                      onChange={handleMinPriceChange}
+                      aria-label="Precio minimo"
+                    />
+
+                    <input
+                      className="catalog-range-input catalog-range-input--max"
+                      type="range"
+                      min={priceBounds.min}
+                      max={priceBounds.max}
+                      step="1"
+                      value={selectedMaxPrice}
+                      onChange={handleMaxPriceChange}
+                      aria-label="Precio maximo"
+                    />
+                  </div>
+
+                  <p className="catalog-price-label">
+                    {formatCatalogPrice(selectedMinPrice)} -{" "}
+                    {formatCatalogPrice(selectedMaxPrice)}
+                  </p>
+                </div>
+              </section>
+
+              <section className="catalog-filter-section">
+                <div className="catalog-filter-section-heading">
+                  <span>Ordenar</span>
+                </div>
+                <div
+                  className="catalog-sort-stack"
+                  role="radiogroup"
+                  aria-label="Ordenar productos"
+                >
+                  {CATALOG_SORT_FILTER_OPTIONS.map((option) => (
+                    <button
+                      type="button"
+                      key={option.value || "none"}
+                      className={selectedSortOrder === option.value ? "active" : ""}
+                      onClick={() => {
+                        setSelectedSortOrder(option.value);
+                        setCatalogPage(1);
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            <div className="catalog-filter-actions">
+              <button type="button" className="catalog-clear-button" onClick={clearFilters}>
+                Limpiar
+              </button>
+              <button type="submit" className="catalog-filter-apply">
+                Aplicar
+              </button>
+            </div>
+          </form>
+        </aside>
+
         <div className="catalog-product-area">
           {isLoading && <p className="catalog-status">Cargando catálogo...</p>}
           {!isLoading && error && <p className="catalog-error">{error}</p>}
@@ -430,264 +716,9 @@ function Catalog() {
       {filterDrawerOpen && (
         <div
           className="catalog-filter-overlay"
-          aria-hidden={!filterDrawerOpen}
           onClick={() => setFilterDrawerOpen(false)}
-        >
-          <aside
-            className="catalog-filter-drawer"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Filtros de catálogo"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="catalog-filter-drawer-header">
-              <h2>Filtros</h2>
-              <button
-                type="button"
-                className="catalog-filter-close"
-                aria-label="Cerrar filtros"
-                onClick={() => setFilterDrawerOpen(false)}
-              >
-                <X size={24} strokeWidth={1.7} />
-              </button>
-            </div>
-
-            <form
-              className="catalog-filter-content"
-              onSubmit={(event) => {
-                event.preventDefault();
-                setFilterDrawerOpen(false);
-              }}
-            >
-              <div className="catalog-filter-scroll">
-                <section className="catalog-filter-section">
-                  <div className="catalog-filter-section-heading">
-                    <span>Búsqueda</span>
-                  </div>
-                  <input
-                    className="input catalog-shop-search"
-                    placeholder="Buscar plantas, flores o macetas"
-                    value={searchTerm}
-                    onChange={(event) => {
-                      setSearchTerm(event.target.value);
-                      setCatalogPage(1);
-                    }}
-                  />
-                </section>
-
-                <section className="catalog-filter-section">
-                  <div className="catalog-filter-section-heading">
-                    <span>Categoría</span>
-                  </div>
-                  <div className="catalog-option-grid" role="radiogroup" aria-label="Categoría">
-                    <button
-                      type="button"
-                      className={selectedCategoryId === "all" ? "active" : ""}
-                      onClick={() => {
-                        setSelectedCategoryId("all");
-                        setCatalogPage(1);
-                      }}
-                    >
-                      Todas
-                    </button>
-
-                    {normalizedCategories.map((category) => (
-                      <button
-                        type="button"
-                        key={category.id}
-                        className={selectedCategoryId === category.id ? "active" : ""}
-                        onClick={() => {
-                          setSelectedCategoryId(category.id);
-                          setCatalogPage(1);
-                        }}
-                      >
-                        {category.name}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-
-                <section className="catalog-filter-section">
-                  <div className="catalog-filter-section-heading">
-                    <span>Tipo</span>
-                  </div>
-                  <div className="catalog-option-grid" role="radiogroup" aria-label="Tipo">
-                    <button
-                      type="button"
-                      className={selectedTypeId === "all" ? "active" : ""}
-                      onClick={() => {
-                        setSelectedTypeId("all");
-                        setCatalogPage(1);
-                      }}
-                    >
-                      Todos
-                    </button>
-
-                    {normalizedProductTypes.map((type) => (
-                      <button
-                        type="button"
-                        key={type.id}
-                        className={selectedTypeId === type.id ? "active" : ""}
-                        onClick={() => {
-                          setSelectedTypeId(type.id);
-                          setCatalogPage(1);
-                        }}
-                      >
-                        {type.name}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-
-                <section className="catalog-filter-section">
-                  <div className="catalog-filter-section-heading">
-                    <span>Tamaño</span>
-                  </div>
-                  <div className="catalog-option-grid" role="radiogroup" aria-label="Tamaño">
-                    {CATALOG_FILTER_OPTIONS.SIZES.map((option) => (
-                      <button
-                        type="button"
-                        key={option.value}
-                        className={selectedSize === option.value ? "active" : ""}
-                        onClick={() => {
-                          setSelectedSize(option.value);
-                          setCatalogPage(1);
-                        }}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-
-                <section className="catalog-filter-section">
-                  <div className="catalog-filter-section-heading">
-                    <span>Material</span>
-                  </div>
-                  <div className="catalog-option-grid" role="radiogroup" aria-label="Material">
-                    {CATALOG_FILTER_OPTIONS.MATERIALS.map((option) => (
-                      <button
-                        type="button"
-                        key={option.value}
-                        className={selectedMaterial === option.value ? "active" : ""}
-                        onClick={() => {
-                          setSelectedMaterial(option.value);
-                          setCatalogPage(1);
-                        }}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-
-                <section className="catalog-filter-section">
-                  <div className="catalog-filter-section-heading">
-                    <span>Disponibilidad</span>
-                  </div>
-                  <div
-                    className="catalog-option-grid"
-                    role="radiogroup"
-                    aria-label="Disponibilidad"
-                  >
-                    {CATALOG_FILTER_OPTIONS.AVAILABILITY.map((option) => (
-                      <button
-                        type="button"
-                        key={option.value}
-                        className={selectedAvailability === option.value ? "active" : ""}
-                        onClick={() => {
-                          setSelectedAvailability(option.value);
-                          setCatalogPage(1);
-                        }}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-
-                <section className="catalog-filter-section">
-                  <div className="catalog-filter-section-heading">
-                    <span>Precio</span>
-                  </div>
-                  <div className="catalog-price-filter">
-                    <div className="catalog-price-slider">
-                      <div className="catalog-price-slider-track" />
-                      <div
-                        className="catalog-price-slider-range"
-                        style={{
-                          left: `${minPercent}%`,
-                          right: `${100 - maxPercent}%`,
-                        }}
-                      />
-
-                      <input
-                        className="catalog-range-input catalog-range-input--min"
-                        type="range"
-                        min={priceBounds.min}
-                        max={priceBounds.max}
-                        step="1"
-                        value={selectedMinPrice}
-                        onChange={handleMinPriceChange}
-                        aria-label="Precio minimo"
-                      />
-
-                      <input
-                        className="catalog-range-input catalog-range-input--max"
-                        type="range"
-                        min={priceBounds.min}
-                        max={priceBounds.max}
-                        step="1"
-                        value={selectedMaxPrice}
-                        onChange={handleMaxPriceChange}
-                        aria-label="Precio maximo"
-                      />
-                    </div>
-
-                    <p className="catalog-price-label">
-                      {formatCatalogPrice(selectedMinPrice)} -{" "}
-                      {formatCatalogPrice(selectedMaxPrice)}
-                    </p>
-                  </div>
-                </section>
-
-                <section className="catalog-filter-section">
-                  <div className="catalog-filter-section-heading">
-                    <span>Ordenar</span>
-                  </div>
-                  <div
-                    className="catalog-sort-stack"
-                    role="radiogroup"
-                    aria-label="Ordenar productos"
-                  >
-                    {CATALOG_SORT_FILTER_OPTIONS.map((option) => (
-                      <button
-                        type="button"
-                        key={option.value || "none"}
-                        className={selectedSortOrder === option.value ? "active" : ""}
-                        onClick={() => {
-                          setSelectedSortOrder(option.value);
-                          setCatalogPage(1);
-                        }}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              </div>
-
-              <div className="catalog-filter-actions">
-                <button type="button" className="catalog-clear-button" onClick={clearFilters}>
-                  Limpiar
-                </button>
-                <button type="submit" className="catalog-filter-apply">
-                  Aplicar
-                </button>
-              </div>
-            </form>
-          </aside>
-        </div>
+          aria-hidden="true"
+        />
       )}
     </div>
   );
