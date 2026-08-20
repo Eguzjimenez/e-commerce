@@ -20,7 +20,7 @@ function PaginationControls({ pagination, onPageChange, isLoading = false }) {
   };
 
   return (
-    <nav className="pagination-controls" aria-label="Paginacion">
+    <nav className="pagination-controls" aria-label="Paginación">
       <button
         type="button"
         onClick={goToPreviousPage}

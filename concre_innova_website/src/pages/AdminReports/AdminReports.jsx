@@ -118,7 +118,7 @@ function buildReportHtml({ rango, totales, items, productos }) {
   <h2>Detalle de ventas</h2>
   <table>
     <thead>
-      <tr><th>Fecha</th><th>Producto</th><th>Categoria</th><th>Unidades</th><th>Pedidos</th><th>Ingresos</th></tr>
+      <tr><th>Fecha</th><th>Producto</th><th>Categoría</th><th>Unidades</th><th>Pedidos</th><th>Ingresos</th></tr>
     </thead>
     <tbody>${filas || '<tr><td colspan="6">Sin movimientos en el periodo.</td></tr>'}</tbody>
   </table>
@@ -126,7 +126,7 @@ function buildReportHtml({ rango, totales, items, productos }) {
   <h2>Productos mas vendidos</h2>
   <table>
     <thead>
-      <tr><th>#</th><th>Producto</th><th>Categoria</th><th>Unidades</th><th>Ingresos</th></tr>
+      <tr><th>#</th><th>Producto</th><th>Categoría</th><th>Unidades</th><th>Ingresos</th></tr>
     </thead>
     <tbody>${ranking || '<tr><td colspan="5">Sin datos en el periodo.</td></tr>'}</tbody>
   </table>
@@ -320,7 +320,7 @@ function AdminReports() {
           </div>
 
           <div className="admin-reports-field">
-            <label htmlFor="reporte-categoria">Categoria</label>
+            <label htmlFor="reporte-categoria">Categoría</label>
             <select
               id="reporte-categoria"
               value={idCategoria}
@@ -406,7 +406,7 @@ function AdminReports() {
 
               <section className="admin-reports-card">
                 <header>
-                  <h2>Ingresos por categoria</h2>
+                  <h2>Ingresos por categoría</h2>
                   <p>Participacion de cada linea de productos.</p>
                 </header>
                 <BarChart
@@ -562,7 +562,7 @@ function AdminReports() {
                     <tr>
                       <th>Fecha</th>
                       <th>Producto</th>
-                      <th>Categoria</th>
+                      <th>Categoría</th>
                       <th>Unidades</th>
                       <th>Pedidos</th>
                       <th>Ingresos</th>

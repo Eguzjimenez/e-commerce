@@ -75,7 +75,7 @@ function Login() {
 
         <div className="auth-heading">
           <span>Acceso</span>
-          <h1>Iniciar sesion</h1>
+          <h1>Iniciar sesión</h1>
           <p>Ingresa para continuar con tus compras o gestionar el panel interno.</p>
         </div>
 
@@ -92,7 +92,7 @@ function Login() {
           <input
             className="login-input"
             type="password"
-            placeholder="Contrasena"
+            placeholder="Contraseña"
             value={contrasena}
             onChange={(event) => setContrasena(event.target.value)}
             required
@@ -106,7 +106,7 @@ function Login() {
         </form>
 
         <div className="login-links">
-          <Link to="/forgot-password">Olvidaste tu contrasena?</Link>
+          <Link to="/forgot-password">Olvidaste tu contraseña?</Link>
           <Link to="/register">Crear cuenta</Link>
         </div>
       </div>

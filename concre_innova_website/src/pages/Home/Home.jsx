@@ -5,7 +5,6 @@ import Swal from "sweetalert2";
 import { PUBLIC_ROUTES } from "../../routes/routes";
 import ProductModal from "../../components/ProductModal/ProductModal";
 import { getCatalogProducts } from "../../services/catalogService";
-import { getCompanyInfo } from "../../services/empresaService";
 import { addToCart } from "../../services/cartService";
 import heroBotanicalImage from "../../img/Hero-background.png";
 import macetaNoirImage from "../../img/Maceta-Negra.jpg";
@@ -75,23 +74,6 @@ function Home() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [productsError, setProductsError] = useState("");
-  const [companyInfo, setCompanyInfo] = useState(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    getCompanyInfo()
-      .then((info) => {
-        if (isMounted) {
-          setCompanyInfo(info);
-        }
-      })
-      .catch(() => setCompanyInfo(null));
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   useEffect(() => {
     const slideTimer = setInterval(() => {
@@ -184,7 +166,7 @@ function Home() {
 
           <div className="home-showcase-actions">
             <Link to={PUBLIC_ROUTES.CATALOG} className="btn">
-              Explorar catalogo
+              Explorar catálogo
             </Link>
             <Link to={PUBLIC_ROUTES.CATALOG} className="home-ghost-btn">
               Armar regalo
@@ -269,7 +251,7 @@ function Home() {
           </div>
           <p>
             La experiencia prioriza decisiones claras: decorar, regalar, renovar o cuidar.
-            Cada coleccion puede mapearse a categorias existentes del catalogo.
+            Cada coleccion puede mapearse a categorías existentes del catálogo.
           </p>
         </div>
 
@@ -298,17 +280,19 @@ function Home() {
           </div>
           <p>
             La propuesta habla del espacio fisico, del origen y de la experiencia de
-            visitar. Aqui el relato se vuelve local, sereno y cercano a San Miguel
+            visitar. Aquí el relato se vuelve local, sereno y cercano a San Miguel
             Oeste de Naranjo.
           </p>
         </div>
 
         <div className="home-story-layout">
-          <div className="home-story-photo">
+          <figure className="home-story-photo">
             <img src={heroBotanicalImage} alt="Macetas y plantas en un espacio exterior" />
-            <span>Foto real del lugar</span>
-            <p>Entorno verde, luz natural y macetas como parte de la experiencia de visita.</p>
-          </div>
+            <figcaption className="home-story-caption">
+              <span>Foto real del lugar</span>
+              <p>Entorno verde, luz natural y macetas como parte de la experiencia de visita.</p>
+            </figcaption>
+          </figure>
 
           <article className="home-story-panel">
             <span>Raices</span>
@@ -347,7 +331,7 @@ function Home() {
       <section className="home-section featured-section" id="productos-destacados">
         <div className="home-section-heading">
           <div>
-            <span className="home-section-kicker">Seleccion destacada</span>
+            <span className="home-section-kicker">Selección destacada</span>
             <h2>Piezas con presencia natural</h2>
           </div>
           <p>
@@ -403,74 +387,7 @@ function Home() {
         )}
       </section>
 
-      <footer className="footer home-footer">
-        <div className="home-footer-top">
-          <div>
-            <span>Identidad local</span>
-            <h2>Desde San Miguel Oeste de Naranjo</h2>
-          </div>
-          <p>
-            La marca se presenta como una experiencia cercana y confiable: seleccion
-            botanica, asesoria de cuidado, preparacion de regalos y entrega local con
-            una estetica de calidad.
-          </p>
-        </div>
 
-        <div className="footer-container">
-          <div>
-            <h3>Concre Innova</h3>
-            <p>Diseno ecologico para espacios modernos</p>
-          </div>
-
-          <div>
-            <h4>Contacto</h4>
-            {companyInfo?.correo && (
-              <p>
-                <a href={`mailto:${companyInfo.correo}`}>{companyInfo.correo}</a>
-              </p>
-            )}
-            {companyInfo?.telefono && (
-              <p>
-                <a href={`tel:${companyInfo.telefono.replace(/\s/g, "")}`}>
-                  {companyInfo.telefono}
-                </a>
-              </p>
-            )}
-            <p>
-              <Link to={PUBLIC_ROUTES.CONTACT}>Enviar una consulta</Link>
-            </p>
-          </div>
-
-          <div>
-            <h4>Redes</h4>
-            {companyInfo?.instagram && (
-              <p>
-                <a href={companyInfo.instagram} target="_blank" rel="noreferrer">
-                  Instagram
-                </a>
-              </p>
-            )}
-            {companyInfo?.facebook && (
-              <p>
-                <a href={companyInfo.facebook} target="_blank" rel="noreferrer">
-                  Facebook
-                </a>
-              </p>
-            )}
-            {companyInfo?.tikTok && (
-              <p>
-                <a href={companyInfo.tikTok} target="_blank" rel="noreferrer">
-                  TikTok
-                </a>
-              </p>
-            )}
-          </div>
-        </div>
-
-        <p className="footer-copy">
-          2026 Concre Innova - Todos los derechos reservados
-        </p>
-      </footer>
 
       <ProductModal
         product={selectedProduct}

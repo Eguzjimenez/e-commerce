@@ -297,7 +297,7 @@ function QuotationRequest() {
     <main className="quotation-request-page">
       <header className="quotation-request-header">
         <span>Cotizaciones</span>
-        <h1>Nueva cotizacion</h1>
+        <h1>Nueva cotización</h1>
       </header>
 
       <form className="quotation-request-form" onSubmit={handleSubmit}>
@@ -305,7 +305,7 @@ function QuotationRequest() {
           <div className="quotation-request-section-heading">
             <div>
               <strong>Productos y cantidades</strong>
-              <span>Indica los articulos que necesitas cotizar.</span>
+              <span>Indica los artículos que necesitas cotizar.</span>
             </div>
             <button
               type="button"
@@ -387,7 +387,7 @@ function QuotationRequest() {
           </div>
         </section>
 
-        <label htmlFor="quotation-description">Descripcion</label>
+        <label htmlFor="quotation-description">Descripción</label>
         <textarea
           id="quotation-description"
           value={description}

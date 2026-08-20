@@ -17,6 +17,10 @@ import {
   validateCartStock,
 } from "../../services/orderService";
 import { PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
+import {
+  desglosarImpuesto,
+  formatearPorcentajeImpuesto,
+} from "../../services/pricingService";
 import { formatCatalogPrice } from "../../services/catalogPresentationService";
 import "./Cart.css";
 
@@ -169,6 +173,12 @@ function Cart() {
     stockSummary.status === "available" && Number.isFinite(validatedSubtotal)
       ? validatedSubtotal
       : calculatedSubtotal;
+
+  // El precio de catalogo ya incluye impuesto: aqui solo se desglosa.
+  const desgloseCarrito = useMemo(
+    () => desglosarImpuesto(purchaseSubtotal),
+    [purchaseSubtotal]
+  );
 
   const totalUnits = useMemo(
     () =>
@@ -431,7 +441,17 @@ function Cart() {
 
           <div className="summary-total">
             <span>Subtotal</span>
-            <span>{formatCatalogPrice(purchaseSubtotal)}</span>
+            <span>{formatCatalogPrice(desgloseCarrito.subtotal)}</span>
+          </div>
+
+          <div className="summary-total">
+            <span>IVA ({formatearPorcentajeImpuesto(desgloseCarrito.tasa)})</span>
+            <span>{formatCatalogPrice(desgloseCarrito.impuesto)}</span>
+          </div>
+
+          <div className="summary-total summary-total--final">
+            <span>Total a pagar</span>
+            <strong>{formatCatalogPrice(desgloseCarrito.total)}</strong>
           </div>
 
           <p

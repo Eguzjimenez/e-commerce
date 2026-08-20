@@ -320,7 +320,7 @@ function ChatBot() {
                         to={PUBLIC_ROUTES.CATALOG}
                         onClick={() => setIsOpen(false)}
                       >
-                        Ver el catalogo completo
+                        Ver el catálogo completo
                       </Link>
                     </div>
                   )}

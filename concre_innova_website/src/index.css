@@ -390,3 +390,49 @@ optgroup {
     gap: 18px;
   }
 }
+
+/* Estructura general: el pie de página queda siempre al final aunque la vista
+   sea corta, sin recurrir a posicionamiento fijo. */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-content {
+  flex: 1 0 auto;
+}
+
+/* ---------------------------------------------------------------------------
+   Fotografía de producto
+   Las piezas del catálogo se fotografían completas sobre fondo neutro, así que
+   recortarlas con "cover" les quitaba borde y base. Se define aquí una sola vez
+   el tratamiento —encajar sin recortar sobre el fondo del contenedor— para que
+   todas las vistas presenten las imágenes con el mismo criterio.
+   --------------------------------------------------------------------------- */
+.card img,
+.product-visual img,
+.catalog-card-image,
+.cart-product-image,
+.favorite-card-image,
+.history-item-image,
+.detail-gallery-image,
+.modal-image-wrap img,
+.admin-product-image,
+.admin-view-product-image,
+.home-feature-media img,
+.home-product-card img,
+.home-collection-card img {
+  object-fit: contain;
+  object-position: center;
+  background: var(--catalog-media-bg);
+}
+
+/* El velo verde sobre la foto tenía sentido con imágenes a sangre; con la pieza
+   completa sobre fondo claro solo ensuciaba el color real del producto. */
+.product-visual::after,
+.catalog-card-visual::after,
+.favorite-image-link::after,
+.modal-image-wrap::after {
+  content: none;
+}

@@ -1,6 +1,5 @@
 .home-page {
-  background:
-    linear-gradient(180deg, var(--paper) 0%, var(--linen) 46%, #efe7d7 100%);
+  background: var(--linen);
   overflow: hidden;
 }
 
@@ -9,19 +8,6 @@
   min-height: min(660px, calc(100vh - 210px));
   color: var(--on-dark);
   overflow: hidden;
-}
-
-.home-hero::after {
-  content: "";
-  position: absolute;
-  z-index: 2;
-  left: -8%;
-  right: -8%;
-  bottom: -72px;
-  height: 128px;
-  background: var(--linen);
-  border-radius: 50% 50% 0 0 / 72% 72% 0 0;
-  pointer-events: none;
 }
 
 .home-hero-image,
@@ -282,8 +268,31 @@
   padding-top: clamp(36px, 4.8vw, 54px);
 }
 
-.home-section + .home-section {
-  border-top: 1px solid var(--line-strong);
+/* Bandas por seccion: alternar tonos de la paleta ayuda a leer la pagina
+   como bloques de informacion separados, no como un lienzo plano. */
+.home-section {
+  position: relative;
+}
+
+.home-collections,
+.home-story,
+.featured-section {
+  clip-path: inset(0 -100vmax);
+}
+
+.home-collections {
+  background: var(--paper);
+  box-shadow: 0 0 0 100vmax var(--paper);
+}
+
+.home-story {
+  background: var(--linen);
+  box-shadow: 0 0 0 100vmax var(--linen);
+}
+
+.featured-section {
+  background: var(--sand);
+  box-shadow: 0 0 0 100vmax var(--sand);
 }
 
 .home-section-heading {
@@ -391,47 +400,48 @@
   align-items: stretch;
 }
 
+/* La leyenda salio de encima de la fotografia: antes se apoyaba en un velo
+   translucido y el texto competia con la imagen. Ahora ocupa su propia banda
+   inferior, con contraste garantizado y sin recortar la foto. */
 .home-story-photo {
-  min-height: 328px;
-  position: relative;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border-radius: var(--radius-md);
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
 }
 
 .home-story-photo img {
   width: 100%;
-  height: 100%;
+  aspect-ratio: 4 / 3;
+  height: auto;
   object-fit: cover;
+  object-position: center;
 }
 
-.home-story-photo::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(22, 20, 15, 0.2);
+.home-story-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 22px 22px;
+  background: var(--forest-ink);
 }
 
-.home-story-photo span,
-.home-story-photo p {
-  position: absolute;
-  z-index: 2;
-  left: 26px;
-}
-
-.home-story-photo span {
-  top: 26px;
-  color: var(--on-dark);
+.home-story-caption span {
+  color: var(--sage);
   font-size: 0.74rem;
   font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
-.home-story-photo p {
-  bottom: 26px;
-  max-width: 390px;
-  color: var(--on-dark);
-  font-weight: 600;
+.home-story-caption p {
   margin: 0;
+  color: var(--on-dark-muted);
+  font-weight: 500;
+  line-height: 1.55;
 }
 
 .home-story-panel {
@@ -717,20 +727,12 @@
     grid-template-columns: 1fr;
   }
 
-  .home-story-photo {
-    min-height: 360px;
-  }
 }
 
 @media (max-width: 760px) {
   .home-hero {
     min-height: 470px;
     padding-bottom: 18px;
-  }
-
-  .home-hero::after {
-    bottom: -58px;
-    height: 104px;
   }
 
   .home-hero-content {

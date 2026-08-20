@@ -88,17 +88,17 @@ function AdminCompanyInfo() {
   };
 
   return (
-    <AdminLayout title="Informacion de la Empresa">
+    <AdminLayout title="Información de la Empresa">
       <div className="admin-company-page">
         {error && <div className="admin-products-error">{error}</div>}
-        {loading && <div className="admin-products-empty">Cargando informacion...</div>}
+        {loading && <div className="admin-products-empty">Cargando información...</div>}
 
         {!loading && (
           <>
             <section className="admin-company-card">
               <header>
                 <h2>Datos publicos</h2>
-                <p>Esta informacion se muestra en la pagina de contacto y en el pie del sitio.</p>
+                <p>Esta información se muestra en la página de contacto y en el pie del sitio.</p>
               </header>
 
               <form className="admin-company-form" onSubmit={handleSubmit}>
@@ -115,7 +115,7 @@ function AdminCompanyInfo() {
                 </label>
 
                 <label className="admin-company-full">
-                  Descripcion
+                  Descripción
                   <textarea
                     name="descripcion"
                     value={info.descripcion}
@@ -137,7 +137,7 @@ function AdminCompanyInfo() {
                 </label>
 
                 <label>
-                  Telefono
+                  Teléfono
                   <input
                     type="text"
                     name="telefono"
@@ -159,7 +159,7 @@ function AdminCompanyInfo() {
                 </label>
 
                 <label>
-                  Horario de atencion
+                  Horario de atención
                   <input
                     type="text"
                     name="horario"
@@ -170,7 +170,7 @@ function AdminCompanyInfo() {
                 </label>
 
                 <label className="admin-company-full">
-                  Direccion
+                  Dirección
                   <input
                     type="text"
                     name="direccion"
@@ -188,7 +188,7 @@ function AdminCompanyInfo() {
                     value={info.facebook}
                     onChange={handleChange}
                     maxLength={255}
-                    placeholder="https://www.facebook.com/tu-pagina"
+                    placeholder="https://www.facebook.com/tu-página"
                   />
                 </label>
 

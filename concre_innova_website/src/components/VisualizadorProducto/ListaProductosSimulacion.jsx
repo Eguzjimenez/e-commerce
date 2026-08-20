@@ -21,7 +21,7 @@ function ListaProductosSimulacion({
   if (items.length === 0) {
     return (
       <p className="simulacion-estado">
-        Agrega productos del catalogo para verlos en tu espacio.
+        Agrega productos del catálogo para verlos en tu espacio.
       </p>
     );
   }

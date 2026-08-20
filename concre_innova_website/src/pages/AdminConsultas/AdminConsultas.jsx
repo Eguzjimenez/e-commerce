@@ -172,7 +172,7 @@ function AdminConsultas() {
                   <th scope="col">Asunto</th>
                   <th scope="col">Recibida</th>
                   <th scope="col">Estado</th>
-                  <th scope="col">Accion</th>
+                  <th scope="col">Acción</th>
                 </tr>
               </thead>
               <tbody>

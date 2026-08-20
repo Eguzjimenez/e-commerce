@@ -240,7 +240,7 @@ function AdminProductTypes() {
                 </label>
 
                 <label>
-                  Descripcion
+                  Descripción
                   <textarea
                     name="descripcion"
                     value={typeForm.descripcion}

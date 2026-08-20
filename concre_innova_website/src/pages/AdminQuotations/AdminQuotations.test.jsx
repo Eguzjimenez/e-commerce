@@ -99,7 +99,7 @@ test("allows sales staff to approve and convert an accepted quotation", async ()
   render(<AdminQuotations />);
 
   fireEvent.click(
-    await screen.findByRole("button", { name: "Aprobar cotizacion" })
+    await screen.findByRole("button", { name: "Aprobar cotización" })
   );
 
   await waitFor(() =>

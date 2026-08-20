@@ -42,7 +42,7 @@ test("submits the description and selected reference image", async () => {
   expect(
     await screen.findByRole("option", { name: "Macetero terraza" })
   ).toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText("Descripcion"), {
+  fireEvent.change(screen.getByLabelText("Descripción"), {
     target: { value: "Macetero personalizado para terraza" },
   });
   fireEvent.change(screen.getByLabelText("Preferencias"), {

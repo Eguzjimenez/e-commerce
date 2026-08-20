@@ -191,7 +191,7 @@ function ProductDetail() {
         <h1>Producto no disponible</h1>
         <p>{error || "No se pudo mostrar el producto solicitado."}</p>
         <Link to={PUBLIC_ROUTES.CATALOG} className="btn">
-          Ver catalogo
+          Ver catálogo
         </Link>
       </div>
     );
@@ -215,7 +215,7 @@ function ProductDetail() {
 
         <div className="product-detail-info">
           <Link to={PUBLIC_ROUTES.CATALOG} className="product-detail-back">
-            Volver al catalogo
+            Volver al catálogo
           </Link>
           <span className="product-category">
             {getCatalogProductCategoryName(product, normalizedCategories)}
@@ -229,11 +229,11 @@ function ProductDetail() {
               <dd>{getCatalogProductAvailabilityText(product)}</dd>
             </div>
             <div>
-              <dt>Categoria</dt>
+              <dt>Categoría</dt>
               <dd>{getCatalogProductCategoryName(product, normalizedCategories)}</dd>
             </div>
             <div>
-              <dt>Tamano</dt>
+              <dt>Tamaño</dt>
               <dd>{getCatalogProductAttributeText(product, "tamano")}</dd>
             </div>
             <div>
@@ -288,7 +288,7 @@ function ProductDetail() {
         <section className="product-related-section container">
           <div className="product-related-header">
             <h2>Productos relacionados</h2>
-            <Link to={PUBLIC_ROUTES.CATALOG}>Ver catalogo</Link>
+            <Link to={PUBLIC_ROUTES.CATALOG}>Ver catálogo</Link>
           </div>
 
           <div className="product-related-grid">

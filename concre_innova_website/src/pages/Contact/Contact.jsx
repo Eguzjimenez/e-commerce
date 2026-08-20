@@ -95,7 +95,7 @@ function Contact() {
         </p>
       </header>
 
-      {loading && <p className="contact-state">Cargando informacion...</p>}
+      {loading && <p className="contact-state">Cargando información...</p>}
       {!loading && error && <p className="contact-state error">{error}</p>}
 
       {!loading && empresa && (
@@ -119,7 +119,7 @@ function Contact() {
                 <li>
                   <Phone size={18} aria-hidden="true" />
                   <div>
-                    <span>Telefono</span>
+                    <span>Teléfono</span>
                     <a href={`tel:${empresa.telefono.replace(/\s/g, "")}`}>{empresa.telefono}</a>
                   </div>
                 </li>
@@ -141,7 +141,7 @@ function Contact() {
                 <li>
                   <MapPin size={18} aria-hidden="true" />
                   <div>
-                    <span>Direccion</span>
+                    <span>Dirección</span>
                     <p>{empresa.direccion}</p>
                   </div>
                 </li>
@@ -215,7 +215,7 @@ function Contact() {
               </label>
 
               <label>
-                Telefono (opcional)
+                Teléfono (opcional)
                 <input
                   type="tel"
                   name="telefono"

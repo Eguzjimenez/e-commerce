@@ -451,7 +451,7 @@ function AdminQuotations() {
     Boolean(appliedFilters.search) || Boolean(appliedFilters.status);
 
   return (
-    <AdminLayout title="Atencion de Cotizaciones">
+    <AdminLayout title="Atención de Cotizaciones">
       <div className="admin-quotations-views" role="tablist">
         <button
           type="button"
@@ -591,7 +591,7 @@ function AdminQuotations() {
             <div className="admin-quotation-pagination">
               <button
                 type="button"
-                title="Pagina anterior"
+                title="Página anterior"
                 disabled={!pagination.hasPreviousPage}
                 onClick={() => setPage((currentPage) => currentPage - 1)}
               >
@@ -602,7 +602,7 @@ function AdminQuotations() {
               </span>
               <button
                 type="button"
-                title="Pagina siguiente"
+                title="Página siguiente"
                 disabled={!pagination.hasNextPage}
                 onClick={() => setPage((currentPage) => currentPage + 1)}
               >
@@ -615,7 +615,7 @@ function AdminQuotations() {
         {selectedQuotation && (
           <form className="admin-quotation-detail" onSubmit={handleSubmit}>
             <div className="admin-quotation-detail-header">
-              <h2>Detalle de cotizacion</h2>
+              <h2>Detalle de cotización</h2>
               <span
                 className={`quotation-status ${statusClass(
                   selectedQuotation.estado
@@ -643,7 +643,7 @@ function AdminQuotations() {
                 {formatDate(selectedQuotation.fechaRespuesta)}
               </p>
               <p>
-                <strong>Descripcion:</strong>{" "}
+                <strong>Descripción:</strong>{" "}
                 {selectedQuotation.descripcion}
               </p>
               <p>
@@ -833,7 +833,7 @@ function AdminQuotations() {
                     disabled={submitting}
                   >
                     <CheckCircle2 size={17} />
-                    Aprobar cotizacion
+                    Aprobar cotización
                   </button>
                   <button
                     className="admin-secondary-button reject"
@@ -842,7 +842,7 @@ function AdminQuotations() {
                     disabled={submitting}
                   >
                     <XCircle size={17} />
-                    Rechazar cotizacion
+                    Rechazar cotización
                   </button>
                 </>
               )}
@@ -865,7 +865,7 @@ function AdminQuotations() {
             )}
             {!canRespond && !canResolve && !canConvert && !selectedQuotation.idPedido && (
               <p className="admin-quotation-state">
-                No hay acciones pendientes para esta cotizacion.
+                No hay acciones pendientes para esta cotización.
               </p>
             )}
           </form>

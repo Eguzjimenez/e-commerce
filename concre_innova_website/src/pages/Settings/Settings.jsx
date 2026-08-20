@@ -188,7 +188,7 @@ function Settings() {
   return (
     <main className="settings-page">
       <header className="settings-header">
-        <span>Configuracion</span>
+        <span>Configuración</span>
         <h1>Preferencias del sistema</h1>
         <p>Controla las notificaciones que recibis y la apariencia de toda la aplicacion.</p>
       </header>

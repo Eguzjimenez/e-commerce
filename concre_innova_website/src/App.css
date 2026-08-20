@@ -25,18 +25,25 @@
 }
 
 .navbar-compact .nav-container {
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   min-height: 56px;
   gap: 18px;
 }
 
+/* La marca ocupa siempre la columna central y las acciones la ultima, de modo
+   que todas las vistas comparten la misma composicion de navegacion. */
+.nav-brand-block {
+  grid-column: 2;
+}
+
+.nav-utility-actions {
+  grid-column: 3;
+}
+
 .navbar-compact .nav-brand-block {
-  grid-template-columns: auto auto;
-  align-items: center;
-  justify-items: start;
-  justify-self: start;
-  column-gap: 12px;
-  text-align: left;
+  justify-items: center;
+  justify-self: center;
+  text-align: center;
   padding: 0;
 }
 

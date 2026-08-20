@@ -180,7 +180,7 @@ function AdminCategories() {
 
         <div className="admin-categories-grid">
           {loading && (
-            <div className="admin-products-empty">Cargando categorias...</div>
+            <div className="admin-products-empty">Cargando categorías...</div>
           )}
 
           {!loading && categories.map((category) => (
@@ -213,7 +213,7 @@ function AdminCategories() {
           ))}
 
           {!loading && categories.length === 0 && (
-            <div className="admin-products-empty">No hay categorias registradas.</div>
+            <div className="admin-products-empty">No hay categorías registradas.</div>
           )}
         </div>
 
@@ -240,7 +240,7 @@ function AdminCategories() {
                 </label>
 
                 <label>
-                  Descripcion
+                  Descripción
                   <textarea
                     name="descripcion"
                     value={categoryForm.descripcion}

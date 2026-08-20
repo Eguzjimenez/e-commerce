@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar";
+import Footer from "./components/Footer/Footer";
 import AppRoutes from "./routes/AppRoutes";
 import ChatBot from "./pages/Chat/Chat";
 import { verifyStoredRecoveryToken } from "./services/authService";
@@ -29,8 +30,13 @@ function App() {
 
   return (
     <Router>
-      <Navbar />
-      <AppRoutes />
+      <div className="app-shell">
+        <Navbar />
+        <div className="app-content">
+          <AppRoutes />
+        </div>
+        <Footer />
+      </div>
       <ChatBot />
     </Router>
   );

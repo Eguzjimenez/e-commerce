@@ -113,10 +113,10 @@ function MyAccount() {
           </span>
           Mi cuenta
         </h1>
-        <p>Consulta y actualiza la informacion de tu cuenta de cliente.</p>
+        <p>Consulta y actualiza la información de tu cuenta de cliente.</p>
       </header>
 
-      {loading && <div className="my-account-status">Cargando informacion...</div>}
+      {loading && <div className="my-account-status">Cargando información...</div>}
 
       {!loading && error && <div className="my-account-error">{error}</div>}
 
@@ -157,7 +157,7 @@ function MyAccount() {
                 </label>
 
                 <label>
-                  <span>Telefono</span>
+                  <span>Teléfono</span>
                   <input
                     name="telefono"
                     value={form.telefono}
@@ -166,7 +166,7 @@ function MyAccount() {
                 </label>
 
                 <label>
-                  <span>Direccion</span>
+                  <span>Dirección</span>
                   <input
                     name="direccion"
                     value={form.direccion}
@@ -175,7 +175,7 @@ function MyAccount() {
                 </label>
 
                 <label>
-                  <span>Nueva contrasena</span>
+                  <span>Nueva contraseña</span>
                   <input
                     type="password"
                     name="contrasena"

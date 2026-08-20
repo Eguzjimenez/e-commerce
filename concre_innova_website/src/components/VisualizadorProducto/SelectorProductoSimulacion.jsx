@@ -99,7 +99,7 @@ function SelectorProductoSimulacion({
 
       {!cargando && !error && productosMostrados.length === 0 && (
         <p className="simulacion-estado">
-          No se encontraron productos para esa busqueda.
+          No se encontraron productos para esa búsqueda.
         </p>
       )}
 

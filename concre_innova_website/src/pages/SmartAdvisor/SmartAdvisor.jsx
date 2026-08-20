@@ -241,7 +241,7 @@ function SmartAdvisor() {
       {!isLoadingQuestionnaire && !errorMessage && totalQuestions === 0 && (
         <div className="advisor-empty">
           <h2>El asesor no esta disponible</h2>
-          <p>Vuelve a intentarlo mas tarde o explora el catalogo completo.</p>
+          <p>Vuelve a intentarlo mas tarde o explora el catálogo completo.</p>
         </div>
       )}
 

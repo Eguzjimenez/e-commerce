@@ -11,6 +11,10 @@ import {
   validateCartStock,
 } from "../../services/orderService";
 import { PRIVATE_ROUTES, PUBLIC_ROUTES } from "../../routes/routes";
+import {
+  desglosarImpuesto,
+  formatearPorcentajeImpuesto,
+} from "../../services/pricingService";
 import ComprobantePedido from "../../components/ComprobantePedido/ComprobantePedido";
 
 const CARD_PAYMENT_METHOD = "Tarjeta";
@@ -98,6 +102,7 @@ function escapeHtml(value) {
 }
 
 function buildReceiptHtml(receipt) {
+  const desgloseComprobante = desglosarImpuesto(receipt.total);
   const rows = receipt.items
     .map(
       (item) => `
@@ -124,7 +129,8 @@ function buildReceiptHtml(receipt) {
       table { width: 100%; border-collapse: collapse; margin-top: 18px; }
       th, td { border-bottom: 1px solid #d8dde1; padding: 10px 8px; }
       th { background: #f4f6f8; text-align: left; }
-      .total { margin-top: 16px; text-align: right; font-size: 1.1rem; font-weight: 700; }
+      .desglose { margin: 4px 0 0; text-align: right; font-size: 0.94rem; color: #4a463c; }
+      .total { margin-top: 10px; text-align: right; font-size: 1.15rem; font-weight: 700; }
       .foot { margin-top: 26px; color: #5b6770; font-size: 0.9rem; }
     </style>
   </head>
@@ -133,7 +139,7 @@ function buildReceiptHtml(receipt) {
     <p class="meta"><strong>Pedido:</strong> #${escapeHtml(receipt.idPedido)}</p>
     <p class="meta"><strong>Fecha:</strong> ${escapeHtml(receipt.fecha)}</p>
     <p class="meta"><strong>Cliente (usuario):</strong> ${escapeHtml(receipt.idUsuario)}</p>
-    <p class="meta"><strong>Direccion:</strong> ${escapeHtml(receipt.direccionEntrega)}</p>
+    <p class="meta"><strong>Dirección:</strong> ${escapeHtml(receipt.direccionEntrega)}</p>
     <p class="meta"><strong>Metodo de pago:</strong> ${escapeHtml(receipt.metodoPago)}</p>
     ${receipt.last4 ? `<p class="meta"><strong>Tarjeta:</strong> Terminada en ${escapeHtml(receipt.last4)}</p>` : ""}
 
@@ -151,6 +157,8 @@ function buildReceiptHtml(receipt) {
       </tbody>
     </table>
 
+    <p class="desglose">Subtotal: ${escapeHtml(formatCatalogPrice(desgloseComprobante.subtotal))}</p>
+    <p class="desglose">IVA (${formatearPorcentajeImpuesto(desgloseComprobante.tasa)}) incluido: ${escapeHtml(formatCatalogPrice(desgloseComprobante.impuesto))}</p>
     <p class="total">Total pagado: ${escapeHtml(formatCatalogPrice(receipt.total))}</p>
     <p class="foot">Este documento es un comprobante digital de tu compra.</p>
   </body>
@@ -210,6 +218,10 @@ function Checkout() {
       0
     );
   }, [productos]);
+
+  // El impuesto no se suma: se desglosa el que ya viene incluido en el precio,
+  // para que el total cobrado coincida exactamente con el que registra la API.
+  const desglose = useMemo(() => desglosarImpuesto(total), [total]);
   const requiresCardData = metodoPago === CARD_PAYMENT_METHOD;
 
   const ensureUserSession = async () => {
@@ -463,7 +475,7 @@ function Checkout() {
         <div className="checkout-heading checkout-heading-wide">
           <span className="checkout-eyebrow">Pago seguro</span>
           <h1>Pago</h1>
-          <p>Completa la informacion para finalizar tu compra.</p>
+          <p>Completa la información para finalizar tu compra.</p>
         </div>
 
         <div className="checkout-layout">
@@ -495,8 +507,23 @@ function Checkout() {
             </div>
 
             <div className="checkout-total-box">
-              <span>Total</span>
-              <strong>{formatCatalogPrice(total)}</strong>
+              <div className="checkout-total-row">
+                <span>Subtotal</span>
+                <span>{formatCatalogPrice(desglose.subtotal)}</span>
+              </div>
+
+              <div className="checkout-total-row">
+                <span>
+                  IVA ({formatearPorcentajeImpuesto(desglose.tasa)})
+                  <small>Incluido en el precio</small>
+                </span>
+                <span>{formatCatalogPrice(desglose.impuesto)}</span>
+              </div>
+
+              <div className="checkout-total-row checkout-total-row--final">
+                <span>Total a pagar</span>
+                <strong>{formatCatalogPrice(desglose.total)}</strong>
+              </div>
             </div>
           </aside>
 
@@ -508,7 +535,7 @@ function Checkout() {
 
             <input
               className="input"
-              placeholder="Direccion de entrega"
+              placeholder="Dirección de entrega"
               value={direccionEntrega}
               maxLength={255}
               onChange={(event) => setDireccionEntrega(event.target.value)}
@@ -544,7 +571,7 @@ function Checkout() {
                 <input
                   className="input"
                   inputMode="numeric"
-                  placeholder="Numero de tarjeta"
+                  placeholder="Número de tarjeta"
                   value={cardNumber}
                   onChange={(event) => setCardNumber(formatCardNumber(event.target.value))}
                 />
