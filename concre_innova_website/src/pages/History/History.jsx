@@ -123,7 +123,7 @@ function History() {
     ) {
       Swal.fire({
         icon: "warning",
-        title: "Rango de fechas invalido",
+        title: "Rango de fechas inválido",
         text: "La fecha inicial no puede ser posterior a la fecha final.",
       });
       return;
@@ -168,7 +168,7 @@ function History() {
       if (availableItems.length === 0) {
         throw new Error(
           response?.mensaje ||
-            "Los productos de este pedido no estan disponibles actualmente."
+            "Los productos de este pedido no están disponibles actualmente."
         );
       }
 
@@ -182,7 +182,7 @@ function History() {
         text: `Se agregaron ${availableItems.length} producto(s) al carrito.${warningText}`,
         showCancelButton: true,
         confirmButtonText: "Ver carrito",
-        cancelButtonText: "Seguir aqui",
+        cancelButtonText: "Seguir aquí",
       });
 
       if (result.isConfirmed) {

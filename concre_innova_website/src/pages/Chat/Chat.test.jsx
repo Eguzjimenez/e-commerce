@@ -164,7 +164,7 @@ test("offers escalation when the bot cannot resolve the query", async () => {
   expect(
     await screen.findByText("Tu consulta fue enviada a nuestro equipo de soporte.")
   ).toBeInTheDocument();
-  expect(screen.getByText("Atencion de soporte")).toBeInTheDocument();
+  expect(screen.getByText("Atención de soporte")).toBeInTheDocument();
 });
 
 test("hides escalation when human support is disabled", async () => {

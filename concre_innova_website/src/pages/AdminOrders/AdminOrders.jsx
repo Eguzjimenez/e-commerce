@@ -143,7 +143,7 @@ function AdminOrders() {
       await Swal.fire({
         icon: "success",
         title: "Pedido actualizado",
-        text: "El estado del pedido se actualizo correctamente.",
+        text: "El estado del pedido se actualizó correctamente.",
         timer: 1800,
         showConfirmButton: false,
       });

@@ -60,7 +60,7 @@ test("returns a clear message for a network connection failure", async () => {
   fetch.mockRejectedValue(new TypeError("Failed to fetch"));
 
   await expect(request("/api/test")).rejects.toThrow(
-    "No fue posible conectar con el servidor. Verifica tu conexion e intenta nuevamente."
+    "No fue posible conectar con el servidor. Verifica tu conexión e intenta nuevamente."
   );
 });
 

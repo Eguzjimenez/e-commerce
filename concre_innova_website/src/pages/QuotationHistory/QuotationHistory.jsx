@@ -124,10 +124,10 @@ function QuotationHistory() {
     const isAcceptance = decision === "Aceptar";
     const confirmation = await Swal.fire({
       icon: "question",
-      title: `${decision} cotizacion`,
+      title: `${decision} cotización`,
       text: isAcceptance
-        ? "La cotizacion pasara a revision del equipo de ventas."
-        : "La cotizacion quedara marcada como rechazada.",
+        ? "La cotización pasara a revision del equipo de ventas."
+        : "La cotización quedara marcada como rechazada.",
       showCancelButton: true,
       confirmButtonText: decision,
       cancelButtonText: "Cancelar",
@@ -172,14 +172,14 @@ function QuotationHistory() {
         : "";
       await Swal.fire({
         icon: "success",
-        title: `Cotizacion ${result.estado.toLowerCase()}`,
+        title: `Cotización ${result.estado.toLowerCase()}`,
         text: `${result.mensaje}${orderSummary}`,
       });
     } catch (error) {
       await Swal.fire({
         icon: "error",
-        title: "No se pudo actualizar la cotizacion",
-        text: error?.message || "Intenta realizar la accion nuevamente.",
+        title: "No se pudo actualizar la cotización",
+        text: error?.message || "Intenta realizar la acción nuevamente.",
       });
     } finally {
       setProcessingDecision(false);
@@ -278,7 +278,7 @@ function QuotationHistory() {
         <p className="quotation-history-state">
           {hasActiveFilters
             ? "No hay cotizaciones que coincidan con los filtros."
-            : "Todavia no has enviado solicitudes de cotizacion."}
+            : "Todavia no has enviado solicitudes de cotización."}
         </p>
       )}
 
@@ -297,7 +297,7 @@ function QuotationHistory() {
                 >
                   <span>
                     {quotation.numeroSeguimiento ||
-                      `Cotizacion #${quotation.idCotizacion}`}
+                      `Cotización #${quotation.idCotizacion}`}
                   </span>
                   <strong>
                     {formatDate(

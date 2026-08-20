@@ -64,7 +64,7 @@ function AdminCompanyInfo() {
       const result = await updateCompanyInfo(info);
 
       if (result?.codigo !== 1) {
-        throw new Error(result?.mensaje || "No se pudo actualizar la informacion.");
+        throw new Error(result?.mensaje || "No se pudo actualizar la información.");
       }
 
       await Swal.fire({

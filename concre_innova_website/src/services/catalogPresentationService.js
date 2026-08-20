@@ -194,7 +194,7 @@ export function buildAdminProductViewModel(product, categories) {
     descripcion: product.descripcion ?? "",
     price: Number(product.precio) || 0,
     precio: Number(product.precio) || 0,
-    category: categoryName === "Producto" ? "Sin categoria" : categoryName,
+    category: categoryName === "Producto" ? "Sin categoría" : categoryName,
     categoryId,
     idCategoria: categoryId,
     typeId,
@@ -315,8 +315,8 @@ export function getProductFormValidation(productForm) {
 
   if (!productForm.idCategoria) {
     return {
-      title: "Categoria requerida",
-      text: "Selecciona una categoria.",
+      title: "Categoría requerida",
+      text: "Selecciona una categoría.",
     };
   }
 
@@ -329,22 +329,22 @@ export function getProductFormValidation(productForm) {
 
   if (hasInvalidAttributeLength(productForm.tamano)) {
     return {
-      title: "Tamano invalido",
-      text: "El tamano no puede superar 80 caracteres.",
+      title: "Tamaño inválido",
+      text: "El tamaño no puede superar 80 caracteres.",
     };
   }
 
   if (hasInvalidAttributeLength(productForm.material)) {
     return {
-      title: "Material invalido",
+      title: "Material inválido",
       text: "El material no puede superar 80 caracteres.",
     };
   }
 
   if (String(productForm.caracteristicas || "").trim().length > 500) {
     return {
-      title: "Caracteristicas invalidas",
-      text: "Las caracteristicas no pueden superar 500 caracteres.",
+      title: "Características invalidas",
+      text: "Las características no pueden superar 500 caracteres.",
     };
   }
 
@@ -354,22 +354,22 @@ export function getProductFormValidation(productForm) {
 
   if (Number.isNaN(precio) || precio <= 0) {
     return {
-      title: "Precio invalido",
+      title: "Precio inválido",
       text: "Ingresa un precio numerico mayor a cero.",
     };
   }
 
   if (Number.isNaN(cantidadDisponible) || cantidadDisponible < 0) {
     return {
-      title: "Cantidad disponible invalida",
-      text: "Ingresa una cantidad disponible valida.",
+      title: "Cantidad disponible inválida",
+      text: "Ingresa una cantidad disponible válida.",
     };
   }
 
   if (Number.isNaN(cantidadMinima) || cantidadMinima < 0) {
     return {
-      title: "Cantidad minima invalida",
-      text: "Ingresa una cantidad minima valida.",
+      title: "Cantidad mínima inválida",
+      text: "Ingresa una cantidad mínima válida.",
     };
   }
 
@@ -440,14 +440,14 @@ export function getCategoryFormValidation(categoryForm, existingCategories = [])
   if (!nombre) {
     return {
       title: "Nombre requerido",
-      text: "Ingresa el nombre de la categoria.",
+      text: "Ingresa el nombre de la categoría.",
     };
   }
 
   if (nombre.length > 100) {
     return {
-      title: "Nombre invalido",
-      text: "El nombre de la categoria no puede superar 100 caracteres.",
+      title: "Nombre inválido",
+      text: "El nombre de la categoría no puede superar 100 caracteres.",
     };
   }
 
@@ -466,8 +466,8 @@ export function getCategoryFormValidation(categoryForm, existingCategories = [])
 
   if (String(categoryForm.descripcion || "").trim().length > 255) {
     return {
-      title: "Descripcion invalida",
-      text: "La descripcion no puede superar 255 caracteres.",
+      title: "Descripción inválida",
+      text: "La descripción no puede superar 255 caracteres.",
     };
   }
 
@@ -500,7 +500,7 @@ export function getTipoProductoFormValidation(tipoForm, existingTypes = []) {
 
   if (nombre.length > 100) {
     return {
-      title: "Nombre invalido",
+      title: "Nombre inválido",
       text: "El nombre del tipo de producto no puede superar 100 caracteres.",
     };
   }
@@ -520,8 +520,8 @@ export function getTipoProductoFormValidation(tipoForm, existingTypes = []) {
 
   if (String(tipoForm.descripcion || "").trim().length > 255) {
     return {
-      title: "Descripcion invalida",
-      text: "La descripcion no puede superar 255 caracteres.",
+      title: "Descripción inválida",
+      text: "La descripción no puede superar 255 caracteres.",
     };
   }
 

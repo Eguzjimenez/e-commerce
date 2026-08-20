@@ -96,13 +96,13 @@ export async function uploadProductImage(file) {
 
   if (lastError?.status === 405) {
     throw new Error(
-      "La API de imagen existe pero no permite este metodo. Configura REACT_APP_UPLOAD_PRODUCT_IMAGE_PATH con el endpoint correcto de carga."
+      "La API de imagen existe pero no permite este método. Configura REACT_APP_UPLOAD_PRODUCT_IMAGE_PATH con el endpoint correcto de carga."
     );
   }
 
   if (lastError?.status === 404) {
     throw new Error(
-      "No se encontro endpoint de carga de imagen. Configura REACT_APP_UPLOAD_PRODUCT_IMAGE_PATH."
+      "No se encontró endpoint de carga de imagen. Configura REACT_APP_UPLOAD_PRODUCT_IMAGE_PATH."
     );
   }
 
@@ -118,5 +118,5 @@ export async function uploadProductImage(file) {
     );
   }
 
-  throw lastError || new Error("No se encontro endpoint para subir imagenes.");
+  throw lastError || new Error("No se encontró endpoint para subir imágenes.");
 }

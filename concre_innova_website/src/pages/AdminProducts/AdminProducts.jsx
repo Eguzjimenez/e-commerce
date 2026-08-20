@@ -338,10 +338,10 @@ function AdminProducts() {
 
       await Swal.fire({
         icon: "success",
-        title: modalMode === "edit" ? "Actualizacion exitosa" : "Ingreso exitoso",
+        title: modalMode === "edit" ? "Actualización exitosa" : "Ingreso exitoso",
         text:
           modalMode === "edit"
-            ? "El producto se actualizo correctamente."
+            ? "El producto se actualizó correctamente."
             : "El producto se agrego correctamente.",
         timer: 1800,
         showConfirmButton: false,

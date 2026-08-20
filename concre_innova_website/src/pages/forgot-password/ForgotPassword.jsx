@@ -31,7 +31,7 @@ function ForgotPassword() {
         setStep(2);
         await Swal.fire({
           icon: "success",
-          title: "Codigo enviado",
+          title: "Código enviado",
           text: data?.mensaje || "Revisa tu correo para continuar.",
         });
       } else {
@@ -58,41 +58,41 @@ function ForgotPassword() {
         setStep(3);
         await Swal.fire({
           icon: "success",
-          title: "Codigo verificado",
-          text: data?.mensaje || "Ahora puedes crear una nueva contrasena.",
+          title: "Código verificado",
+          text: data?.mensaje || "Ahora puedes crear una nueva contraseña.",
         });
       } else {
-        await Swal.fire({ icon: "warning", title: "Codigo", text: data?.mensaje || "Codigo no valido" });
+        await Swal.fire({ icon: "warning", title: "Codigo", text: data?.mensaje || "Código no válido" });
       }
     } catch (err) {
-      await Swal.fire({ icon: "error", title: "Error", text: err.message || "Error validando codigo" });
+      await Swal.fire({ icon: "error", title: "Error", text: err.message || "Error validando código" });
     }
   };
 
   const handlePasswordChange = async (e) => {
     e?.preventDefault();
     if (!password || password !== passwordConfirm) {
-      await Swal.fire({ icon: "warning", title: "Contrasenas", text: "Las contrasenas no coinciden" });
+      await Swal.fire({ icon: "warning", title: "Contrasenas", text: "Las contraseñas no coinciden" });
       return;
     }
 
     const passwordMessage = getPasswordPolicyMessage(password);
 
     if (passwordMessage) {
-      await Swal.fire({ icon: "warning", title: "Contrasena debil", text: passwordMessage });
+      await Swal.fire({ icon: "warning", title: "Contraseña debil", text: passwordMessage });
       return;
     }
 
     try {
       const res = await resetPassword({ recoveryToken, nuevaContrasena: password });
       if (res?.codigo === 1) {
-        await Swal.fire({ icon: "success", title: "Exito", text: res.mensaje || "Contrasena actualizada correctamente" });
+        await Swal.fire({ icon: "success", title: "Exito", text: res.mensaje || "Contraseña actualizada correctamente" });
         navigate("/login");
       } else {
-        await Swal.fire({ icon: "error", title: "Error", text: res?.mensaje || "No se pudo actualizar la contrasena" });
+        await Swal.fire({ icon: "error", title: "Error", text: res?.mensaje || "No se pudo actualizar la contraseña" });
       }
     } catch (err) {
-      await Swal.fire({ icon: "error", title: "Error", text: err.message || "Error actualizando la contrasena" });
+      await Swal.fire({ icon: "error", title: "Error", text: err.message || "Error actualizando la contraseña" });
     }
   };
 

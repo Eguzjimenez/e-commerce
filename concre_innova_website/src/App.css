@@ -482,3 +482,14 @@
   outline-offset: 3px;
   border-radius: var(--radius-sm);
 }
+
+/* Con las entradas del panel el menú necesita más de una línea. */
+.nav-menu-staff {
+  flex-wrap: wrap;
+  gap: 10px clamp(14px, 2.2vw, 30px);
+  row-gap: 8px;
+}
+
+.nav-menu-staff li a {
+  font-size: 0.88rem;
+}

@@ -62,80 +62,6 @@ function formatShortDate(value) {
   });
 }
 
-function buildReportHtml({ rango, totales, items, productos }) {
-  const filas = items
-    .map(
-      (item) => `<tr>
-        <td>${new Date(item.fecha).toLocaleDateString("es-CR")}</td>
-        <td>${item.producto}</td>
-        <td>${item.categoria}</td>
-        <td>${item.unidades}</td>
-        <td>${item.pedidos}</td>
-        <td>${formatCurrency(item.ingresos)}</td>
-      </tr>`
-    )
-    .join("");
-
-  const ranking = productos
-    .map(
-      (producto, index) => `<tr>
-        <td>${index + 1}</td>
-        <td>${producto.producto}</td>
-        <td>${producto.categoria}</td>
-        <td>${producto.unidadesVendidas}</td>
-        <td>${formatCurrency(producto.ingresos)}</td>
-      </tr>`
-    )
-    .join("");
-
-  return `<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8" />
-<title>Reporte de ventas Concre Innova</title>
-<style>
-  body { font-family: Arial, Helvetica, sans-serif; color: #23301f; padding: 32px; }
-  h1 { margin: 0 0 4px; }
-  .muted { color: #5f5749; margin: 0 0 24px; }
-  .cards { display: flex; gap: 16px; margin-bottom: 28px; }
-  .card { border: 1px solid #ded6c7; border-radius: 10px; padding: 14px 18px; }
-  .card span { display: block; color: #5f5749; font-size: 12px; }
-  .card strong { font-size: 20px; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 28px; }
-  th, td { border-bottom: 1px solid #ded6c7; padding: 8px; text-align: left; font-size: 13px; }
-  th { background: #f5f0e6; }
-</style>
-</head>
-<body>
-  <h1>Reporte de ventas</h1>
-  <p class="muted">Periodo del ${rango.desde} al ${rango.hasta} - Concre Innova</p>
-
-  <div class="cards">
-    <div class="card"><span>Ingresos totales</span><strong>${formatCurrency(totales.ingresosTotales)}</strong></div>
-    <div class="card"><span>Pedidos</span><strong>${totales.pedidosTotales}</strong></div>
-    <div class="card"><span>Unidades</span><strong>${totales.unidadesTotales}</strong></div>
-    <div class="card"><span>Ticket promedio</span><strong>${formatCurrency(totales.ticketPromedio)}</strong></div>
-  </div>
-
-  <h2>Detalle de ventas</h2>
-  <table>
-    <thead>
-      <tr><th>Fecha</th><th>Producto</th><th>Categoría</th><th>Unidades</th><th>Pedidos</th><th>Ingresos</th></tr>
-    </thead>
-    <tbody>${filas || '<tr><td colspan="6">Sin movimientos en el periodo.</td></tr>'}</tbody>
-  </table>
-
-  <h2>Productos más vendidos</h2>
-  <table>
-    <thead>
-      <tr><th>#</th><th>Producto</th><th>Categoría</th><th>Unidades</th><th>Ingresos</th></tr>
-    </thead>
-    <tbody>${ranking || '<tr><td colspan="5">Sin datos en el periodo.</td></tr>'}</tbody>
-  </table>
-</body>
-</html>`;
-}
-
 function AdminReports() {
   const initialRange = defaultRange();
 
@@ -240,23 +166,37 @@ function AdminReports() {
     downloadFile(csv, `reporte-ventas-${fechaDesde}-${fechaHasta}.csv`, "text/csv;charset=utf-8");
   };
 
+  // El reporte sale con encabezado, tabla y totales de la marca, no en crudo.
   const handleExportHtml = () => {
     if (!reporte) {
       return;
     }
 
-    const html = buildReportHtml({
-      rango: { desde: fechaDesde, hasta: fechaHasta },
-      totales: reporte.totales,
-      items: reporte.items,
-      productos,
+    descargarDocumento("reporte", {
+      titulo: "Reporte de ventas",
+      subtitulo: `Período del ${fechaDesde} al ${fechaHasta}`,
+      columnas: [
+        { clave: "fecha", titulo: "Fecha" },
+        { clave: "producto", titulo: "Producto" },
+        { clave: "categoria", titulo: "Categoría" },
+        { clave: "unidades", titulo: "Unidades", numerica: true },
+        { clave: "pedidos", titulo: "Pedidos", numerica: true },
+        { clave: "ingresos", titulo: "Ingresos", numerica: true },
+      ],
+      filas: reporte.items.map((item) => ({
+        fecha: new Date(item.fecha).toLocaleDateString("es-CR"),
+        producto: item.producto,
+        categoria: item.categoria,
+        unidades: item.unidades,
+        pedidos: item.pedidos,
+        ingresos: formatCurrency(item.ingresos),
+      })),
+      notas:
+        `Ingresos totales: ${formatCurrency(reporte.totales.ingresosTotales)} · ` +
+        `Pedidos: ${reporte.totales.pedidosTotales} · ` +
+        `Unidades: ${reporte.totales.unidadesTotales} · ` +
+        `Ticket promedio: ${formatCurrency(reporte.totales.ticketPromedio)}`,
     });
-
-    downloadFile(
-      html,
-      `reporte-ventas-${fechaDesde}-${fechaHasta}.html`,
-      "text/html;charset=utf-8"
-    );
   };
 
   const serieDiaria = useMemo(() => {
@@ -388,10 +328,10 @@ function AdminReports() {
               {loading ? "Generando..." : "Generar reporte"}
             </button>
             <button type="button" className="admin-ghost-button" onClick={handleExportCsv}>
-              Exportar CSV
+              Exportar datos (CSV)
             </button>
             <button type="button" className="admin-ghost-button" onClick={handleExportHtml}>
-              Exportar reporte
+              Descargar reporte
             </button>
           </div>
         </form>

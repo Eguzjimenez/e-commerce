@@ -110,7 +110,7 @@ function AdminConsultas() {
       await Swal.fire({
         icon: "success",
         title: "Consulta respondida",
-        text: "La respuesta se registro y se envio al cliente por correo.",
+        text: "La respuesta se registro y se envío al cliente por correo.",
         timer: 1900,
         showConfirmButton: false,
       });
@@ -267,7 +267,7 @@ function AdminConsultas() {
               <div className="consultas-form-acciones">
                 <button
                   type="button"
-                  className="consultas-accion secundaria"
+                  className="consultas-acción secundaria"
                   onClick={cerrarRespuesta}
                   disabled={enviando}
                 >

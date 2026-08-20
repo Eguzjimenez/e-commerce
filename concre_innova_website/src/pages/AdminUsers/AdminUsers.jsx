@@ -224,8 +224,8 @@ function AdminUsers() {
     if (modalMode === "add" && !formData.contrasena) {
       await Swal.fire({
         icon: "warning",
-        title: "Contrasena requerida",
-        text: "Ingresa una contrasena para el nuevo usuario.",
+        title: "Contraseña requerida",
+        text: "Ingresa una contraseña para el nuevo usuario.",
       });
       return;
     }
@@ -237,7 +237,7 @@ function AdminUsers() {
     if (passwordMessage) {
       await Swal.fire({
         icon: "warning",
-        title: "Contrasena invalida",
+        title: "Contraseña inválida",
         text: passwordMessage,
       });
       return;

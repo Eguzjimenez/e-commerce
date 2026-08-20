@@ -45,7 +45,7 @@ export async function login({ correo, contrasena }) {
   });
 
   if (data?.codigo !== 1) {
-    throw new Error(data?.mensaje || "No se pudo iniciar sesion.");
+    throw new Error(data?.mensaje || "No se pudo iniciar sesión.");
   }
 
   const token = extractToken(data);

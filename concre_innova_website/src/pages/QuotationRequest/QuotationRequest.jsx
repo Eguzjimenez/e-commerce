@@ -228,8 +228,8 @@ function QuotationRequest({ embedded = false, onSubmitted } = {}) {
     if (!trimmedDescription || !trimmedPreferences) {
       await Swal.fire({
         icon: "warning",
-        title: "Informacion requerida",
-        text: "Completa la descripcion y las preferencias de la solicitud.",
+        title: "Información requerida",
+        text: "Completa la descripción y las preferencias de la solicitud.",
       });
       return;
     }
@@ -238,7 +238,7 @@ function QuotationRequest({ embedded = false, onSubmitted } = {}) {
     if (imageValidationMessage) {
       await Swal.fire({
         icon: "warning",
-        title: "Imagenes requeridas",
+        title: "Imágenes requeridas",
         text: imageValidationMessage,
       });
       return;
@@ -260,7 +260,7 @@ function QuotationRequest({ embedded = false, onSubmitted } = {}) {
 
       if (!result?.exitoso) {
         throw new Error(
-          result?.mensaje || "No fue posible registrar la cotizacion."
+          result?.mensaje || "No fue posible registrar la cotización."
         );
       }
 
@@ -290,7 +290,7 @@ function QuotationRequest({ embedded = false, onSubmitted } = {}) {
     } catch (error) {
       await Swal.fire({
         icon: "error",
-        title: "No se pudo enviar la cotizacion",
+        title: "No se pudo enviar la cotización",
         text: error?.message || "Intenta enviar la solicitud nuevamente.",
       });
     } finally {
