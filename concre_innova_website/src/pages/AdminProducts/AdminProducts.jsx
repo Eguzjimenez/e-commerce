@@ -2,6 +2,7 @@ import "./AdminProducts.css";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Swal from "sweetalert2";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
+import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import Modal from "../../components/Modal/Modal";
 import PaginationControls from "../../components/PaginationControls/PaginationControls";
 import {
@@ -95,6 +96,9 @@ function AdminProducts() {
 
   const [newProduct, setNewProduct] = useState(EMPTY_PRODUCT_FORM);
 
+  // La consulta espera a que se termine de escribir en vez de salir por tecla.
+  const busquedaDiferida = useDebouncedValue(searchTerm);
+
   const loadLookups = async () => {
     try {
       const [categoriesResponse, typesResponse] = await Promise.all([
@@ -117,7 +121,7 @@ function AdminProducts() {
 
     try {
       const productsResponse = await getCatalogProducts({
-        searchTerm,
+        searchTerm: busquedaDiferida,
         categoryId: selectedCategoryId === "all" ? undefined : selectedCategoryId,
         page,
         pageSize: ADMIN_PRODUCTS_PAGE_SIZE,
@@ -144,7 +148,7 @@ function AdminProducts() {
     } finally {
       setLoading(false);
     }
-  }, [productPage, searchTerm, selectedCategoryId]);
+  }, [productPage, busquedaDiferida, selectedCategoryId]);
 
   useEffect(() => {
     loadLookups();
@@ -447,7 +451,8 @@ function AdminProducts() {
   };
 
   return (
-    <AdminLayout title="Gestión de Productos">
+    <AdminLayout title="Productos"
+      subtitle="Crea, edita y duplica las piezas del catálogo.">
       <div className="admin-products-page">
         <div className="admin-products-topbar">
           <div className="admin-products-filters">

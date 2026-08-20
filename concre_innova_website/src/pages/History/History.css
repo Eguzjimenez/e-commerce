@@ -247,7 +247,6 @@
 	width: 68px;
 	height: 68px;
 	flex: none;
-	object-fit: cover;
 	border-radius: 10px;
 	background: var(--sage-100);
 }

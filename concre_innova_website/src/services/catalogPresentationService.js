@@ -405,8 +405,37 @@ export function buildProductRequestPayload(productForm, modalMode) {
   return payload;
 }
 
+/**
+ * Normaliza el nombre igual que el API antes de compararlo: recorta los
+ * extremos y colapsa los espacios internos repetidos. Sin esto,
+ * "Macetas  Interior" pasaba el control y quedaba junto a "Macetas Interior".
+ */
+export function normalizarNombreCatalogo(nombre) {
+  return String(nombre ?? "").trim().replace(/\s+/g, " ");
+}
+
+/**
+ * Devuelve la categoria existente que choca con el nombre indicado, o null.
+ * Se usa para avisar mientras se escribe, no solo al guardar.
+ */
+export function findDuplicateCategory(nombre, existingCategories = [], idActual = null) {
+  const objetivo = normalizarNombreCatalogo(nombre).toLowerCase();
+
+  if (!objetivo) {
+    return null;
+  }
+
+  return (
+    existingCategories.find(
+      (category) =>
+        normalizarNombreCatalogo(category?.name).toLowerCase() === objetivo &&
+        String(category?.id) !== String(idActual ?? "")
+    ) || null
+  );
+}
+
 export function getCategoryFormValidation(categoryForm, existingCategories = []) {
-  const nombre = String(categoryForm.nombreCategoria || "").trim();
+  const nombre = normalizarNombreCatalogo(categoryForm.nombreCategoria);
 
   if (!nombre) {
     return {
@@ -422,16 +451,16 @@ export function getCategoryFormValidation(categoryForm, existingCategories = [])
     };
   }
 
-  const isDuplicate = existingCategories.some(
-    (category) =>
-      String(category.name || "").trim().toLowerCase() === nombre.toLowerCase() &&
-      String(category.id) !== String(categoryForm.idCategoria || "")
+  const duplicada = findDuplicateCategory(
+    nombre,
+    existingCategories,
+    categoryForm.idCategoria
   );
 
-  if (isDuplicate) {
+  if (duplicada) {
     return {
-      title: "Categoria duplicada",
-      text: "Ya existe una categoria con ese nombre.",
+      title: "Categoría duplicada",
+      text: `Ya existe la categoría "${duplicada.name}". Usa otro nombre.`,
     };
   }
 

@@ -310,3 +310,25 @@
     grid-template-columns: 1fr;
   }
 }
+
+.admin-categories-count {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+/* Aviso inmediato de choque de nombres, mientras se escribe. */
+.admin-category-duplicate {
+  display: block;
+  margin-top: 6px;
+  color: var(--danger);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.admin-content .admin-category-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

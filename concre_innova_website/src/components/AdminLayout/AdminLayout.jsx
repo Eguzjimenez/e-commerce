@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { ADMIN_NAV_ITEMS, getAdminPanelName } from "../../constants/adminNavigation";
 import { getUserRole } from "../../services/authService";
 
-function AdminLayout({ title, children }) {
+function AdminLayout({ title, subtitle, children }) {
   const userRole = getUserRole();
   const visibleItems = ADMIN_NAV_ITEMS.filter((item) => item.roles.includes(userRole));
   const panelName = getAdminPanelName(userRole);
@@ -35,10 +35,12 @@ function AdminLayout({ title, children }) {
       </aside>
 
       <section className="admin-main">
+        {/* El titulo de la pantalla vive solo aqui: cada vista aporta su propio
+            subtitulo en vez de repetir un encabezado dentro del contenido. */}
         <header className="admin-header">
           <div>
             <h1>{title}</h1>
-            <p>Gestiona las operaciones del negocio desde un solo lugar</p>
+            {subtitle && <p>{subtitle}</p>}
           </div>
         </header>
 

@@ -451,7 +451,8 @@ function AdminQuotations() {
     Boolean(appliedFilters.search) || Boolean(appliedFilters.status);
 
   return (
-    <AdminLayout title="Atención de Cotizaciones">
+    <AdminLayout title="Cotizaciones"
+      subtitle="Responde las solicitudes y conviértelas en pedidos.">
       <div className="admin-quotations-views" role="tablist">
         <button
           type="button"

@@ -326,24 +326,15 @@
   border-radius: var(--radius-md);
 }
 
+/* El encaje de la foto (contain sobre fondo neutro) y la ausencia de velo se
+   definen una sola vez en index.css. Aqui solo queda la caja y la transicion:
+   repetir object-fit o el ::after volvia a recortar y a teñir la imagen,
+   porque App.css se carga despues de index.css. */
 .product-visual img {
   width: 100%;
   height: 100%;
   min-height: 230px;
-  object-fit: cover;
-  opacity: 0.96;
   transition: transform 320ms ease, opacity 320ms ease;
-}
-
-.product-visual::after,
-.catalog-card-visual::after,
-.favorite-image-link::after,
-.modal-image-wrap::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(23, 37, 26, 0.1);
-  pointer-events: none;
 }
 
 .product-rating {

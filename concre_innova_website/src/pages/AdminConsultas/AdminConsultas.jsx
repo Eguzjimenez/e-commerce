@@ -128,7 +128,8 @@ function AdminConsultas() {
   };
 
   return (
-    <AdminLayout title="Consultas de clientes">
+    <AdminLayout title="Consultas"
+      subtitle="Responde los mensajes recibidos desde el formulario de contacto.">
       <div className="consultas-page">
         <div className="consultas-toolbar">
           <div className="consultas-filtros" role="tablist" aria-label="Estado de la consulta">

@@ -202,10 +202,9 @@ function ProductDetail() {
   return (
     <>
       <div className="product-detail-page container">
+        {/* La disponibilidad se anuncia junto al precio; repetirla sobre la
+            foto solo tapaba parte de la pieza. */}
         <div className="product-detail-media product-visual">
-          <span className={`product-rating ${availabilityClass}`}>
-            {getCatalogProductAvailabilityText(product)}
-          </span>
           <img
             src={getCatalogProductImage(product)}
             alt={product.nombre}
@@ -213,42 +212,35 @@ function ProductDetail() {
           />
         </div>
 
+        {/* Orden de lectura: quién es el producto, cuánto cuesta, qué opción se
+            elige y qué se puede hacer. La ficha técnica queda al final, como
+            consulta, en vez de separar el precio de su producto. */}
         <div className="product-detail-info">
           <Link to={PUBLIC_ROUTES.CATALOG} className="product-detail-back">
             Volver al catálogo
           </Link>
-          <span className="product-category">
-            {getCatalogProductCategoryName(product, normalizedCategories)}
-          </span>
-          <h1>{product.nombre}</h1>
-          <p>{product.descripcion || "Producto para interiores y exteriores."}</p>
 
-          <dl className="product-detail-specs">
-            <div>
-              <dt>Disponibilidad</dt>
-              <dd>{getCatalogProductAvailabilityText(product)}</dd>
-            </div>
-            <div>
-              <dt>Categoría</dt>
-              <dd>{getCatalogProductCategoryName(product, normalizedCategories)}</dd>
-            </div>
-            <div>
-              <dt>Tamaño</dt>
-              <dd>{getCatalogProductAttributeText(product, "tamano")}</dd>
-            </div>
-            <div>
-              <dt>Material</dt>
-              <dd>{getCatalogProductAttributeText(product, "material")}</dd>
-            </div>
-            <div>
-              <dt>Referencia</dt>
-              <dd>#{product.idProducto}</dd>
-            </div>
-          </dl>
+          <header className="product-detail-intro">
+            <span className="product-category">
+              {getCatalogProductCategoryName(product, normalizedCategories)}
+            </span>
+            <h1>{product.nombre}</h1>
+            <p className="product-detail-description">
+              {product.descripcion || "Producto para interiores y exteriores."}
+            </p>
+          </header>
+
+          <div className="product-detail-price">
+            <strong>{formatCatalogPrice(selectedVariant?.precio ?? product.precio)}</strong>
+            <span className={`product-detail-availability ${availabilityClass}`}>
+              {getCatalogProductAvailabilityText(product)}
+            </span>
+            <small>IVA incluido</small>
+          </div>
 
           {variants.length > 0 && (
             <label className="product-detail-variant">
-              Variante
+              Elige la variante
               <select
                 value={selectedVariantId}
                 onChange={(event) => setSelectedVariantId(event.target.value)}
@@ -266,8 +258,6 @@ function ProductDetail() {
             </label>
           )}
 
-          <h2>{formatCatalogPrice(selectedVariant?.precio ?? product.precio)}</h2>
-
           <div className="product-detail-actions">
             <button className="btn" type="button" onClick={handleAddToCart}>
               Agregar al carrito
@@ -281,6 +271,28 @@ function ProductDetail() {
               Visualizar en mi espacio
             </button>
           </div>
+
+          <section className="product-detail-sheet">
+            <h2>Ficha técnica</h2>
+            <dl className="product-detail-specs">
+              <div>
+                <dt>Categoría</dt>
+                <dd>{getCatalogProductCategoryName(product, normalizedCategories)}</dd>
+              </div>
+              <div>
+                <dt>Tamaño</dt>
+                <dd>{getCatalogProductAttributeText(product, "tamano")}</dd>
+              </div>
+              <div>
+                <dt>Material</dt>
+                <dd>{getCatalogProductAttributeText(product, "material")}</dd>
+              </div>
+              <div>
+                <dt>Referencia</dt>
+                <dd>#{product.idProducto}</dd>
+              </div>
+            </dl>
+          </section>
         </div>
       </div>
 

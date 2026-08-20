@@ -422,7 +422,15 @@ optgroup {
 .admin-view-product-image,
 .home-feature-media img,
 .home-product-card img,
-.home-collection-card img {
+.home-collection-card img,
+.product-related-card img,
+.advisor-recommendation-media img,
+.admin-image-preview,
+.admin-inventory-detail-media img,
+.cart-product-preview img,
+.favorite-image-link img,
+.main-img,
+.img-gallery img {
   object-fit: contain;
   object-position: center;
   background: var(--catalog-media-bg);

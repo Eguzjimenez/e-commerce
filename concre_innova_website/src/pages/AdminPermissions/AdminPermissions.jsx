@@ -102,7 +102,8 @@ function AdminPermissions() {
   };
 
   return (
-    <AdminLayout title="Gestión de Permisos">
+    <AdminLayout title="Permisos"
+      subtitle="Define qué puede hacer cada rol dentro del sistema.">
       <div className="admin-permissions-page">
         <div className="admin-permissions-toolbar">
           <label>
