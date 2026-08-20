@@ -52,14 +52,6 @@
   margin: -4px 0 0;
 }
 
-.admin-table-wrapper {
-  background: rgba(9, 24, 29, 0.96);
-  border: 1px solid rgba(191, 219, 199, 0.1);
-  border-radius: 8px;
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22);
-  overflow-x: auto;
-}
-
 .admin-users-table {
   border-collapse: collapse;
   min-width: 780px;
@@ -132,7 +124,7 @@
 .user-name-button {
   background: transparent;
   border: 0;
-  color: #f7c873;
+  color: var(--clay);
   cursor: pointer;
   font: inherit;
   font-weight: 800;

@@ -373,7 +373,7 @@
 
 .cart-summary h2 {
   margin: 0 0 4px;
-  color: var(--forest-ink);
+  color: var(--on-dark);
   font-size: 1.05rem;
 }
 
@@ -383,21 +383,21 @@
   justify-content: space-between;
   gap: 12px;
   padding: 9px 0;
-  color: var(--muted);
+  color: var(--on-dark-muted);
   font-size: 0.9rem;
 }
 
 .cart-summary .summary-total--final {
   margin-top: 4px;
   padding-top: 14px;
-  border-top: 1px solid var(--line);
-  color: var(--ink);
+  border-top: 1px solid rgba(216, 208, 191, 0.28);
+  color: var(--on-dark);
   font-size: 1rem;
   font-weight: 700;
 }
 
 .cart-summary .summary-total--final strong {
-  color: var(--forest-ink);
+  color: var(--on-dark);
   font-size: 1.35rem;
 }
 
