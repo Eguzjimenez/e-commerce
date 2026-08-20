@@ -1,6 +1,7 @@
 import "./NotificationItem.css";
 import { Bell, Check, FileText, MessageCircle, Package } from "lucide-react";
 import {
+  NOTIFICATIONS_COPY,
   NOTIFICATION_TYPES,
   formatNotificationDate,
 } from "../../services/notificationService";
@@ -50,7 +51,9 @@ function NotificationItem({ notification, compact = false, onOpen, onMarkAsRead 
           </span>
         </span>
 
-        {unread && <span className="notification-item-dot" aria-label="Sin leer" />}
+        {unread && (
+          <span className="notification-item-dot" role="img" aria-label={NOTIFICATIONS_COPY.sinLeer} />
+        )}
       </button>
 
       {unread && onMarkAsRead && (
@@ -58,11 +61,11 @@ function NotificationItem({ notification, compact = false, onOpen, onMarkAsRead 
           type="button"
           className="notification-item-read"
           onClick={() => onMarkAsRead(notification)}
-          title="Marcar como leida"
-          aria-label={`Marcar como leida: ${notification?.titulo}`}
+          title={NOTIFICATIONS_COPY.marcarUna}
+          aria-label={`${NOTIFICATIONS_COPY.marcarUna}: ${notification?.titulo}`}
         >
           <Check size={15} strokeWidth={2} />
-          {!compact && <span>Marcar como leida</span>}
+          {!compact && <span>{NOTIFICATIONS_COPY.marcarUna}</span>}
         </button>
       )}
     </article>

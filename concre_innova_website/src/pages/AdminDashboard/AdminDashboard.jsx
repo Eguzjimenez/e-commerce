@@ -107,14 +107,15 @@ function AdminDashboard() {
                 <BarChart
                   data={ventasMensuales}
                   valueFormatter={formatCurrency}
-                  emptyMessage="Todavia no hay ventas registradas."
+                  emptyMessage="Todavía no hay ventas registradas."
+                  ariaLabel="Ingresos por mes"
                 />
               </section>
 
               <section className="admin-dashboard-section">
                 <header>
                   <h2>Inventario saludable</h2>
-                  <p>Productos activos con stock por encima del minimo.</p>
+                  <p>Productos activos con stock por encima del mínimo.</p>
                 </header>
                 <DonutChart
                   percentage={metrics.porcentajeInventarioSaludable}
@@ -126,12 +127,13 @@ function AdminDashboard() {
 
             <section className="admin-dashboard-section">
               <header>
-                <h2>Productos mas vendidos</h2>
-                <p>Ranking historico por unidades vendidas.</p>
+                <h2>Productos más vendidos</h2>
+                <p>Ranking histórico por unidades vendidas.</p>
               </header>
               <HorizontalBars
                 data={productosDestacados}
-                emptyMessage="Aun no hay productos vendidos."
+                emptyMessage="Aún no hay productos vendidos."
+                totalLabel="Unidades vendidas"
               />
             </section>
           </>

@@ -1,0 +1,32 @@
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notification-list.compact {
+  gap: 8px;
+}
+
+.notification-list-state {
+  margin: 0;
+  padding: 22px;
+  border-radius: var(--radius-md);
+  background: var(--surface-muted-soft);
+  color: var(--muted);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.notification-list.compact + .notification-list-state,
+.notification-bell-panel-body .notification-list-state {
+  padding: 18px 8px;
+  background: none;
+  font-size: 0.88rem;
+}
+
+.notification-list-state.is-error {
+  background: rgba(155, 47, 34, 0.08);
+  color: var(--danger);
+  font-weight: 600;
+}

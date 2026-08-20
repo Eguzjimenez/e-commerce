@@ -278,62 +278,59 @@
 .catalog-filter-overlay {
   position: fixed;
   inset: 0;
-  z-index: 220;
-  display: flex;
-  justify-content: flex-end;
-  background: rgba(22, 20, 15, 0.38);
+  z-index: 210;
+  background: rgba(22, 20, 15, 0.42);
   animation: catalogOverlayIn 180ms ease both;
 }
 
-.catalog-filter-drawer {
-  width: min(680px, 100vw);
-  height: 100%;
+.catalog-filter-panel {
+  position: sticky;
+  top: 92px;
+  align-self: start;
+  max-height: calc(100vh - 116px);
   display: flex;
   flex-direction: column;
-  background: var(--paper);
+  padding: 20px;
+  background: var(--surface-muted-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
   color: var(--soil-black);
-  box-shadow: -22px 0 46px rgba(22, 20, 15, 0.16);
-  padding: 30px clamp(22px, 3.3vw, 38px);
-  animation: catalogDrawerIn 240ms ease both;
 }
 
-.catalog-filter-drawer-header {
-  min-height: 42px;
+.catalog-filter-panel-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 14px;
+  gap: 10px;
+  padding-bottom: 14px;
+  margin-bottom: 4px;
+  border-bottom: 2px solid var(--sage-200);
 }
 
-.catalog-filter-drawer-header h2 {
+.catalog-filter-panel-header h2 {
   margin: 0;
-  color: var(--soil-black);
+  flex: 1;
+  color: var(--forest-ink);
   font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 1.34rem;
-  font-weight: 500;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-.catalog-filter-close {
-  width: 42px;
-  height: 42px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  color: var(--soil-black);
-  cursor: pointer;
-  padding: 0;
-  transition: color var(--catalog-motion-fast) ease, transform var(--catalog-motion-medium) ease;
+.catalog-filter-count {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--laurel);
+  color: var(--paper);
+  font-size: 0.72rem;
+  font-weight: 800;
 }
 
-.catalog-filter-close:hover,
-.catalog-filter-close:focus-visible {
-  color: var(--catalog-accent);
-  outline: none;
-  transform: rotate(90deg);
+/* El cierre solo tiene sentido cuando el panel se comporta como cajon. */
+.catalog-filter-close {
+  display: none;
 }
+
 
 .catalog-filter-content {
   min-height: 0;
@@ -596,15 +593,6 @@
   }
 }
 
-@keyframes catalogDrawerIn {
-  from {
-    transform: translateX(34px);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
 @media (max-width: 1180px) {
   .catalog-product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -638,9 +626,8 @@
     transform: translateY(0);
   }
 
-  .catalog-filter-drawer {
+  .catalog-filter-panel {
     width: 100vw;
-    padding: 24px 20px;
   }
 }
 

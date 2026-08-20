@@ -3,13 +3,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell } from "lucide-react";
 import Swal from "sweetalert2";
-import NotificationItem from "../NotificationItem/NotificationItem";
+import NotificationList from "../NotificationList/NotificationList";
 import { PRIVATE_ROUTES } from "../../routes/routes";
 import { openChatAssistant } from "../../services/chatService";
 import {
   NOTIFICATIONS_CHANGED_EVENT,
   NOTIFICATIONS_POLL_INTERVAL_MS,
   NOTIFICATIONS_PREVIEW_SIZE,
+  NOTIFICATIONS_COPY,
   NOTIFICATION_TYPES,
   getNotificationSummary,
   getNotifications,
@@ -101,7 +102,7 @@ function NotificationBell() {
       setNotifications(page.items);
       setUnreadCount(page.noLeidas);
     } catch (loadError) {
-      setError(loadError.message || "No se pudieron cargar las notificaciones.");
+      setError(loadError.message || NOTIFICATIONS_COPY.errorCarga);
     } finally {
       setLoading(false);
     }
@@ -177,7 +178,7 @@ function NotificationBell() {
       await markNotificationAsRead(notification.idNotificacion);
       await loadPreview();
     } catch (markError) {
-      setError(markError.message || "No se pudo actualizar la notificacion.");
+      setError(markError.message || NOTIFICATIONS_COPY.errorMarcar);
     }
   };
 
@@ -186,7 +187,7 @@ function NotificationBell() {
       await markAllNotificationsAsRead();
       await loadPreview();
     } catch (markError) {
-      setError(markError.message || "No se pudieron actualizar las notificaciones.");
+      setError(markError.message || NOTIFICATIONS_COPY.errorMarcarTodas);
     }
   };
 
@@ -212,38 +213,25 @@ function NotificationBell() {
       </button>
 
       {open && (
-        <div className="notification-bell-panel" role="dialog" aria-label="Notificaciones">
+        <div className="notification-bell-panel" role="dialog" aria-label={NOTIFICATIONS_COPY.titulo}>
           <header className="notification-bell-panel-header">
-            <h2>Notificaciones</h2>
+            <h2>{NOTIFICATIONS_COPY.titulo}</h2>
             {unreadCount > 0 && (
               <button type="button" onClick={handleMarkAllAsRead}>
-                Marcar todas
+                {NOTIFICATIONS_COPY.marcarTodas}
               </button>
             )}
           </header>
 
           <div className="notification-bell-panel-body">
-            {loading && <p className="notification-bell-state">Cargando...</p>}
-            {!loading && error && (
-              <p className="notification-bell-state error">{error}</p>
-            )}
-            {!loading && !error && notifications.length === 0 && (
-              <p className="notification-bell-state">
-                Todavia no tenes notificaciones.
-              </p>
-            )}
-
-            {!loading &&
-              !error &&
-              notifications.map((notification) => (
-                <NotificationItem
-                  key={notification.idNotificacion}
-                  notification={notification}
-                  compact
-                  onOpen={handleOpenNotification}
-                  onMarkAsRead={handleMarkAsRead}
-                />
-              ))}
+            <NotificationList
+              notifications={notifications}
+              loading={loading}
+              error={error}
+              compact
+              onOpen={handleOpenNotification}
+              onMarkAsRead={handleMarkAsRead}
+            />
           </div>
 
           <footer className="notification-bell-panel-footer">
@@ -254,7 +242,7 @@ function NotificationBell() {
                 navigate(PRIVATE_ROUTES.NOTIFICATIONS);
               }}
             >
-              Ver todas
+              {NOTIFICATIONS_COPY.verTodas}
             </button>
           </footer>
         </div>

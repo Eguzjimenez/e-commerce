@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BellRing, CheckCheck } from "lucide-react";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
-import NotificationItem from "../../components/NotificationItem/NotificationItem";
+import NotificationList from "../../components/NotificationList/NotificationList";
 import PaginationControls from "../../components/PaginationControls/PaginationControls";
 import { ROLE_GROUPS } from "../../constants/roleAccess";
 import { getUserRole } from "../../services/authService";
@@ -11,6 +11,7 @@ import { openChatAssistant } from "../../services/chatService";
 import { DEFAULT_PAGINATION } from "../../services/paginationService";
 import {
   NOTIFICATIONS_CHANGED_EVENT,
+  NOTIFICATIONS_COPY,
   NOTIFICATIONS_PAGE_SIZE,
   NOTIFICATION_TYPES,
   getNotifications,
@@ -20,7 +21,7 @@ import {
 
 const FILTERS = [
   { id: "todas", label: "Todas", soloNoLeidas: false },
-  { id: "no-leidas", label: "Sin leer", soloNoLeidas: true },
+  { id: "no-leidas", label: NOTIFICATIONS_COPY.sinLeer, soloNoLeidas: true },
 ];
 
 function Notifications() {
@@ -48,7 +49,7 @@ function Notifications() {
       setPagination(page);
       setUnreadCount(page.noLeidas);
     } catch (loadError) {
-      setError(loadError.message || "No se pudieron cargar tus notificaciones.");
+      setError(loadError.message || NOTIFICATIONS_COPY.errorCarga);
     } finally {
       setLoading(false);
     }
@@ -96,7 +97,7 @@ function Notifications() {
       await markNotificationAsRead(notification.idNotificacion);
       await loadNotifications();
     } catch (markError) {
-      setError(markError.message || "No se pudo actualizar la notificacion.");
+      setError(markError.message || NOTIFICATIONS_COPY.errorMarcar);
     }
   };
 
@@ -106,16 +107,17 @@ function Notifications() {
       setPageNumber(1);
       await loadNotifications();
     } catch (markError) {
-      setError(markError.message || "No se pudieron actualizar las notificaciones.");
+      setError(markError.message || NOTIFICATIONS_COPY.errorMarcarTodas);
     }
   };
 
   const panelUser = ROLE_GROUPS.SALES_MANAGEMENT.includes(getUserRole());
+  const totalRegistros = pagination.totalItems ?? pagination.items.length;
 
   const content = (
     <>
       <div className="notifications-toolbar">
-        <div className="notifications-filters" role="tablist">
+        <div className="notifications-filters" role="tablist" aria-label="Filtrar avisos">
           {FILTERS.map((filter) => (
             <button
               key={filter.id}
@@ -138,48 +140,44 @@ function Notifications() {
           onClick={handleMarkAllAsRead}
           disabled={loading || unreadCount === 0}
         >
-          <CheckCheck size={16} strokeWidth={1.9} />
-          Marcar todas como leidas
+          <CheckCheck size={16} strokeWidth={1.9} aria-hidden="true" />
+          {NOTIFICATIONS_COPY.marcarTodas}
         </button>
       </div>
 
-      {loading && <p className="notifications-state">Cargando notificaciones...</p>}
-      {!loading && error && <p className="notifications-state error">{error}</p>}
-
-      {!loading && !error && pagination.items.length === 0 && (
-        <p className="notifications-state">
-          No hay notificaciones para mostrar en esta vista.
+      {!loading && !error && totalRegistros > 0 && (
+        <p className="notifications-summary">
+          {totalRegistros} {totalRegistros === 1 ? "aviso" : "avisos"}
+          {unreadCount > 0 ? ` · ${unreadCount} sin leer` : " · todos leídos"}
         </p>
       )}
 
-      {!loading && !error && pagination.items.length > 0 && (
-        <>
-          <div className="notifications-list">
-            {pagination.items.map((notification) => (
-              <NotificationItem
-                key={notification.idNotificacion}
-                notification={notification}
-                onOpen={handleOpenNotification}
-                onMarkAsRead={handleMarkAsRead}
-              />
-            ))}
-          </div>
+      <NotificationList
+        notifications={pagination.items}
+        loading={loading}
+        error={error}
+        emptyMessage={
+          filterId === "no-leidas"
+            ? NOTIFICATIONS_COPY.vacioSinLeer
+            : NOTIFICATIONS_COPY.vacio
+        }
+        onOpen={handleOpenNotification}
+        onMarkAsRead={handleMarkAsRead}
+      />
 
-          {pagination.totalPages > 1 && (
-            <PaginationControls
-              pagination={pagination}
-              onPageChange={setPageNumber}
-              isLoading={loading}
-            />
-          )}
-        </>
+      {!loading && !error && pagination.totalPages > 1 && (
+        <PaginationControls
+          pagination={pagination}
+          onPageChange={setPageNumber}
+          isLoading={loading}
+        />
       )}
     </>
   );
 
   if (panelUser) {
     return (
-      <AdminLayout title="Notificaciones">
+      <AdminLayout title={NOTIFICATIONS_COPY.titulo}>
         <div className="notifications-panel">{content}</div>
       </AdminLayout>
     );
