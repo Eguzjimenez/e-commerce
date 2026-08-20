@@ -20,7 +20,6 @@ import ComprobantePedido from "../../components/ComprobantePedido/ComprobantePed
 const CARD_PAYMENT_METHOD = "Tarjeta";
 const PAYMENT_METHODS = [
   CARD_PAYMENT_METHOD,
-  "SINPE Movil",
   "Efectivo contra entrega",
 ];
 
@@ -57,12 +56,41 @@ function validateCardData({ cardHolder, cardNumber, expiry, cvv }) {
   const expiryDigits = String(expiry || "").replace(/\D/g, "");
   const cvvDigits = String(cvv || "").replace(/\D/g, "");
 
-  if (cardHolderValue.length < 5) {
-    return "Ingresa el nombre completo del titular de la tarjeta.";
+  if (cardHolderValue.length < 5 || !/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(cardHolderValue)) {
+    return "Ingresa el nombre del titular como aparece en la tarjeta.";
+  }
+
+  if (cardHolderValue.split(/\s+/).filter(Boolean).length < 2) {
+    return "Ingresa nombre y apellido del titular de la tarjeta.";
   }
 
   if (cardDigits.length !== 16) {
     return "El numero de tarjeta debe tener 16 digitos.";
+  }
+
+  if (/^(\d)\1+$/.test(cardDigits)) {
+    return "El numero de tarjeta no es valido.";
+  }
+
+  let luhnSum = 0;
+  let shouldDouble = false;
+
+  for (let index = cardDigits.length - 1; index >= 0; index -= 1) {
+    let digit = Number(cardDigits[index]);
+
+    if (shouldDouble) {
+      digit *= 2;
+      if (digit > 9) {
+        digit -= 9;
+      }
+    }
+
+    luhnSum += digit;
+    shouldDouble = !shouldDouble;
+  }
+
+  if (luhnSum % 10 !== 0) {
+    return "El numero de tarjeta no es valido.";
   }
 
   if (expiryDigits.length !== 4) {
@@ -140,7 +168,7 @@ function buildReceiptHtml(receipt) {
     <p class="meta"><strong>Fecha:</strong> ${escapeHtml(receipt.fecha)}</p>
     <p class="meta"><strong>Cliente (usuario):</strong> ${escapeHtml(receipt.idUsuario)}</p>
     <p class="meta"><strong>Dirección:</strong> ${escapeHtml(receipt.direccionEntrega)}</p>
-    <p class="meta"><strong>Metodo de pago:</strong> ${escapeHtml(receipt.metodoPago)}</p>
+    <p class="meta"><strong>Método de pago:</strong> ${escapeHtml(receipt.metodoPago)}</p>
     ${receipt.last4 ? `<p class="meta"><strong>Tarjeta:</strong> Terminada en ${escapeHtml(receipt.last4)}</p>` : ""}
 
     <table>
@@ -231,8 +259,8 @@ function Checkout() {
 
     await Swal.fire({
       icon: "info",
-      title: "Inicia sesion para continuar",
-      text: "Debes iniciar sesion antes de validar stock o confirmar la compra.",
+      title: "Inicia sesión para continuar",
+      text: "Debes iniciar sesión antes de validar stock o confirmar la compra.",
     });
 
     navigate(PUBLIC_ROUTES.LOGIN, {
@@ -251,7 +279,7 @@ function Checkout() {
     if (productos.length === 0) {
       await Swal.fire({
         icon: "info",
-        title: "Carrito vacio",
+        title: "Carrito vacío",
         text: "No hay productos para validar.",
       });
       return;
@@ -338,8 +366,8 @@ function Checkout() {
     if (!direccionEntrega.trim()) {
       await Swal.fire({
         icon: "warning",
-        title: "Direccion requerida",
-        text: "Ingresa la direccion de entrega para continuar.",
+        title: "Dirección requerida",
+        text: "Ingresa la dirección de entrega para continuar.",
       });
       return;
     }
@@ -347,8 +375,8 @@ function Checkout() {
     if (direccionEntrega.trim().length > 255) {
       await Swal.fire({
         icon: "warning",
-        title: "Direccion demasiado larga",
-        text: "La direccion de entrega no puede superar 255 caracteres.",
+        title: "Dirección demasiado larga",
+        text: "La dirección de entrega no puede superar 255 caracteres.",
       });
       return;
     }
@@ -370,8 +398,8 @@ function Checkout() {
     if (!idUsuario) {
       await Swal.fire({
         icon: "error",
-        title: "Sesion invalida",
-        text: "No fue posible identificar el usuario en sesion.",
+        title: "Sesión inválida",
+        text: "No fue posible identificar el usuario en sesión.",
       });
       return;
     }
@@ -427,7 +455,8 @@ function Checkout() {
       setCvv("");
 
       const totalPedido = Number(response?.total);
-      const totalText = formatCatalogPrice(Number.isFinite(totalPedido) ? totalPedido : total);
+      const finalTotal = Number.isFinite(totalPedido) ? totalPedido : total;
+      const totalText = formatCatalogPrice(finalTotal);
       const orderIdText = response?.idPedido != null ? ` (Pedido #${response.idPedido})` : "";
       const receiptData = {
         idPedido: response?.idPedido ?? "N/A",
@@ -436,7 +465,7 @@ function Checkout() {
         direccionEntrega: direccionEntrega.trim(),
         metodoPago,
         last4,
-        total: Number.isFinite(totalPedido) ? totalPedido : total,
+        total: finalTotal,
         items: purchasedItems,
       };
 
@@ -530,7 +559,7 @@ function Checkout() {
           <section className="checkout-panel checkout-form-panel">
             <div className="checkout-panel-head">
               <h3>Datos de pago</h3>
-              <p>Selecciona el metodo de pago y confirma la compra.</p>
+              <p>Selecciona el método de pago y confirma la compra.</p>
             </div>
 
             <input
@@ -542,7 +571,7 @@ function Checkout() {
             />
 
             <fieldset className="checkout-payment-method">
-              <legend>Metodo de pago</legend>
+              <legend>Método de pago</legend>
               <div className="checkout-payment-options">
                 {PAYMENT_METHODS.map((paymentMethod) => (
                   <label className="checkout-payment-option" key={paymentMethod}>

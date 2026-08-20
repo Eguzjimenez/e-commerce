@@ -160,7 +160,7 @@ test("rejects decimal quantities without changing the cart", async () => {
     expect(Swal.fire).toHaveBeenCalledWith(
       expect.objectContaining({
         icon: "warning",
-        title: "Cantidad invalida",
+        title: "Cantidad inválida",
       })
     );
   });

@@ -42,7 +42,7 @@ function Contact() {
         setForm((previous) => ({ ...previous, correo: auth.correo }));
       }
     } catch (loadError) {
-      setError(loadError.message || "No se pudo cargar la informacion de contacto.");
+      setError(loadError.message || "No se pudo cargar la información de contacto.");
     } finally {
       setLoading(false);
     }
@@ -90,7 +90,7 @@ function Contact() {
         <span>Contacto</span>
         <h1>Hablemos de tu espacio</h1>
         <p>
-          Escribinos para cotizaciones, asesoria de cuidado o cualquier consulta sobre
+          Escríbenos para cotizaciones, asesoría de cuidado o cualquier consulta sobre
           nuestros productos.
         </p>
       </header>
@@ -159,7 +159,7 @@ function Contact() {
             </ul>
 
             <div className="contact-social">
-              <span>Seguinos</span>
+              <span>Síguenos</span>
               <div>
                 {empresa.facebook && (
                   <a href={empresa.facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
@@ -202,7 +202,7 @@ function Contact() {
               </label>
 
               <label>
-                Correo electronico
+                Correo electrónico
                 <input
                   type="email"
                   name="correo"

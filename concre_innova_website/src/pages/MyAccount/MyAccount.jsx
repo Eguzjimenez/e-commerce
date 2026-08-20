@@ -22,7 +22,7 @@ function MyAccount() {
 
   const loadUserProfile = useCallback(async () => {
     if (!Number.isInteger(userId) || userId <= 0) {
-      setError("No se pudo identificar al usuario de la sesion.");
+      setError("No se pudo identificar al usuario de la sesión.");
       setLoading(false);
       return;
     }
@@ -42,7 +42,7 @@ function MyAccount() {
         contrasena: "",
       });
     } catch (loadError) {
-      setError(loadError?.message || "No se pudo cargar la informacion de la cuenta.");
+      setError(loadError?.message || "No se pudo cargar la información de la cuenta.");
       setProfile(null);
     } finally {
       setLoading(false);
@@ -79,12 +79,12 @@ function MyAccount() {
       const response = await updateUserInfo(payload);
 
       if (Number(response?.codigo) !== 1) {
-        throw new Error(response?.mensaje || "No se pudo actualizar la informacion.");
+        throw new Error(response?.mensaje || "No se pudo actualizar la información.");
       }
 
       await Swal.fire({
         icon: "success",
-        title: "Informacion actualizada",
+        title: "Información actualizada",
         text: response?.mensaje || "Los cambios se guardaron correctamente.",
         timer: 1600,
         showConfirmButton: false,

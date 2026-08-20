@@ -18,15 +18,15 @@ import {
 
 const homeSlides = [
   {
-    label: "Floristeria y macetas - San Miguel Oeste",
+    label: "Floristería y macetas - San Miguel Oeste",
     title: "Concre Innova",
-    text: "Piezas botanicas, flores y macetas seleccionadas para hogares, terrazas y espacios que buscan una presencia natural, sobria y duradera.",
-    highlight: "Asesoria directa",
+    text: "Piezas botánicas, flores y macetas seleccionadas para hogares, terrazas y espacios que buscan una presencia natural, sobria y duradera.",
+    highlight: "Asesoría directa",
   },
   {
     label: "Regalos vivos",
     title: "Detalles naturales listos para entregar",
-    text: "Sets curados para regalar con planta, maceta, tarjeta y una preparacion cuidada desde Naranjo.",
+    text: "Sets curados para regalar con planta, maceta, tarjeta y una preparación cuidada desde Naranjo.",
     highlight: "Listo para regalo",
   },
   {
@@ -40,7 +40,7 @@ const homeSlides = [
 const collectionCards = [
   {
     title: "Macetas de autor",
-    text: "Concreto, ceramica y acabados sobrios",
+    text: "Concreto, cerámica y acabados sobrios",
     image: macetaNoirImage,
   },
   {
@@ -50,7 +50,7 @@ const collectionCards = [
   },
   {
     title: "Plantas interiores",
-    text: "Seleccion para salas, oficinas y terrazas",
+    text: "Selección para salas, oficinas y terrazas",
     image: macetaNoirImage,
   },
   {
@@ -200,7 +200,7 @@ function Home() {
                     ? getCatalogProductImage(featuredHeroProduct)
                     : macetaNoirImage
                 }
-                alt={featuredHeroProduct?.nombre || "Seleccion botanica"}
+                alt={featuredHeroProduct?.nombre || "Selección botánica"}
                 onError={(event) => {
                   if (featuredHeroProduct) {
                     handleCatalogImageFallback(event, featuredHeroProduct.imagen);
@@ -211,7 +211,7 @@ function Home() {
 
             <div className="home-feature-copy">
               <span>{currentSlide.highlight}</span>
-              <strong>{featuredHeroProduct?.nombre || "Seleccion botanica"}</strong>
+              <strong>{featuredHeroProduct?.nombre || "Selección botánica"}</strong>
               <small>
                 {featuredHeroProduct
                   ? formatCatalogPrice(featuredHeroProduct.precio)
@@ -247,11 +247,11 @@ function Home() {
         <div className="home-section-heading">
           <div>
             <span className="home-section-kicker">Colecciones</span>
-            <h2>Comprar por intencion</h2>
+            <h2>Comprar por intención</h2>
           </div>
           <p>
             La experiencia prioriza decisiones claras: decorar, regalar, renovar o cuidar.
-            Cada coleccion puede mapearse a categorías existentes del catálogo.
+            Cada colección puede mapearse a categorías existentes del catálogo.
           </p>
         </div>
 
@@ -279,7 +279,7 @@ function Home() {
             <h2>Un lugar que define nuestra forma de cuidar</h2>
           </div>
           <p>
-            La propuesta habla del espacio fisico, del origen y de la experiencia de
+            La propuesta habla del espacio físico, del origen y de la experiencia de
             visitar. Aquí el relato se vuelve local, sereno y cercano a San Miguel
             Oeste de Naranjo.
           </p>
@@ -295,7 +295,7 @@ function Home() {
           </figure>
 
           <article className="home-story-panel">
-            <span>Raices</span>
+            <span>Raíces</span>
             <h3>Del oficio al detalle vivo</h3>
             <p>
               Las raices de la marca se cuentan desde el cuidado diario: seleccionar
@@ -321,7 +321,6 @@ function Home() {
               <img src={image} alt="" aria-hidden="true" />
               <figcaption>
                 <strong>{caption}</strong>
-                <span>Reemplazar por fotografia real</span>
               </figcaption>
             </figure>
           ))}
@@ -386,8 +385,6 @@ function Home() {
           </div>
         )}
       </section>
-
-
 
       <ProductModal
         product={selectedProduct}

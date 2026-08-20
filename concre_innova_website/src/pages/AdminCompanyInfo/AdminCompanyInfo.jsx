@@ -45,7 +45,7 @@ function AdminCompanyInfo() {
       setInfo({ ...EMPTY_INFO, ...infoResponse });
       setMensajes(Array.isArray(mensajesResponse?.items) ? mensajesResponse.items : []);
     } catch (loadError) {
-      setError(loadError.message || "No se pudo cargar la informacion de la empresa.");
+      setError(loadError.message || "No se pudo cargar la información de la empresa.");
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ function AdminCompanyInfo() {
 
       await Swal.fire({
         icon: "success",
-        title: "Informacion actualizada",
+        title: "Información actualizada",
         text: "Los datos de la empresa se guardaron correctamente.",
         timer: 1800,
         showConfirmButton: false,
@@ -88,7 +88,7 @@ function AdminCompanyInfo() {
   };
 
   return (
-    <AdminLayout title="Información de la Empresa">
+    <AdminLayout title="Información de la empresa">
       <div className="admin-company-page">
         {error && <div className="admin-products-error">{error}</div>}
         {loading && <div className="admin-products-empty">Cargando información...</div>}

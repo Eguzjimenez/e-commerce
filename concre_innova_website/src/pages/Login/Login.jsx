@@ -26,14 +26,14 @@ function Login() {
         await Swal.fire({
           icon: "success",
           title: "Bienvenido",
-          text: auth.mensaje || "Inicio de sesion exitoso.",
+          text: auth.mensaje || "Inicio de sesión exitoso.",
           timer: 1800,
           showConfirmButton: false,
         });
       }
 
       if (auth.codigo === 0) {
-        const msg = auth.mensaje || "No se pudo iniciar sesion.";
+        const msg = auth.mensaje || "No se pudo iniciar sesión.";
         setError(msg);
         Swal.fire({
           icon: "error",
@@ -53,11 +53,11 @@ function Login() {
         navigate("/");
       }
     } catch (err) {
-      const message = err?.message || "Error al iniciar sesion. Verifica tus datos.";
+      const message = err?.message || "Error al iniciar sesión. Verifica tus datos.";
       setError(message);
       Swal.fire({
         icon: "error",
-        title: "No se pudo iniciar sesion",
+        title: "No se pudo iniciar sesión",
         text: message,
       });
     } finally {
@@ -106,7 +106,7 @@ function Login() {
         </form>
 
         <div className="login-links">
-          <Link to="/forgot-password">Olvidaste tu contraseña?</Link>
+          <Link to="/forgot-password">¿Olvidaste tu contraseña?</Link>
           <Link to="/register">Crear cuenta</Link>
         </div>
       </div>

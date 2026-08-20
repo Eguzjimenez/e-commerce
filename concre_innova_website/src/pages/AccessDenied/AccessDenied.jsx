@@ -17,7 +17,7 @@ function AccessDenied() {
         <h1 className="access-denied-title">Acceso denegado</h1>
 
         <p className="access-denied-message">
-          No tienes permisos para acceder a esta seccion.
+          No tienes permisos para acceder a esta sección.
         </p>
 
         <div className="access-denied-detail">
@@ -25,7 +25,7 @@ function AccessDenied() {
             <strong>Usuario:</strong> {auth?.correo ?? "Desconocido"}
           </p>
           <p>
-            <strong>Seccion solicitada:</strong>{" "}
+            <strong>Sección solicitada:</strong>{" "}
             <code>{attemptedPath}</code>
           </p>
           <p className="access-denied-warning">
@@ -44,7 +44,7 @@ function AccessDenied() {
             className="access-denied-btn secondary"
             onClick={() => navigate(-1)}
           >
-            Volver atras
+            Volver atrás
           </button>
         </div>
       </div>

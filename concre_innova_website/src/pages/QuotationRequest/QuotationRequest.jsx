@@ -50,7 +50,7 @@ function validateSelectedImages(files) {
   }
 
   if (files.length > MAX_IMAGES) {
-    return `Solo puedes adjuntar hasta ${MAX_IMAGES} imagenes.`;
+    return `Solo puedes adjuntar hasta ${MAX_IMAGES} imágenes.`;
   }
 
   const invalidType = files.find(
@@ -88,7 +88,7 @@ function validateRequestedProducts(rows) {
         row.cantidad > 1000
     )
   ) {
-    return "Selecciona productos validos y cantidades entre 1 y 1000.";
+    return "Selecciona productos válidos y cantidades entre 1 y 1000.";
   }
 
   if (
@@ -176,7 +176,7 @@ function QuotationRequest() {
       event.target.value = "";
       await Swal.fire({
         icon: "warning",
-        title: "Imagenes no validas",
+        title: "Imágenes no válidas",
         text: validationMessage,
       });
       return;

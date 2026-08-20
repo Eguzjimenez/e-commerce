@@ -123,7 +123,7 @@ function buildReportHtml({ rango, totales, items, productos }) {
     <tbody>${filas || '<tr><td colspan="6">Sin movimientos en el periodo.</td></tr>'}</tbody>
   </table>
 
-  <h2>Productos mas vendidos</h2>
+  <h2>Productos más vendidos</h2>
   <table>
     <thead>
       <tr><th>#</th><th>Producto</th><th>Categoría</th><th>Unidades</th><th>Ingresos</th></tr>
@@ -480,7 +480,7 @@ function AdminReports() {
                           : "admin-reports-variation negative"
                       }
                     >
-                      <span>Variacion de ingresos</span>
+                      <span>Variación de ingresos</span>
                       <strong>
                         {Number(comparativo.variacionIngresosPorcentaje) >= 0 ? "+" : ""}
                         {Number(comparativo.variacionIngresosPorcentaje).toFixed(1)}%
@@ -507,7 +507,7 @@ function AdminReports() {
               <header className="admin-reports-card-header">
                 <div>
                   <h2>Clientes frecuentes</h2>
-                  <p>Clientes con mas de un pedido, ordenados por recurrencia.</p>
+                  <p>Clientes con más de un pedido, ordenados por recurrencia.</p>
                 </div>
               </header>
 

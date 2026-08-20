@@ -352,7 +352,7 @@
 }
 
 .catalog-filter-section {
-  border-top: 1px solid rgba(22, 20, 15, 0.16);
+  border-top: 1px solid var(--catalog-border);
   padding: 16px 0 18px;
 }
 
@@ -405,7 +405,7 @@
   align-items: center;
   justify-content: center;
   background: transparent;
-  border: 1px solid rgba(22, 20, 15, 0.72);
+  border: 1px solid var(--catalog-border);
   color: var(--soil-black);
   cursor: pointer;
   font-size: 0.92rem;
@@ -432,8 +432,8 @@
 
 .catalog-option-grid button.active,
 .catalog-sort-stack button.active {
-  background: var(--soil-black);
-  border-color: var(--soil-black);
+  background: var(--forest-700);
+  border-color: var(--forest-700);
   color: var(--on-dark);
 }
 
@@ -458,7 +458,7 @@
 }
 
 .catalog-price-slider-track {
-  background: rgba(22, 20, 15, 0.16);
+  background: var(--catalog-border);
 }
 
 .catalog-price-slider-range {
@@ -524,7 +524,7 @@
   margin-top: 0;
   padding: 18px 0 2px;
   background: var(--paper);
-  border-top: 1px solid rgba(22, 20, 15, 0.16);
+  border-top: 1px solid var(--catalog-border);
 }
 
 .catalog-clear-button,
@@ -546,7 +546,7 @@
 
 .catalog-clear-button {
   background: transparent;
-  border: 1px solid rgba(22, 20, 15, 0.72);
+  border: 1px solid var(--catalog-border);
   color: var(--soil-black);
 }
 

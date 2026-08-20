@@ -129,7 +129,7 @@ test("shows the welcome screen before starting the questionnaire", async () => {
   render(<SmartAdvisor />);
 
   expect(
-    await screen.findByText("Bienvenido a tu asesoria personalizada")
+    await screen.findByText("Bienvenido a tu asesoría personalizada")
   ).toBeInTheDocument();
   expect(
     screen.getByRole("button", { name: "Iniciar cuestionario" })

@@ -132,7 +132,7 @@ function Cart() {
           response,
           message: allAvailable
             ? "Todos los productos tienen stock disponible."
-            : "Hay productos sin stock suficiente.",
+             : "Hay productos sin stock suficiente.",
         });
       } catch (error) {
         if (error?.name === "AbortError") {
@@ -222,8 +222,8 @@ function Cart() {
     if (!Number.isFinite(parsedQuantity) || !Number.isInteger(parsedQuantity)) {
       await Swal.fire({
         icon: "warning",
-        title: "Cantidad invalida",
-        text: "La cantidad debe ser un numero entero.",
+        title: "Cantidad inválida",
+        text: "La cantidad debe ser un número entero.",
       });
       return;
     }
