@@ -428,3 +428,35 @@
     width: 100%;
   }
 }
+
+.quotation-history-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.quotation-history-new {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--forest-700);
+  border-radius: var(--radius-md);
+  background: var(--forest-700);
+  color: var(--paper);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.quotation-history-new:hover {
+  background: var(--forest-800);
+}
+
+.quotation-history-new:focus-visible {
+  outline: 2px solid var(--forest-600);
+  outline-offset: 2px;
+}

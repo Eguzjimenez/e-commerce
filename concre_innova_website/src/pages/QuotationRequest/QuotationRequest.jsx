@@ -101,7 +101,7 @@ function validateRequestedProducts(rows) {
   return null;
 }
 
-function QuotationRequest() {
+function QuotationRequest({ embedded = false, onSubmitted } = {}) {
   const fileInputRef = useRef(null);
   const [availableProducts, setAvailableProducts] = useState([]);
   const [requestedProducts, setRequestedProducts] = useState([]);
@@ -282,6 +282,11 @@ function QuotationRequest() {
         title: "Solicitud recibida",
         text: `${result.numeroSeguimiento} fue registrada y esta lista para ser procesada por el equipo administrativo.`,
       });
+
+      // Al abrirse desde el historial, este se refresca y el dialogo cierra.
+      if (typeof onSubmitted === "function") {
+        onSubmitted(result);
+      }
     } catch (error) {
       await Swal.fire({
         icon: "error",
@@ -294,8 +299,9 @@ function QuotationRequest() {
   };
 
   return (
-    <main className="quotation-request-page">
-      <header className="quotation-request-header">
+    <main className={`quotation-request-page ${embedded ? "is-embedded" : ""}`.trim()}>
+      {/* En el dialogo del historial, el titulo lo pone el propio dialogo. */}
+      <header className="quotation-request-header" hidden={embedded}>
         <span>Cotizaciones</span>
         <h1>Nueva cotización</h1>
       </header>

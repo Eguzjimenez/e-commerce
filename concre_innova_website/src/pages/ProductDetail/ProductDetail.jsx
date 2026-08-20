@@ -221,9 +221,6 @@ function ProductDetail() {
           </Link>
 
           <header className="product-detail-intro">
-            <span className="product-category">
-              {getCatalogProductCategoryName(product, normalizedCategories)}
-            </span>
             <h1>{product.nombre}</h1>
             <p className="product-detail-description">
               {product.descripcion || "Producto para interiores y exteriores."}

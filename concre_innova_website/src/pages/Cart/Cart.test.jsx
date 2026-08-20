@@ -120,7 +120,7 @@ test("validates stock before increasing quantity and recalculates totals", async
       ]
     );
     expect(screen.getByLabelText("Cantidad de Maceta")).toHaveValue(2);
-    expect(screen.getByText("Unidades: 2")).toBeInTheDocument();
+    expect(screen.getByText("1 producto(s) · 2 unidad(es)")).toBeInTheDocument();
   });
 });
 
@@ -145,7 +145,7 @@ test("asks for confirmation before removing a cart item", async () => {
     })
   );
 
-  expect(await screen.findByText("Tu carrito esta vacio.")).toBeInTheDocument();
+  expect(await screen.findByText("Tu carrito está vacío.")).toBeInTheDocument();
   expect(JSON.parse(localStorage.getItem("concre_innova_cart"))).toEqual([]);
 });
 

@@ -1,4 +1,4 @@
-import { ADMIN_ROUTES, PRIVATE_ROUTES } from "../routes/routes";
+import { ADMIN_ROUTES } from "../routes/routes";
 import { ROLE_GROUPS } from "./roleAccess";
 
 export const ADMIN_NAV_ITEMS = [
@@ -71,16 +71,6 @@ export const ADMIN_NAV_ITEMS = [
     to: ADMIN_ROUTES.BITACORA,
     label: "Bitacora",
     roles: ROLE_GROUPS.ADMIN_ONLY,
-  },
-  {
-    to: PRIVATE_ROUTES.NOTIFICATIONS,
-    label: "Notificaciones",
-    roles: ROLE_GROUPS.SALES_MANAGEMENT,
-  },
-  {
-    to: PRIVATE_ROUTES.SETTINGS,
-    label: "Configuracion",
-    roles: ROLE_GROUPS.SALES_MANAGEMENT,
   },
 ];
 
