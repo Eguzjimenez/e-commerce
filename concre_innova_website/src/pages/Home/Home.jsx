@@ -8,6 +8,10 @@ import { getCatalogProducts } from "../../services/catalogService";
 import { addToCart } from "../../services/cartService";
 import heroBotanicalImage from "../../img/Hero-background.png";
 import macetaNoirImage from "../../img/Maceta-Negra.jpg";
+import naranjoRoadImage from "../../img/Naranjo_1.jpeg";
+import naranjoLandscapeImage from "../../img/Naranjo_2.jpeg";
+import naranjoFarmImage from "../../img/Naranjo_3.jpeg";
+import naranjoHomeImage from "../../img/Naranjo_4.png";
 import {
   buildCatalogModalProduct,
   formatCatalogPrice,
@@ -37,11 +41,13 @@ const homeSlides = [
   },
 ];
 
+// El primer valor solo identifica la entrada en React: la galeria es decorativa
+// y no lleva pie de foto.
 const storyPhotos = [
-  ["Fachada o entrada del local", macetaNoirImage],
-  ["Mesa de trabajo y preparacion", heroBotanicalImage],
-  ["Entorno natural de Naranjo", heroBotanicalImage],
-  ["Detalle de macetas y plantas", macetaNoirImage],
+  ["carretera", naranjoRoadImage],
+  ["paisaje", naranjoLandscapeImage],
+  ["finca", naranjoFarmImage],
+  ["hogar", naranjoHomeImage],
 ];
 
 function Home() {
@@ -264,12 +270,9 @@ function Home() {
         </div>
 
         <div className="home-story-gallery">
-          {storyPhotos.map(([caption, image]) => (
-            <figure key={caption}>
+          {storyPhotos.map(([key, image]) => (
+            <figure key={key}>
               <img src={image} alt="" aria-hidden="true" />
-              <figcaption>
-                <strong>{caption}</strong>
-              </figcaption>
             </figure>
           ))}
         </div>
