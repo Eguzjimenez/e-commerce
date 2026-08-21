@@ -6,20 +6,29 @@
   margin-top: clamp(32px, 5vw, 64px);
 }
 
-/* La foto se muestra completa: la caja fija la proporción y el encaje sin
-   recorte viene del bloque central de index.css. */
+/* La foto conserva su proporción real y se centra dentro del marco. Antes se
+   estiraba hasta la altura de la ficha y el relleno sobrante se pintaba con un
+   tono distinto al del propio marco, así que la imagen se leía como un bloque
+   pegado encima en vez de formar parte de la tarjeta. */
 .product-detail-media {
   min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 2vw, 28px);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--paper);
   overflow: hidden;
 }
 
-.product-detail-media img {
-  width: 100%;
-  height: 100%;
+.product-detail-media.product-visual img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   min-height: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
 }
 
 .product-detail-info {
