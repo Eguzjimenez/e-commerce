@@ -465,7 +465,13 @@
   margin-top: 18px;
 }
 
+/* Las fotos no comparten proporcion (una es cuadrada y otra 16:9). Con un
+   recuadro de proporcion fija habria que recortarlas, asi que cada una ocupa
+   todo el ancho de su tarjeta, conserva su altura natural y se centra en el
+   alto comun de la fila: se ven completas y sin aire lateral. */
 .home-story-gallery figure {
+  display: flex;
+  flex-direction: column;
   margin: 0;
   padding: 12px;
   transition: border-color 180ms ease, transform 220ms ease;
@@ -473,19 +479,12 @@
 
 .home-story-gallery img {
   width: 100%;
-  aspect-ratio: 1.47 / 1;
-  object-fit: cover;
-}
-
-.home-story-gallery figcaption {
-  display: grid;
-  gap: 5px;
-  padding: 14px 4px 4px;
-}
-
-.home-story-gallery strong {
-  color: var(--ink);
-  font-size: 0.82rem;
+  height: auto;
+  margin-block: auto;
+  aspect-ratio: auto;
+  object-fit: contain;
+  background: transparent;
+  border-radius: var(--radius-sm);
 }
 
 .home-story-gallery span {
