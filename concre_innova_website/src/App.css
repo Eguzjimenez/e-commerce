@@ -12,53 +12,12 @@
 
 .nav-container {
   width: min(var(--max-page), calc(100% - 40px));
-  min-height: 68px;
+  min-height: 56px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr);
-  align-items: center;
-  gap: 28px;
-}
-
-.navbar-admin {
-  padding: 12px 0;
-}
-
-.navbar-compact .nav-container {
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  min-height: 56px;
+  align-items: center;
   gap: 18px;
-}
-
-/* La marca ocupa siempre la columna central y las acciones la ultima, de modo
-   que todas las vistas comparten la misma composicion de navegacion. */
-.nav-brand-block {
-  grid-column: 2;
-}
-
-.nav-utility-actions {
-  grid-column: 3;
-}
-
-.navbar-compact .nav-brand-block {
-  justify-items: center;
-  justify-self: center;
-  text-align: center;
-  padding: 0;
-}
-
-.navbar-compact .nav-brand-block::before {
-  grid-row: span 2;
-  width: 26px;
-  height: 26px;
-}
-
-.navbar-compact .nav-logo {
-  font-size: clamp(1.5rem, 2vw, 1.78rem);
-}
-
-.navbar-admin .nav-utility-actions {
-  gap: 12px;
 }
 
 .nav-role {
@@ -82,31 +41,16 @@
   border-radius: 50%;
 }
 
-.navbar-admin .nav-icon-link,
-.navbar-admin .nav-logout-button {
-  min-height: 42px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 0 18px;
-  font-size: 0.88rem;
-  font-weight: 600;
-}
-
-.navbar-admin .nav-icon-link:hover,
-.navbar-admin .nav-icon-link.active,
-.navbar-admin .nav-logout-button:hover {
-  background: var(--surface-muted-soft);
-  border-color: var(--clay);
-  transform: none;
-}
-
+/* La marca ocupa siempre la columna central y las acciones la ultima, de modo
+   que todas las vistas comparten la misma composicion de navegacion. */
 .nav-brand-block {
+  grid-column: 2;
   position: relative;
   display: grid;
   justify-items: center;
   justify-self: center;
   gap: 2px;
-  padding: 4px 0 0;
+  padding: 0;
   text-decoration: none;
   text-align: center;
   white-space: nowrap;
@@ -114,8 +58,9 @@
 
 .nav-brand-block::before {
   content: "";
-  width: 28px;
-  height: 28px;
+  grid-row: span 2;
+  width: 26px;
+  height: 26px;
   background:
     linear-gradient(135deg, rgba(var(--paper-rgb), 0.32), rgba(var(--paper-rgb), 0)),
     var(--clay);
@@ -127,7 +72,7 @@
 .nav-logo {
   color: var(--ink);
   font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: clamp(1.78rem, 2.5vw, 2.14rem);
+  font-size: clamp(1.5rem, 2vw, 1.78rem);
   font-weight: 600;
   line-height: 1;
 }
@@ -139,7 +84,12 @@
   text-transform: uppercase;
 }
 
+.preference-toggles {
+  grid-column: 1;
+}
+
 .nav-utility-actions {
+  grid-column: 3;
   display: flex;
   justify-self: end;
   align-items: center;
@@ -367,17 +317,15 @@
     gap: 14px;
   }
 
+  /* Sin espacio para cuatro bloques en una linea, los interruptores pasan a su
+     propia fila y la marca deja de recortarse. */
+  .preference-toggles {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
   .nav-icon-label {
     display: none;
-  }
-
-  .navbar-admin .nav-container {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: "brand actions";
-  }
-
-  .navbar-admin .nav-icon-label {
-    display: inline;
   }
 
   .menu-toggle {
@@ -432,8 +380,10 @@
 }
 
 @media (max-width: 560px) {
+  /* Con tres acciones a la derecha la marca no cabe a tamano de escritorio y se
+     recortaba con puntos suspensivos. */
   .nav-logo {
-    font-size: 1.74rem;
+    font-size: clamp(1.05rem, 5vw, 1.28rem);
   }
 
   .nav-location {
@@ -455,17 +405,6 @@
     display: none;
   }
 
-  .navbar-admin .nav-icon-label {
-    display: none;
-  }
-
-  .navbar-admin .nav-icon-link,
-  .navbar-admin .nav-logout-button {
-    width: 38px;
-    height: 38px;
-    padding: 0;
-  }
-
   .nav-register-link {
     display: none;
   }
@@ -481,15 +420,4 @@
   outline: 2px solid var(--forest-600);
   outline-offset: 3px;
   border-radius: var(--radius-sm);
-}
-
-/* Con las entradas del panel el menú necesita más de una línea. */
-.nav-menu-staff {
-  flex-wrap: wrap;
-  gap: 10px clamp(14px, 2.2vw, 30px);
-  row-gap: 8px;
-}
-
-.nav-menu-staff li a {
-  font-size: 0.88rem;
 }

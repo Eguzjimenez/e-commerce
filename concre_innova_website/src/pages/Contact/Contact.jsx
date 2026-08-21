@@ -120,7 +120,7 @@ function Contact() {
                   <Phone size={18} aria-hidden="true" />
                   <div>
                     <span>Teléfono</span>
-                    <a href={`tel:${empresa.teléfono.replace(/\s/g, "")}`}>{empresa.telefono}</a>
+                    <a href={`tel:${empresa.telefono.replace(/\s/g, "")}`}>{empresa.telefono}</a>
                   </div>
                 </li>
               )}
