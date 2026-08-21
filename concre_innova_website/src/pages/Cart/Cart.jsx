@@ -362,9 +362,6 @@ function Cart() {
                   <img src={product.img} alt={product.name} />
 
                   <div className="cart-info">
-                    <span className="product-category">
-                      Producto seleccionado
-                    </span>
                     <h3>{product.name}</h3>
                     {attributes.length > 0 && (
                       <p className="cart-attributes">
