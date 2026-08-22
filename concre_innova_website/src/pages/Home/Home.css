@@ -312,7 +312,6 @@
   text-align: justify;
 }
 
-.home-product-grid,
 .home-story-gallery {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -322,6 +321,14 @@
 .home-story-gallery {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 24px;
+}
+
+/* Tres columnas para los seis destacados: dos filas completas en vez de una de
+   cuatro y otra de dos, y tarjetas con espacio suficiente para la fotografia. */
+.home-product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 24px;
 }
 
 .home-product-card,
@@ -534,6 +541,8 @@
   grid-column: 1 / -1;
 }
 
+/* La tarjeta vuelve a ser una superficie: sobre la banda de la seccion, sin
+   fondo ni borde, la reja se leia como una lista de imagenes sueltas. */
 .home-product-card {
   animation: homeProductReveal 520ms ease both;
   animation-delay: calc(var(--card-index) * 60ms);
@@ -589,6 +598,46 @@
   flex-direction: column;
   gap: 10px;
   padding: 20px 20px 22px;
+}
+
+/* Jerarquia dentro de la tarjeta: nombre, ficha breve y, separados por una
+   linea, el precio junto al llamado a la accion. */
+.home-product-card .product-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 6px 6px;
+}
+
+.home-product-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.home-product-footer {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.home-product-cta {
+  color: var(--clay);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.home-product-card:hover .home-product-cta {
+  text-decoration: underline;
 }
 
 .product-card-body h3 {
