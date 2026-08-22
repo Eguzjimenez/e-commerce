@@ -94,7 +94,7 @@
    ocupa el espacio vacio de la izquierda y queda siempre a la vista. */
 .catalog-shop-layout {
   display: grid;
-  grid-template-columns: minmax(280px, 330px) minmax(0, 1fr);
+  grid-template-columns: minmax(300px, 384px) minmax(0, 1fr);
   gap: 32px;
   align-items: start;
 }
@@ -240,29 +240,6 @@
   color: var(--muted);
   font-size: 0.95rem;
   line-height: 1.45;
-}
-
-.catalog-card-action {
-  margin-top: auto;
-  padding-top: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  border-top: 1px solid var(--line);
-}
-
-.catalog-card-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--laurel);
-  font-size: 0.96rem;
-  font-weight: 700;
-}
-
-.catalog-shop-card:hover .catalog-card-cta {
-  color: var(--clay);
 }
 
 .catalog-status,
@@ -449,13 +426,13 @@
   color: var(--muted);
 }
 
-/* Las opciones se ajustan a su texto en lugar de repartirse en columnas de
-   ancho fijo: con la reja, "XL" ocupaba lo mismo que "Macetas Exterior" y cada
-   grupo terminaba con media fila vacia. */
+/* Reja de columnas iguales: las opciones quedan alineadas en filas y columnas
+   dentro de cada grupo. El minimo de 150px evita que las etiquetas largas se
+   partan en dos lineas. */
 .catalog-option-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
 }
 
 .catalog-option-grid button,
@@ -491,13 +468,14 @@
   outline: none;
 }
 
+/* La opcion elegida llevaba texto casi negro (--forest-ink) sobre verde oscuro
+   (--laurel): 1.6:1 de contraste, ilegible. Ahora el texto va en claro. */
 .catalog-option-grid button.active,
 .catalog-sort-stack button.active {
-  background: var(--laurel);
-  border-color: var(--laurel);
-  color: var(--forest-ink);
+  background: var(--forest-700);
+  border-color: var(--forest-700);
+  color: var(--paper);
   font-weight: 700;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 :root[data-theme="oscuro"] .catalog-option-grid button.active,
@@ -577,11 +555,12 @@
 
 .catalog-sort-stack {
   display: grid;
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
 }
 
 .catalog-sort-stack button {
-  min-height: 52px;
+  min-height: 36px;
   justify-content: center;
   padding: 0 16px;
   text-align: center;
@@ -872,10 +851,31 @@
   gap: 18px;
 }
 
+/* Dentro del modal la vista se aplanaba a una sola columna y quedaba mucho
+   espacio sin usar a la derecha. Con auto-fit el asesor arma dos columnas en
+   cuanto hay ancho, igual que el catalogo reparte filtros y reja. */
 .advisor-in-modal .advisor-welcome,
-.advisor-in-modal .advisor-workspace,
 .advisor-in-modal .advisor-results-header {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(238px, 1fr));
+  gap: 18px;
+}
+
+/* Igual que el catalogo: navegacion estrecha a la izquierda y area de trabajo
+   ancha a la derecha, no dos columnas iguales. */
+.advisor-in-modal .advisor-workspace {
+  grid-template-columns: minmax(0, 0.38fr) minmax(0, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 720px) {
+  .advisor-in-modal .advisor-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* El rail deja de fijarse: dentro del modal no hay desplazamiento de pagina. */
+.advisor-in-modal .advisor-rail {
+  position: static;
 }
 
 .advisor-in-modal .advisor-rail {

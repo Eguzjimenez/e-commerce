@@ -697,12 +697,6 @@ function Catalog() {
                         <p className="catalog-card-meta">{buildCatalogProductSummary(product)}</p>
                       )}
                       <strong>{formatCatalogPrice(product.precio)}</strong>
-
-                      <div className="catalog-card-action">
-                        <span className="catalog-card-cta" aria-hidden="true">
-                          Ver detalle
-                        </span>
-                      </div>
                     </div>
                   </article>
                 );
