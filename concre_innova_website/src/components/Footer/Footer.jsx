@@ -52,7 +52,6 @@ function Footer() {
           <h3>Explorar</h3>
           <Link to={PUBLIC_ROUTES.HOME}>Inicio</Link>
           <Link to={PUBLIC_ROUTES.CATALOG}>Catálogo</Link>
-          <Link to={PUBLIC_ROUTES.SMART_ADVISOR}>Asesor inteligente</Link>
           <Link to={PUBLIC_ROUTES.FAVORITES}>Favoritos</Link>
         </nav>
 

@@ -14,6 +14,7 @@ import naranjoFarmImage from "../../img/Naranjo_3.jpeg";
 import naranjoHomeImage from "../../img/Naranjo_4.png";
 import {
   buildCatalogModalProduct,
+  buildCatalogProductSummary,
   formatCatalogPrice,
   getCatalogProductImage,
   getFeaturedCatalogProducts,
@@ -318,7 +319,18 @@ function Home() {
 
                 <div className="product-card-body">
                   <h3>{product.nombre}</h3>
-                  <p className="home-product-price">{formatCatalogPrice(product.precio)}</p>
+                  {buildCatalogProductSummary(product) && (
+                    <p className="home-product-meta">
+                      {buildCatalogProductSummary(product)}
+                    </p>
+                  )}
+
+                  <div className="home-product-footer">
+                    <p className="home-product-price">{formatCatalogPrice(product.precio)}</p>
+                    <span className="home-product-cta" aria-hidden="true">
+                      Ver detalle
+                    </span>
+                  </div>
                 </div>
               </article>
             ))}
