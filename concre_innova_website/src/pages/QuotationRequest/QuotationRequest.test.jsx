@@ -1,7 +1,11 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import Swal from "sweetalert2";
-import { getCatalogProducts } from "../../services/catalogService";
+import {
+  getCatalogProducts,
+  getProductImageCandidates,
+} from "../../services/catalogService";
 import { createQuotation } from "../../services/quotationService";
+import { getCompanyInfo } from "../../services/empresaService";
 import QuotationRequest from "./QuotationRequest";
 
 jest.mock("../../services/quotationService", () => ({
@@ -10,6 +14,11 @@ jest.mock("../../services/quotationService", () => ({
 
 jest.mock("../../services/catalogService", () => ({
   getCatalogProducts: jest.fn(),
+  getProductImageCandidates: jest.fn(() => []),
+}));
+
+jest.mock("../../services/empresaService", () => ({
+  getCompanyInfo: jest.fn(),
 }));
 
 jest.mock("sweetalert2", () => ({
@@ -21,11 +30,18 @@ beforeEach(() => {
   getCatalogProducts.mockResolvedValue({
     items: [{ idProducto: 5, nombre: "Macetero terraza" }],
   });
+  getCompanyInfo.mockResolvedValue({});
+  getProductImageCandidates.mockReturnValue([]);
   URL.createObjectURL = jest.fn(() => "blob:reference-image");
   URL.revokeObjectURL = jest.fn();
 });
 
-test("submits the description and selected reference image", async () => {
+async function advanceStep() {
+  fireEvent.click(screen.getByRole("button", { name: /continuar/i }));
+  await waitFor(() => expect(Swal.fire).not.toHaveBeenCalled());
+}
+
+test("walks the three steps and submits the description and reference image", async () => {
   createQuotation.mockResolvedValue({
     exitoso: true,
     idCotizacion: 24,
@@ -42,7 +58,11 @@ test("submits the description and selected reference image", async () => {
   expect(
     await screen.findByRole("option", { name: "Macetero terraza" })
   ).toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText("Descripción"), {
+
+  // Paso 1 -> 2
+  await advanceStep();
+
+  fireEvent.change(await screen.findByLabelText("Descripción"), {
     target: { value: "Macetero personalizado para terraza" },
   });
   fireEvent.change(screen.getByLabelText("Preferencias"), {
@@ -51,9 +71,11 @@ test("submits the description and selected reference image", async () => {
   fireEvent.change(screen.getByLabelText("Adjuntar imagenes"), {
     target: { files: [referenceImage] },
   });
-  fireEvent.click(
-    screen.getByRole("button", { name: "Enviar solicitud" })
-  );
+
+  // Paso 2 -> 3
+  await advanceStep();
+
+  fireEvent.click(await screen.findByRole("button", { name: /enviar solicitud/i }));
 
   await waitFor(() =>
     expect(createQuotation).toHaveBeenCalledWith({
@@ -63,15 +85,34 @@ test("submits the description and selected reference image", async () => {
       imagenes: [referenceImage],
     })
   );
-  expect(
-    await screen.findByText(
-      "Solicitud COT-0000000024 recibida y lista para procesarse."
-    )
-  ).toBeInTheDocument();
   expect(Swal.fire).toHaveBeenCalledWith(
     expect.objectContaining({
       icon: "success",
       title: "Solicitud recibida",
     })
   );
+});
+
+test("blocks the delivery data step until the project details are complete", async () => {
+  Swal.fire.mockResolvedValue({});
+
+  render(<QuotationRequest />);
+  expect(
+    await screen.findByRole("option", { name: "Macetero terraza" })
+  ).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole("button", { name: /continuar/i }));
+  await screen.findByLabelText("Descripción");
+
+  fireEvent.click(screen.getByRole("button", { name: /continuar/i }));
+
+  await waitFor(() =>
+    expect(Swal.fire).toHaveBeenCalledWith(
+      expect.objectContaining({
+        icon: "warning",
+        title: "Información requerida",
+      })
+    )
+  );
+  expect(createQuotation).not.toHaveBeenCalled();
 });

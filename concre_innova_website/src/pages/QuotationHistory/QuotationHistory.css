@@ -1,7 +1,9 @@
+/* Igual que el catalogo: la pantalla ocupa el ancho completo de la ventana en
+   lugar de dejar margen muerto a los lados. */
 .quotation-history-page {
-  margin: 0 auto;
-  max-width: 1180px;
-  padding: 42px 24px 70px;
+  width: 100%;
+  margin: 0;
+  padding: 42px clamp(16px, 2.4vw, 44px) 70px;
 }
 
 .quotation-history-header span,
@@ -12,10 +14,25 @@
   text-transform: uppercase;
 }
 
-.quotation-history-header h1 {
-  color: var(--ink);
-  font-size: clamp(2rem, 4vw, 3.4rem);
-  margin: 8px 0 28px;
+/* Misma direccion de diseño que el resumen de la cotización: superficie clara,
+   borde fino y titulo serif dentro de una sola tarjeta. */
+.quotation-history-card {
+  padding: 24px 26px 28px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.quotation-history-card .quotation-history-filters {
+  background: var(--surface-muted-soft);
+}
+
+.quotation-history-header h1,
+.quotation-history-header h2 {
+  color: var(--soil-black);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 6px 0 22px;
 }
 
 .quotation-history-filters {
