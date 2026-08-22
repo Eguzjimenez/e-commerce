@@ -1,6 +1,6 @@
 import "./Contact.css";
 import { useEffect, useState } from "react";
-import { Clock, ExternalLink, Mail, MapPin, Phone, Send } from "lucide-react";
+import { Camera, Clock, Mail, MapPin, Music2, Phone, Send, Users } from "lucide-react";
 import Swal from "sweetalert2";
 import { getCompanyInfo, sendContactMessage } from "../../services/empresaService";
 import { getAuth } from "../../services/authService";
@@ -50,7 +50,17 @@ function Contact() {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setForm((previous) => ({ ...previous, [name]: value }));
+    let nextValue = value;
+
+    if (name === "nombre") {
+      nextValue = value.replace(/[^\p{L}\s]/gu, "");
+    }
+
+    if (name === "telefono") {
+      nextValue = value.replace(/\D/g, "").slice(0, 15);
+    }
+
+    setForm((previous) => ({ ...previous, [name]: nextValue }));
   };
 
   const handleSubmit = async (event) => {
@@ -75,7 +85,7 @@ function Contact() {
       await Swal.fire({
         icon: "error",
         title: "No se pudo enviar",
-        text: sendError.message || "Revisa los datos e intenta nuevamente.",
+        text: sendError.message || "Revisa los datos e inténtalo nuevamente.",
       });
     } finally {
       setSending(false);
@@ -163,19 +173,19 @@ function Contact() {
               <div>
                 {empresa.facebook && (
                   <a href={empresa.facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
-                    <ExternalLink size={18} aria-hidden="true" />
+                    <Users size={18} aria-hidden="true" />
                     Facebook
                   </a>
                 )}
                 {empresa.instagram && (
                   <a href={empresa.instagram} target="_blank" rel="noreferrer" aria-label="Instagram">
-                    <ExternalLink size={18} aria-hidden="true" />
+                    <Camera size={18} aria-hidden="true" />
                     Instagram
                   </a>
                 )}
                 {empresa.tikTok && (
                   <a href={empresa.tikTok} target="_blank" rel="noreferrer" aria-label="TikTok">
-                    <ExternalLink size={18} aria-hidden="true" />
+                    <Music2 size={18} aria-hidden="true" />
                     TikTok
                   </a>
                 )}
@@ -185,7 +195,7 @@ function Contact() {
 
           <section className="contact-form-card">
             <h2>Enviar una consulta</h2>
-            <p>Completa el formulario y te contactamos por correo.</p>
+            <p>Completa el formulario y nos pondremos en contacto contigo por correo.</p>
 
             <form className="contact-form" onSubmit={handleSubmit}>
               <label>
@@ -193,6 +203,9 @@ function Contact() {
                 <input
                   type="text"
                   name="nombre"
+                  autoComplete="name"
+                  pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+"
+                  title="Ingresa solo letras y espacios."
                   value={form.nombre}
                   onChange={handleChange}
                   maxLength={150}
@@ -206,6 +219,9 @@ function Contact() {
                 <input
                   type="email"
                   name="correo"
+                  autoComplete="email"
+                  pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+                  title="Ingresa un correo electrónico válido."
                   value={form.correo}
                   onChange={handleChange}
                   maxLength={150}
@@ -219,14 +235,10 @@ function Contact() {
                 <input
                   type="tel"
                   name="telefono"
-                  inputMode="tel"
-                  /* Admite digitos, espacios, guiones, parentesis y prefijo
-                     internacional; la API aplica la misma regla. Los parentesis
-                     van escapados porque el navegador compila el patron con la
-                     bandera "v", donde son caracteres reservados. */
-                  pattern="\+?[0-9\s.\-\(\)]{8,20}"
-                  title="Entre 8 y 15 digitos. Se permiten espacios, guiones, parentesis y el prefijo +."
-                  placeholder="8888-8888"
+                  inputMode="numeric"
+                  pattern="[0-9]{8,15}"
+                  title="Ingresa entre 8 y 15 dígitos. Este campo es opcional."
+                  placeholder="88888888"
                   value={form.telefono}
                   onChange={handleChange}
                   maxLength={20}

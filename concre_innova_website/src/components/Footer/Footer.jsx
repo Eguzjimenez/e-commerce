@@ -1,6 +1,7 @@
 import "./Footer.css";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Camera, Mail, Music2, Phone, Users } from "lucide-react";
 import { getCompanyInfo } from "../../services/empresaService";
 import { PUBLIC_ROUTES } from "../../routes/routes";
 
@@ -58,10 +59,16 @@ function Footer() {
         <div className="site-footer-column">
           <h3>Contacto</h3>
           {empresa?.correo && (
-            <a href={`mailto:${empresa.correo}`}>{empresa.correo}</a>
+            <a href={`mailto:${empresa.correo}`}>
+              <Mail className="site-footer-link-icon" size={17} aria-hidden="true" />
+              {empresa.correo}
+            </a>
           )}
           {empresa?.telefono && (
-            <a href={`tel:${telefonoEnlace}`}>{empresa.telefono}</a>
+            <a href={`tel:${telefonoEnlace}`}>
+              <Phone className="site-footer-link-icon" size={17} aria-hidden="true" />
+              {empresa.telefono}
+            </a>
           )}
           {empresa?.direccion && <p>{empresa.direccion}</p>}
           {empresa?.horario && <p className="site-footer-note">{empresa.horario}</p>}
@@ -72,16 +79,19 @@ function Footer() {
           <h3>Redes</h3>
           {empresa?.instagram && (
             <a href={empresa.instagram} target="_blank" rel="noreferrer">
+              <Camera className="site-footer-link-icon" size={17} aria-hidden="true" />
               Instagram
             </a>
           )}
           {empresa?.facebook && (
             <a href={empresa.facebook} target="_blank" rel="noreferrer">
+              <Users className="site-footer-link-icon" size={17} aria-hidden="true" />
               Facebook
             </a>
           )}
           {empresa?.tikTok && (
             <a href={empresa.tikTok} target="_blank" rel="noreferrer">
+              <Music2 className="site-footer-link-icon" size={17} aria-hidden="true" />
               TikTok
             </a>
           )}

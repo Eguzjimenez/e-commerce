@@ -243,7 +243,6 @@ function Home() {
           <figure className="home-story-photo">
             <img src={heroBotanicalImage} alt="Macetas y plantas en un espacio exterior" />
             <figcaption className="home-story-caption">
-              <span>Foto real del lugar</span>
               <p>Entorno verde, luz natural y macetas como parte de la experiencia de visita.</p>
             </figcaption>
           </figure>
@@ -252,9 +251,9 @@ function Home() {
             <span>Raíces</span>
             <h3>Del oficio al detalle vivo</h3>
             <p>
-              Las raices de la marca se cuentan desde el cuidado diario: seleccionar
-              plantas sanas, preparar macetas duraderas y convertir flores en gestos
-              memorables.
+              Las raíces de la marca nacen del cuidado diario: seleccionar plantas sanas, preparar macetas duraderas y 
+              convertir flores en gestos memorables. Entendemos la botánica como un oficio paciente para llevar vida y 
+              equilibrio a tu hogar.
             </p>
           </article>
 
@@ -262,9 +261,9 @@ function Home() {
             <span>San Miguel Oeste</span>
             <h3>Una tienda pensada desde el paisaje</h3>
             <p>
-              Naranjo permite construir una experiencia mas calmada: verde cercano,
-              ritmo local y productos elegidos para hogares que buscan naturaleza sin
-              exceso visual.
+              Naranjo nos permite crear una experiencia sin prisas. Desde San Miguel Oeste, combinamos el verde cercano y 
+              la luz natural con una selección sobria de plantas y piezas, 
+              pensadas para quienes buscan naturaleza sin exceso visual.
             </p>
           </article>
         </div>
@@ -284,10 +283,6 @@ function Home() {
             <span className="home-section-kicker">Selección destacada</span>
             <h2>Piezas con presencia natural</h2>
           </div>
-          <p>
-            Cards reducen decoracion y tratan cada item como un objeto de cuidado.
-            Precio, material y disponibilidad se mantienen claros.
-          </p>
         </div>
 
         {isLoadingProducts && (

@@ -53,6 +53,15 @@
   color: var(--forest-ink);
 }
 
+:root[data-theme="oscuro"] .register-header h1 {
+  color: var(--soil-black);
+}
+
+:root[data-theme="oscuro"] .register-tag {
+  background: var(--sage-100);
+  color: var(--soil-black);
+}
+
 .register-header p {
   margin: 0;
   max-width: 52ch;
@@ -75,13 +84,19 @@
 }
 
 .register-section legend {
+  display: inline-block;
   padding: 0 8px;
   margin-left: 4px;
+  background: var(--surface-muted-soft);
   color: var(--forest-700);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+:root[data-theme="oscuro"] .register-section legend {
+  color: var(--soil-black);
 }
 
 .register-grid {
@@ -104,6 +119,15 @@
   color: var(--bark);
   font-size: 0.86rem;
   font-weight: 700;
+}
+
+:root[data-theme="oscuro"] .register-label,
+:root[data-theme="oscuro"] .register-help:not(.is-error) {
+  color: var(--soil-black);
+}
+
+:root[data-theme="oscuro"] .register-help.is-error {
+  color: var(--danger);
 }
 
 .register-input {
