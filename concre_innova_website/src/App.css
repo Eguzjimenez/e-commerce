@@ -2,11 +2,13 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  /* Degradado hacia un tono mas cerrado y filo inferior: sobre el fondo claro de
+     las paginas la barra se confundia con el contenido. */
   background:
-    linear-gradient(180deg, rgba(var(--paper-rgb), 0.96), rgba(var(--linen-rgb), 0.9));
-  border-bottom: 0;
+    linear-gradient(180deg, var(--linen) 0%, var(--surface-muted) 100%);
+  border-bottom: 1px solid var(--line-strong);
   backdrop-filter: blur(16px);
-  box-shadow: 0 14px 34px rgba(22, 20, 15, 0.06);
+  box-shadow: 0 10px 28px rgba(22, 20, 15, 0.1);
   padding: 18px 0 12px;
 }
 
@@ -189,10 +191,34 @@
   transition: transform 180ms ease;
 }
 
+/* Sobre la banda mas cerrada el acento claro quedaba en 4.45:1; la variante
+   oscura de la paleta recupera el contraste. En tema oscuro la relacion se
+   invierte y el tono claro es el que contrasta. */
 .nav-menu li a:hover,
 .logout-btn:hover,
 .nav-chat-button:hover,
 .nav-menu li a.active {
+  color: var(--terracotta-dark);
+}
+
+/* En tema oscuro la banda es gris cerrado y los enlaces heredaban un tono
+   oscuro de la paleta clara: quedaban en 1.28:1. */
+:root[data-theme="oscuro"] .nav-menu li a,
+:root[data-theme="oscuro"] .logout-btn,
+:root[data-theme="oscuro"] .nav-chat-button {
+  color: var(--on-dark-muted);
+}
+
+:root[data-theme="oscuro"] .nav-icon-link,
+:root[data-theme="oscuro"] .nav-logout-button,
+:root[data-theme="oscuro"] .nav-logo {
+  color: var(--on-dark);
+}
+
+:root[data-theme="oscuro"] .nav-menu li a:hover,
+:root[data-theme="oscuro"] .logout-btn:hover,
+:root[data-theme="oscuro"] .nav-chat-button:hover,
+:root[data-theme="oscuro"] .nav-menu li a.active {
   color: var(--clay);
 }
 

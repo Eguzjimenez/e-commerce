@@ -174,11 +174,17 @@
   margin-top: 4px;
 }
 
+/* Los pasos son informacion de apoyo, no una segunda tarjeta principal: pasan
+   a ser una lista con separadores dentro de un solo bloque, un plano por debajo
+   de la tarjeta de inicio. */
 .advisor-steps {
   display: grid;
-  gap: 12px;
+  gap: 0;
   margin: 0;
-  padding: 0;
+  padding: 4px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted-soft);
   list-style: none;
   counter-reset: none;
 }
@@ -186,12 +192,14 @@
 .advisor-step {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  padding: 16px 18px;
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--sage-200);
-  border-radius: var(--radius-md);
-  background: var(--surface-muted-soft);
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+  background: none;
+}
+
+.advisor-step:first-child {
+  border-top: 0;
 }
 
 .advisor-step-number {
@@ -199,8 +207,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--forest-700);
   color: var(--paper);
@@ -210,15 +218,15 @@
 
 .advisor-step h3 {
   margin: 0 0 3px;
-  font-size: 0.98rem;
+  font-size: 0.9rem;
   color: var(--forest-ink);
 }
 
 .advisor-step p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.86rem;
-  line-height: 1.5;
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
 /* ---- Cuestionario ---- */
@@ -444,6 +452,23 @@
   gap: 8px;
   width: auto;
   margin: 0;
+}
+
+/* Todos los botones del asesor comparten el mismo tratamiento claro: antes el
+   principal salia relleno en verde oscuro y los demas en blanco, y en una misma
+   fila de acciones se leian como tres controles distintos. */
+.advisor-page .btn {
+  background: var(--paper);
+  border: 1px solid var(--line-strong);
+  box-shadow: none;
+  color: var(--ink);
+}
+
+.advisor-page .btn:hover:not(:disabled) {
+  background: var(--sand);
+  border-color: var(--laurel);
+  color: var(--ink);
+  transform: none;
 }
 
 .advisor-secondary-button {
