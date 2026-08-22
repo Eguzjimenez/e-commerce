@@ -69,48 +69,48 @@
 }
 
 :root[data-theme="oscuro"] {
-  --forest-ink: #0e1511;
-  --soil-black: #eef2ea;
-  --laurel: #7ba585;
-  --sage: #9fb8a6;
-  --linen: #151d18;
-  --paper: #1b241e;
-  --clay: #c98a5f;
-  --petal: #b79b83;
-  --sand: #26312a;
-  --bark: #cdc6ba;
-  --muted-warm: #a8b6ac;
-  --soft-warm: #91a096;
-  --line: #33413a;
-  --line-strong: #405147;
+  --forest-ink: #1d2021;
+  --soil-black: #f2f1ed;
+  --laurel: #9cbea1;
+  --sage: #c1c9c0;
+  --linen: #242526;
+  --paper: #303234;
+  --clay: #dda078;
+  --petal: #c5aa98;
+  --sand: #3c3d3e;
+  --bark: #e0e1dc;
+  --muted-warm: #c2c6c2;
+  --soft-warm: #adb3ae;
+  --line: #4c4e4f;
+  --line-strong: #7b7e7f;
 
-  --forest-900: #16211a;
-  --forest-800: #1c2a21;
-  --forest-700: #24352a;
-  --forest-500: #6f9a79;
-  --sage-200: #4a5f51;
-  --sage-100: #33443a;
-  --terracotta-dark: #b0764f;
+  --forest-900: #26292a;
+  --forest-800: #303435;
+  --forest-700: #3d4142;
+  --forest-500: #83a88a;
+  --sage-200: #646b65;
+  --sage-100: #4c514d;
+  --terracotta-dark: #d0916d;
   --gold: #d8b875;
-  --navy-800: #1c2a21;
-  --navy-700: #24352a;
-  --blue-muted: #a8b6ac;
-  --danger: #e07a68;
-  --success: #6fbf8b;
-  --warning: #d7a54a;
+  --navy-800: #303435;
+  --navy-700: #3d4142;
+  --blue-muted: #b0b4b0;
+  --danger: #f09a87;
+  --success: #8fd3a0;
+  --warning: #e7bd68;
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.32);
   --shadow-card: 0 24px 56px rgba(0, 0, 0, 0.4);
   --shadow-warm: 0 18px 36px rgba(0, 0, 0, 0.34);
   --shadow-nav: 0 22px 54px rgba(0, 0, 0, 0.42);
-  --surface-highlight: rgba(27, 36, 30, 0.86);
-  --page-gradient-end: #101711;
-  --paper-rgb: 27, 36, 30;
-  --surface-muted: #26312a;
-  --surface-muted-soft: #2c382f;
-  --surface-header: #223029;
-  --surface-accent: #3a3320;
-  --catalog-media-bg: #222d26;
-  --linen-rgb: 21, 29, 24;
+  --surface-highlight: rgba(48, 50, 52, 0.94);
+  --page-gradient-end: #1f2122;
+  --paper-rgb: 48, 50, 52;
+  --surface-muted: #3c3d3e;
+  --surface-muted-soft: #444647;
+  --surface-header: #353738;
+  --surface-accent: #4a443d;
+  --catalog-media-bg: #353738;
+  --linen-rgb: 36, 37, 38;
 }
 
 * {
@@ -411,8 +411,6 @@ optgroup {
    todas las vistas presenten las imágenes con el mismo criterio.
    --------------------------------------------------------------------------- */
 .card img,
-.product-visual img,
-.catalog-card-image,
 .cart-product-image,
 .favorite-card-image,
 .history-item-image,
@@ -421,14 +419,11 @@ optgroup {
 .admin-product-image,
 .admin-view-product-image,
 .home-feature-media img,
-.home-product-card img,
 .home-collection-card img,
-.product-related-card img,
 .advisor-recommendation-media img,
 .admin-image-preview,
 .admin-inventory-detail-media img,
 .cart-product-preview img,
-.favorite-image-link img,
 .main-img,
 .img-gallery img {
   object-fit: contain;

@@ -166,15 +166,6 @@ function MyAccount() {
                 </label>
 
                 <label>
-                  <span>Dirección</span>
-                  <input
-                    name="direccion"
-                    value={form.direccion}
-                    onChange={handleChange}
-                  />
-                </label>
-
-                <label>
                   <span>Nueva contraseña</span>
                   <input
                     type="password"
@@ -184,11 +175,11 @@ function MyAccount() {
                     placeholder="••••••••"
                   />
                 </label>
-              </div>
 
-              <button className="btn my-account-submit" type="submit" disabled={saving}>
-                {saving ? "Guardando..." : "Guardar cambios"}
-              </button>
+                <button className="btn my-account-submit" type="submit" disabled={saving}>
+                  {saving ? "Guardando..." : "Guardar cambios"}
+                </button>
+              </div>
             </form>
           </section>
         </div>

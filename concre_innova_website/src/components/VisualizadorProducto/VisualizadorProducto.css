@@ -148,13 +148,31 @@
 }
 
 .simulacion-selector-busqueda button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   min-height: 40px;
   padding: 0 14px;
-  border: 1px solid rgba(15, 27, 45, 0.15);
+  border: 1px solid var(--line-strong);
   border-radius: 10px;
-  background: var(--surface-muted-soft);
+  background: var(--clay);
+  color: var(--forest-ink);
   font-weight: 700;
   cursor: pointer;
+}
+
+.simulacion-selector-busqueda button:hover:not(:disabled),
+.simulacion-selector-busqueda button:focus-visible {
+  background: var(--laurel);
+  border-color: var(--laurel);
+  outline: 2px solid var(--laurel);
+  outline-offset: 2px;
+}
+
+.simulacion-selector-busqueda button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 .simulacion-selector-titulo {
@@ -446,6 +464,57 @@
   border: 1px solid rgba(166, 33, 33, 0.2);
   border-radius: 10px;
   padding: 10px 12px;
+}
+
+:root[data-theme="oscuro"] .visualizador-modal,
+:root[data-theme="oscuro"] .visualizador-header,
+:root[data-theme="oscuro"] .visualizador-producto-info {
+  color: var(--soil-black);
+}
+
+:root[data-theme="oscuro"] .visualizador-header,
+:root[data-theme="oscuro"] .visualizador-producto-info,
+:root[data-theme="oscuro"] .visualizador-panel-acciones,
+:root[data-theme="oscuro"] .visualizador-guardadas li button:first-child,
+:root[data-theme="oscuro"] .simulacion-selector-card,
+:root[data-theme="oscuro"] .simulacion-item,
+:root[data-theme="oscuro"] .simulacion-item-campos input,
+:root[data-theme="oscuro"] .simulacion-item-campos select,
+:root[data-theme="oscuro"] .visualizador-controls button,
+:root[data-theme="oscuro"] .visualizador-upload-button {
+  border-color: var(--line-strong);
+}
+
+:root[data-theme="oscuro"] .visualizador-close {
+  color: var(--soil-black);
+}
+
+:root[data-theme="oscuro"] .simulacion-selector-precio,
+:root[data-theme="oscuro"] .visualizador-producto-price {
+  color: var(--laurel) !important;
+}
+
+:root[data-theme="oscuro"] .simulacion-selector-card button,
+:root[data-theme="oscuro"] .visualizador-upload-button {
+  background: var(--laurel);
+  border-color: var(--laurel);
+  color: var(--forest-ink);
+}
+
+:root[data-theme="oscuro"] .visualizador-panel-acciones button,
+:root[data-theme="oscuro"] .visualizador-controls button {
+  color: var(--soil-black);
+}
+
+:root[data-theme="oscuro"] .visualizador-panel-acciones .btn {
+  color: var(--on-dark);
+}
+
+:root[data-theme="oscuro"] .visualizador-controls .danger,
+:root[data-theme="oscuro"] .simulacion-item-eliminar,
+:root[data-theme="oscuro"] .visualizador-warning,
+:root[data-theme="oscuro"] .visualizador-guardadas .danger {
+  color: var(--danger);
 }
 
 @media (max-width: 1040px) {

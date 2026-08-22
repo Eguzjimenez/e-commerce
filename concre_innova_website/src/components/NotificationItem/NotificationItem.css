@@ -116,6 +116,12 @@
   color: var(--soft);
 }
 
+:root[data-theme="oscuro"] .notification-item-message,
+:root[data-theme="oscuro"] .notification-item-date {
+  color: var(--soil-black);
+  opacity: 0.82;
+}
+
 .notification-item-dot {
   flex-shrink: 0;
   width: 9px;

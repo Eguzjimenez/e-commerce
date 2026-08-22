@@ -1,9 +1,14 @@
 .product-detail-page {
   display: grid;
-  grid-template-columns: minmax(300px, 1fr) minmax(0, 1.05fr);
-  gap: clamp(24px, 3.5vw, 40px);
+  width: calc(100vw - 8px);
+  max-width: none;
+  box-sizing: border-box;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(28px, 2.5vw, 48px);
   align-items: stretch;
   margin-top: clamp(32px, 5vw, 64px);
+  margin-right: auto;
+  margin-left: auto;
 }
 
 /* La foto conserva su proporción real y se centra dentro del marco. Antes se
@@ -11,10 +16,12 @@
    tono distinto al del propio marco, así que la imagen se leía como un bloque
    pegado encima en vez de formar parte de la tarjeta. */
 .product-detail-media {
-  min-height: 100%;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
   display: grid;
   place-items: center;
-  padding: clamp(16px, 2vw, 28px);
+  padding: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--paper);
@@ -22,11 +29,10 @@
 }
 
 .product-detail-media.product-visual img {
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
-  min-height: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
   border-radius: var(--radius-sm);
   background: transparent;
 }
@@ -39,6 +45,12 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   padding: clamp(24px, 3.4vw, 40px);
+}
+
+:root[data-theme="oscuro"] .product-detail-info h1,
+:root[data-theme="oscuro"] .product-related-header h2,
+:root[data-theme="oscuro"] .product-detail-price strong {
+  color: var(--soil-black);
 }
 
 .product-detail-back {
@@ -70,7 +82,7 @@
 .product-detail-info h1 {
   margin: 0;
   color: var(--forest-ink);
-  font-size: clamp(1.85rem, 3.6vw, 2.75rem);
+  font-size: clamp(1.85rem, 3.6vw, 5.75rem);
   line-height: 1.1;
 }
 
@@ -78,8 +90,9 @@
   margin: 0;
   max-width: 58ch;
   color: var(--muted);
-  font-size: 1rem;
+  font-size: 1.25rem;
   line-height: 1.65;
+  text-align: justify;
 }
 
 /* Precio, disponibilidad e impuesto juntos: la decisión de compra se toma
@@ -165,6 +178,18 @@
   box-shadow: none;
 }
 
+:root[data-theme="oscuro"] .product-visualizer-button {
+  background: var(--surface-muted-soft);
+  border-color: var(--line-strong);
+  color: var(--soil-black);
+}
+
+:root[data-theme="oscuro"] .product-visualizer-button:hover {
+  background: var(--forest-ink);
+  border-color: var(--forest-ink);
+  color: var(--on-dark);
+}
+
 .product-detail-sheet {
   padding-top: 4px;
 }
@@ -180,22 +205,23 @@
 
 .product-detail-specs {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin: 0;
 }
 
 .product-detail-specs div {
-  padding: 12px 14px;
+  padding: 12px 14px 12px 24px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--surface-muted-soft);
+  text-align: center;
 }
 
 .product-detail-specs dt {
   margin-bottom: 5px;
   color: var(--muted);
-  font-size: 0.71rem;
+  font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -203,6 +229,7 @@
 .product-detail-specs dd {
   margin: 0;
   color: var(--ink);
+  font-size: 1.08rem;
   font-weight: 700;
 }
 
@@ -236,15 +263,15 @@
 
 .product-related-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
+  gap: clamp(14px, 2vw, 24px);
 }
 
 .product-related-card {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  height: 100%;
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
@@ -260,10 +287,14 @@
   transform: translateY(-4px);
 }
 
-.product-related-card img {
-  width: calc(100% - 28px);
-  height: 190px;
-  margin: 14px;
+.product-related-section .product-related-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  margin: 0;
+  object-fit: cover;
+  object-position: center;
   background: var(--surface-muted);
 }
 
@@ -272,6 +303,7 @@
   flex: 1;
   flex-direction: column;
   gap: 7px;
+  min-height: 154px;
   padding: 4px 18px 18px;
 }
 
@@ -285,7 +317,7 @@
 .product-related-card h3 {
   margin: 0;
   color: var(--ink);
-  font-size: 1.15rem;
+  font-size: clamp(1.25rem, 1.8vw, 1.55rem);
   line-height: 1.25;
 }
 
@@ -299,7 +331,7 @@
   margin-top: auto;
   padding-top: 8px;
   color: var(--forest-ink);
-  font-size: 1rem;
+  font-size: clamp(1.12rem, 1.6vw, 1.35rem);
 }
 
 .product-detail-status,
@@ -327,15 +359,14 @@
 
 @media (max-width: 900px) {
   .product-detail-page {
+    width: calc(100vw - 8px);
     grid-template-columns: minmax(0, 1fr);
     gap: 20px;
   }
 
   .product-detail-media {
-    aspect-ratio: 1 / 1;
     max-width: 460px;
     margin: 0 auto;
-    width: 100%;
   }
 
   .product-related-header {
@@ -345,7 +376,7 @@
 }
 
 @media (max-width: 560px) {
-  .product-detail-info .btn {
+   .product-detail-info .btn {
     flex-basis: 100%;
   }
 
@@ -354,11 +385,7 @@
   }
 
   .product-related-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 14px;
-  }
-
-  .product-related-card img {
-    height: 140px;
+    grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+    gap: clamp(12px, 3vw, 16px);
   }
 }

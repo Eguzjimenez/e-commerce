@@ -1,5 +1,7 @@
 .contact-page {
-  max-width: 1120px;
+  width: min(1400px, calc(100% - 48px));
+  box-sizing: border-box;
+  max-width: none;
   margin: 0 auto;
   padding: 48px 24px 72px;
   display: flex;
@@ -19,7 +21,7 @@
 
 .contact-header h1 {
   margin: 0 0 10px;
-  font-size: 2.2rem;
+  font-size: clamp(3.35rem, 4vw, 3.25rem);
   color: var(--ink);
 }
 
@@ -27,7 +29,8 @@
   margin: 0;
   color: var(--muted);
   max-width: 620px;
-  line-height: 1.6;
+  font-size: 1.08rem;
+  line-height: 1.65;
 }
 
 .contact-state {
@@ -45,13 +48,15 @@
 
 .contact-layout {
   display: grid;
-  grid-template-columns: 1fr 1.05fr;
-  gap: 24px;
-  align-items: start;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 44px;
+  align-items: stretch;
 }
 
 .contact-info,
 .contact-form-card {
+  height: 100%;
+  box-sizing: border-box;
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 20px;
@@ -61,31 +66,37 @@
   min-width: 0;
 }
 
+.contact-info {
+  display: flex;
+  flex-direction: column;
+}
+
 .contact-info h2,
 .contact-form-card h2 {
   margin: 0 0 8px;
-  font-size: 1.3rem;
+  font-size: 2.5rem;
   color: var(--ink);
 }
 
 .contact-description {
-  margin: 0 0 20px;
+  margin: 0 0 38px;
   color: var(--muted);
-  line-height: 1.6;
+  font-size: 1.30rem;
+  line-height: 2;
 }
 
 .contact-list {
   list-style: none;
-  margin: 0 0 24px;
+  margin: 0 0 0px;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 38px;
 }
 
 .contact-list li {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: flex-start;
 }
 
@@ -97,12 +108,12 @@
 
 .contact-list span {
   display: block;
-  font-size: 0.76rem;
+  font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--muted);
   font-weight: 700;
-  margin-bottom: 2px;
+  margin-bottom: 5px;
 }
 
 .contact-list a,
@@ -110,7 +121,8 @@
   margin: 0;
   color: var(--ink);
   text-decoration: none;
-  font-size: 0.98rem;
+  font-size: 1.22rem;
+  line-height: 1.65;
 }
 
 .contact-list a:hover {
@@ -120,7 +132,7 @@
 
 .contact-social span {
   display: block;
-  font-size: 0.76rem;
+  font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--muted);
@@ -128,22 +140,31 @@
   margin-bottom: 10px;
 }
 
+.contact-social {
+  margin-top: auto;
+  padding-top: 42px;
+}
+
 .contact-social div {
   display: flex;
-  gap: 10px;
+  gap: clamp(12px, 2vw, 24px);
   flex-wrap: wrap;
+  justify-content: stretch;
 }
 
 .contact-social a {
+  flex: 1 1 0;
+  justify-content: center;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 14px;
+  padding: 13px 18px;
   border-radius: 999px;
   border: 1px solid var(--line-strong);
   color: var(--ink);
   text-decoration: none;
-  font-size: 0.88rem;
+  font-size: 1.02rem;
   font-weight: 600;
   transition: background 160ms ease, border-color 160ms ease;
 }
@@ -156,6 +177,7 @@
 .contact-form-card p {
   margin: 0 0 20px;
   color: var(--muted);
+  font-size: 1.02rem;
 }
 
 .contact-form {
@@ -168,7 +190,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 0.86rem;
+  font-size: 0.94rem;
   font-weight: 700;
   color: var(--ink);
 }
@@ -178,11 +200,15 @@
   border: 1px solid var(--line-strong);
   border-radius: 12px;
   padding: 11px 13px;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-family: inherit;
   font-weight: 400;
   background: var(--paper);
   color: var(--ink);
+}
+
+.contact-form textarea {
+  resize: none;
 }
 
 .contact-form input:focus,
@@ -196,7 +222,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 6px;
+  margin-top: 45px;
   padding: 12px 18px;
   border: none;
   border-radius: 12px;

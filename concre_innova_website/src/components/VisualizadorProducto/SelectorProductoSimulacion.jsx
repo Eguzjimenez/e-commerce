@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
 import { getCatalogProducts } from "../../services/catalogService";
 import {
   formatCatalogPrice,
@@ -86,6 +87,7 @@ function SelectorProductoSimulacion({
           onChange={(event) => setTerminoBusqueda(event.target.value)}
         />
         <button type="submit" disabled={cargando}>
+          <Search size={16} aria-hidden="true" />
           Buscar
         </button>
       </form>
